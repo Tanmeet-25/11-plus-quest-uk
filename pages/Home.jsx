@@ -1,454 +1,660 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
+// ─── LEARN CONTENT ────────────────────────────────────────────────────────────
+const LEARN_TOPICS = [
+  {
+    id: "times_tables", icon: "🔢", title: "Times Tables", subject: "maths", colour: "#4F46E5", bg: "#EEF2FF",
+    intro: "Times tables are tested in EVERY 11+ maths paper. Know them instantly and you'll save loads of time!",
+    sections: [
+      {
+        heading: "The Clever Tricks",
+        type: "cards",
+        cards: [
+          { icon: "×2", title: "Just double it!", body: "6 × 2 = 12\n8 × 2 = 16\nAny number × 2 = add it to itself" },
+          { icon: "×5", title: "Ends in 0 or 5", body: "7 × 5 = 35\n8 × 5 = 40\nAlways ends in 0 (even) or 5 (odd)" },
+          { icon: "×9", title: "Digits add to 9!", body: "9×7=63 → 6+3=9 ✓\n9×8=72 → 7+2=9 ✓\nFingers trick works too!" },
+          { icon: "×11", title: "Repeat the digit", body: "3×11=33\n7×11=77\n11×11=121 (careful!)" },
+          { icon: "×12", title: "Do ×10 then +×2", body: "8×12: 8×10=80, 8×2=16\n80+16 = 96 ✓\nWorks every time!" },
+          { icon: "×4", title: "Double twice!", body: "7×4: double 7=14\nthen double again=28 ✓\nEasy!" },
+        ],
+      },
+      {
+        heading: "The Tricky Ones — Memorise These!",
+        type: "flashcards",
+        cards: [
+          { q: "6 × 7 = ?", a: "42", tip: "6 and 7 walk into a shop... they buy 42 things 😄" },
+          { q: "6 × 8 = ?", a: "48", tip: "Six times eight, don't be late — it's 48!" },
+          { q: "7 × 8 = ?", a: "56", tip: "5, 6, 7, 8 → 56 = 7 × 8 🎵 Sing it!" },
+          { q: "7 × 9 = ?", a: "63", tip: "63 = 7 × 9. Digits 6+3=9 ✓" },
+          { q: "8 × 9 = ?", a: "72", tip: "72 = 8 × 9. Digits 7+2=9 ✓" },
+          { q: "12 × 12 = ?", a: "144", tip: "144 is called a gross. Learn it!" },
+        ],
+      },
+      {
+        heading: "How It's Tested in 11+",
+        type: "worked",
+        examples: [
+          { q: "What is 144 ÷ 12?", steps: ["Think: what × 12 = 144?", "12 × 12 = 144", "So 144 ÷ 12 = 12 ✓"], answer: "12", note: "In 11+, division questions test if you know your tables BACKWARDS!" },
+          { q: "A box holds 8 cakes. How many cakes in 7 boxes?", steps: ["8 × 7 = ?", "7 × 8 = 56 (one of the tricky ones!)", "56 cakes total"], answer: "56", note: "Word problems still just need your tables — spot the multiplication!" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "fractions", icon: "➗", title: "Fractions", subject: "maths", colour: "#7C3AED", bg: "#F5F3FF",
+    intro: "Fractions appear in every 11+ paper. Master the rules and you'll find them easy — there are only 4 things you need to know!",
+    sections: [
+      {
+        heading: "The 4 Big Rules",
+        type: "cards",
+        cards: [
+          { icon: "➕", title: "Adding & Subtracting", body: "Make the bottoms EQUAL first!\n½ + ¼ → 2/4 + 1/4 = 3/4\n\nFind the LCM of the bottoms, then adjust the tops." },
+          { icon: "✖️", title: "Multiplying", body: "Top × top, bottom × bottom!\n2/3 × 3/4 = 6/12 = 1/2\n\nThen simplify the answer." },
+          { icon: "➗", title: "Dividing — KCF!", body: "Keep, Change, Flip!\n½ ÷ ¼ = ½ × 4/1 = 2\n\nKeep first fraction, Change ÷ to ×, Flip second fraction." },
+          { icon: "🎯", title: "Fraction of Amount", body: "Divide by bottom, multiply by top!\n¾ of 40:\n÷4 = 10, ×3 = 30 ✓" },
+        ],
+      },
+      {
+        heading: "KCF — Practise Dividing Fractions",
+        type: "flashcards",
+        cards: [
+          { q: "½ ÷ ¼ = ?", a: "2", tip: "KCF: ½ × 4/1 = 4/2 = 2" },
+          { q: "¾ ÷ ½ = ?", a: "1½", tip: "KCF: ¾ × 2/1 = 6/4 = 1½" },
+          { q: "⅔ ÷ ⅓ = ?", a: "2", tip: "KCF: ⅔ × 3/1 = 6/3 = 2" },
+          { q: "¼ ÷ ½ = ?", a: "½", tip: "KCF: ¼ × 2/1 = 2/4 = ½" },
+          { q: "⅔ of 60 = ?", a: "40", tip: "60÷3=20, 20×2=40" },
+          { q: "Simplify 8/12", a: "2/3", tip: "HCF=4: 8÷4=2, 12÷4=3" },
+        ],
+      },
+      {
+        heading: "Worked Examples",
+        type: "worked",
+        examples: [
+          { q: "A school has 840 pupils. 3/7 are girls. How many boys?", steps: ["Find 1/7 of 840 → 840÷7 = 120", "Girls = 3 × 120 = 360", "Boys = 840 − 360 = 480"], answer: "480 boys", note: "Always find 1 part first, then multiply!" },
+          { q: "Which is larger: 3/4 or 5/7?", steps: ["Convert to same denominator (28)", "3/4 = 21/28", "5/7 = 20/28 → so 3/4 is larger!"], answer: "3/4", note: "When comparing fractions, always convert to the same bottom number." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "percentages", icon: "💯", title: "Percentages", subject: "maths", colour: "#0891B2", bg: "#ECFEFF",
+    intro: "Percentage questions are GUARANTEED in your 11+ paper. Learn the shortcuts and solve them in under 10 seconds!",
+    sections: [
+      {
+        heading: "The Speed Shortcuts",
+        type: "cards",
+        cards: [
+          { icon: "10%", title: "Divide by 10", body: "10% of 350 = 35\n10% of 84 = 8.4\nJust move the decimal point!" },
+          { icon: "5%", title: "Half of 10%", body: "5% of 80:\n10% = 8, halve it = 4 ✓\nEasy!" },
+          { icon: "25%", title: "Divide by 4", body: "25% of 120:\n120 ÷ 4 = 30 ✓\n(Same as finding ¼)" },
+          { icon: "15%", title: "10% + 5%", body: "15% of 60:\n10%=6, 5%=3\n6+3=9 ✓" },
+          { icon: "50%", title: "Divide by 2", body: "50% of 74 = 37\nHalf of anything!\nEasiest one." },
+          { icon: "1%", title: "Divide by 100", body: "1% of 250 = 2.5\nThen multiply for any %!\n7% = 7 × 1%" },
+        ],
+      },
+      {
+        heading: "FDP — Know These Off By Heart",
+        type: "table",
+        headers: ["Fraction", "Decimal", "Percentage"],
+        rows: [
+          ["1/2", "0.5", "50%"],
+          ["1/4", "0.25", "25%"],
+          ["3/4", "0.75", "75%"],
+          ["1/5", "0.2", "20%"],
+          ["1/10", "0.1", "10%"],
+          ["1/8", "0.125", "12.5%"],
+          ["1/3", "0.333...", "33.3%"],
+          ["2/3", "0.666...", "66.7%"],
+        ],
+      },
+      {
+        heading: "Worked Examples",
+        type: "worked",
+        examples: [
+          { q: "A jacket costs £80. It's reduced by 35%. What's the sale price?", steps: ["Find 35% of £80", "10% = £8, so 30% = £24, 5% = £4", "35% = £24 + £4 = £28", "Sale price = £80 − £28 = £52"], answer: "£52", note: "Always subtract the discount from the original price!" },
+          { q: "A price goes from £40 to £50. What is the % increase?", steps: ["Increase = £50 − £40 = £10", "% increase = (10 ÷ 40) × 100", "= 0.25 × 100 = 25%"], answer: "25%", note: "% change = (change ÷ original) × 100" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "ratio", icon: "⚖️", title: "Ratio & Proportion", subject: "maths", colour: "#DC2626", bg: "#FEF2F2",
+    intro: "Ratio questions test your logic — they come up in every GL and CEM paper. Once you know the method, they're actually quite quick!",
+    sections: [
+      {
+        heading: "The 3-Step Method",
+        type: "cards",
+        cards: [
+          { icon: "1️⃣", title: "Add the parts", body: "Ratio 2:3 → 2+3 = 5 parts total\nRatio 1:3:2 → 1+3+2 = 6 parts\nAlways add all parts!" },
+          { icon: "2️⃣", title: "Find 1 part", body: "Total ÷ number of parts\n£30 ÷ 5 = £6 per part\nThis is your unit amount" },
+          { icon: "3️⃣", title: "Multiply each share", body: "2:3 with £6 per part:\n2 × £6 = £12\n3 × £6 = £18 ✓" },
+          { icon: "🔁", title: "Simplifying ratios", body: "Divide BOTH sides by HCF\n15:25 → HCF=5 → 3:5\n12:18 → HCF=6 → 2:3" },
+        ],
+      },
+      {
+        heading: "Quick Fire Practice",
+        type: "flashcards",
+        cards: [
+          { q: "Share £40 in ratio 3:5. Larger share?", a: "£25", tip: "8 parts, £5 each. 5×5=£25" },
+          { q: "Simplify 20:35", a: "4:7", tip: "HCF=5: 20÷5=4, 35÷5=7" },
+          { q: "If 4 pens cost £2, how much do 7 cost?", a: "£3.50", tip: "1 pen=50p. 7×50p=£3.50" },
+          { q: "Ratio of boys:girls is 3:4. 28 pupils total. How many girls?", a: "16", tip: "7 parts, 4 each. Girls=4×4=16" },
+        ],
+      },
+      {
+        heading: "Worked Examples",
+        type: "worked",
+        examples: [
+          { q: "Orange juice and lemonade are mixed in ratio 2:5. There's 350ml total. How much lemonade?", steps: ["Total parts = 2+5 = 7", "1 part = 350 ÷ 7 = 50ml", "Lemonade = 5 × 50 = 250ml"], answer: "250ml", note: "Always find 1 part first!" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "algebra", icon: "📐", title: "Algebra", subject: "maths", colour: "#059669", bg: "#ECFDF5",
+    intro: "Algebra uses letters instead of unknown numbers. The 11+ tests simple equations, sequences and function machines. Don't be scared — it's just maths with letters!",
+    sections: [
+      {
+        heading: "Solving Equations — The Balancing Act",
+        type: "cards",
+        cards: [
+          { icon: "⚖️", title: "Keep it balanced!", body: "Whatever you do to one side, do to the other.\nx + 5 = 12\n−5 both sides: x = 7 ✓" },
+          { icon: "➕", title: "Addition → Subtract", body: "x + 8 = 20\nSubtract 8: x = 12 ✓" },
+          { icon: "✖️", title: "Multiply → Divide", body: "3x = 21\nDivide by 3: x = 7 ✓" },
+          { icon: "🔀", title: "Two steps", body: "2x + 3 = 11\nFirst: −3 → 2x = 8\nThen: ÷2 → x = 4 ✓" },
+        ],
+      },
+      {
+        heading: "Sequences — Find the Pattern",
+        type: "flashcards",
+        cards: [
+          { q: "3, 7, 11, 15, ___ ?", a: "19", tip: "+4 each time. 15+4=19" },
+          { q: "2, 4, 8, 16, ___ ?", a: "32", tip: "×2 each time. 16×2=32" },
+          { q: "nth term of 5, 8, 11, 14...?", a: "3n + 2", tip: "+3 each time, starts at 5. n=1: 3+2=5 ✓" },
+          { q: "Input→×4→−3=13. Input?", a: "4", tip: "Reverse: 13+3=16, 16÷4=4" },
+        ],
+      },
+      {
+        heading: "Worked Examples",
+        type: "worked",
+        examples: [
+          { q: "The sum of 3 consecutive numbers is 63. What are they?", steps: ["Let the numbers be n, n+1, n+2", "n + (n+1) + (n+2) = 63", "3n + 3 = 63 → 3n = 60 → n = 20", "Numbers: 20, 21, 22"], answer: "20, 21, 22", note: "Consecutive means one after another in order!" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "synonyms", icon: "📚", title: "Synonyms & Antonyms", subject: "verbal", colour: "#059669", bg: "#ECFDF5",
+    intro: "These come up constantly in verbal reasoning. Synonyms = SAME meaning. Antonyms = OPPOSITE meaning. Build your vocabulary and you'll fly through these!",
+    sections: [
+      {
+        heading: "Key Vocabulary to Know",
+        type: "cards",
+        cards: [
+          { icon: "😊", title: "Happy words", body: "Joyful, Elated, Content, Gleeful, Cheerful, Ecstatic\n\nOpposites: Miserable, Gloomy, Dejected, Sorrowful" },
+          { icon: "💪", title: "Brave words", body: "Courageous, Valiant, Bold, Fearless, Intrepid, Gallant\n\nOpposites: Cowardly, Timid, Fearful, Meek" },
+          { icon: "🌊", title: "Big words", body: "Enormous, Vast, Colossal, Immense, Gigantic, Mammoth\n\nOpposites: Tiny, Minute, Minuscule, Petite" },
+          { icon: "⚡", title: "Fast words", body: "Swift, Rapid, Hasty, Brisk, Nimble, Fleet\n\nOpposites: Sluggish, Lethargic, Slow, Gradual" },
+          { icon: "🎯", title: "Careful words", body: "Meticulous, Precise, Diligent, Thorough, Scrupulous\n\nOpposites: Careless, Negligent, Sloppy, Hasty" },
+          { icon: "💝", title: "Kind words", body: "Benevolent, Generous, Charitable, Compassionate\n\nOpposites: Malevolent, Selfish, Cruel, Callous" },
+        ],
+      },
+      {
+        heading: "Flashcard Practice",
+        type: "flashcards",
+        cards: [
+          { q: "Synonym of METICULOUS?", a: "Careful / Precise", tip: "Meticulous = paying great attention to detail" },
+          { q: "Antonym of BENEVOLENT?", a: "Malevolent", tip: "Bene = good, Male = bad. Like benefit vs malicious!" },
+          { q: "Synonym of ENORMOUS?", a: "Colossal / Vast", tip: "Think of the Colosseum — colossal means massive!" },
+          { q: "Antonym of TRANSPARENT?", a: "Opaque", tip: "Transparent = see-through. Opaque = cannot see through." },
+          { q: "Synonym of SWIFT?", a: "Rapid / Fleet", tip: "Swift as an arrow — fast and direct!" },
+          { q: "Antonym of ANCIENT?", a: "Modern", tip: "Ancient = very old. Modern = new and current." },
+        ],
+      },
+      {
+        heading: "How 11+ Tests This",
+        type: "worked",
+        examples: [
+          { q: "Which word is most similar to BRAVE? Cowardly / Courageous / Reckless / Timid", steps: ["Cowardly = opposite of brave ✗", "Courageous = having courage = brave ✓", "Reckless = careless, not the same ✗", "Timid = shy and fearful ✗"], answer: "Courageous", note: "Think: could both words replace each other in a sentence?" },
+          { q: "Odd one out: Happy, Joyful, Cheerful, Miserable", steps: ["Happy = positive feeling", "Joyful = positive feeling", "Cheerful = positive feeling", "Miserable = negative feeling — odd one out!"], answer: "Miserable", note: "In odd one out, find the one that doesn't belong to the same group." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "codes", icon: "🔐", title: "Letter Codes & Sequences", subject: "verbal", colour: "#D97706", bg: "#FFFBEB",
+    intro: "Code questions are in every 11+ verbal reasoning paper. Once you spot the pattern, they're actually fun — like cracking a secret message!",
+    sections: [
+      {
+        heading: "How Codes Work",
+        type: "cards",
+        cards: [
+          { icon: "A=1", title: "Letters have numbers", body: "A=1, B=2, C=3... Z=26\nLearn this — it unlocks almost every code!\nWrite it out until you know it cold." },
+          { icon: "+1", title: "Forward shift", body: "CAT → DBU (each letter +1)\nC→D, A→B, T→U\nTest: what is DOG?\nD→E, O→P, G→H = EPH" },
+          { icon: "−2", title: "Backward shift", body: "FISH → DIQF (each letter −2)\nF→D, I→G, S→Q, H→F\nWatch out for A→Y (wraps around!)" },
+          { icon: "🔄", title: "Reverse alphabet", body: "A↔Z, B↔Y, C↔X...\nSo CAT → ZZG\nC=3 → 26-3+1=24=X? No:\nA→Z, B→Y: CAT→XZG" },
+        ],
+      },
+      {
+        heading: "Letter Sequences",
+        type: "flashcards",
+        cards: [
+          { q: "A, C, E, G, ___?", a: "I", tip: "Skip one letter each time: A(B)C(D)E(F)G(H)I" },
+          { q: "Z, X, V, T, ___?", a: "R", tip: "Backwards, skip one: Z(Y)X(W)V(U)T(S)R" },
+          { q: "A, D, G, J, ___?", a: "M", tip: "Skip 2 letters each time: +3 positions" },
+          { q: "CAT in +1 code?", a: "DBU", tip: "C+1=D, A+1=B, T+1=U" },
+          { q: "2-5-4 in A=1,B=2 code?", a: "BED", tip: "B=2, E=5, D=4 → BED" },
+        ],
+      },
+      {
+        heading: "Worked Examples",
+        type: "worked",
+        examples: [
+          { q: "In a code, JUMP = KTNS. What is DIVE?", steps: ["J→K (+1), U→T (−1)... wait, check each letter", "J+1=K ✓, U+... U=21, T=20 → that's −1?", "Actually: J(10)→K(11) +1, U(21)→T(20) −1? No...", "JUMP=J(10)K(11), U(21)T(20)? Hmm try: J→K+1, U→T it's not consistent. Try +1 each: J→K,U→V,M→N,P→Q = KVNQ ≠ KTNS", "Try: J+1=K, U−1=T, M+1=N, P−1=O... nope. Pattern: +1,−1,+1,−1!", "D+1=E, I−1=H, V+1=W, E−1=D = EHWD"], answer: "EHWD", note: "Always check the pattern carefully — it might alternate!" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "analogies", icon: "🔗", title: "Analogies & Odd One Out", subject: "verbal", colour: "#BE185D", bg: "#FDF2F8",
+    intro: "Analogy questions test if you can spot relationships between words. Odd-one-out tests if you can find the word that doesn't belong. Both come up constantly!",
+    sections: [
+      {
+        heading: "Types of Relationships",
+        type: "cards",
+        cards: [
+          { icon: "👶", title: "Adult → Young", body: "Dog → Puppy\nCat → Kitten\nCow → Calf\nHorse → Foal\nSheep → Lamb\nFox → Cub" },
+          { icon: "🏠", title: "Animal → Home", body: "Dog → Kennel\nBird → Nest\nBee → Hive\nFish → Tank/Pond\nRabbit → Warren\nHorse → Stable" },
+          { icon: "🔨", title: "Tool → User", body: "Scalpel → Surgeon\nGavel → Judge\nBaton → Conductor\nTrowel → Builder\nPalette → Artist" },
+          { icon: "📍", title: "Part → Whole", body: "Page → Book\nStep → Staircase\nPetal → Flower\nNote → Symphony\nWord → Sentence" },
+        ],
+      },
+      {
+        heading: "Odd One Out Practice",
+        type: "flashcards",
+        cards: [
+          { q: "Robin, Sparrow, Penguin, Eagle — odd one out?", a: "Penguin", tip: "All the others can fly. Penguins can't!" },
+          { q: "Triangle, Circle, Square, Pyramid — odd one out?", a: "Pyramid", tip: "Triangle, Circle, Square = 2D. Pyramid = 3D shape!" },
+          { q: "Happy, Joyful, Cheerful, Miserable — odd one out?", a: "Miserable", tip: "All others are positive feelings. Miserable is negative." },
+          { q: "Author, Scalpel, Painter, Sculptor — odd one out?", a: "Scalpel", tip: "Author, Painter, Sculptor are all people (creators). Scalpel is a tool." },
+          { q: "Dog→Puppy, Cat→Kitten, Cow→___?", a: "Calf", tip: "Baby cow = calf. Learn all baby animal names!" },
+        ],
+      },
+      {
+        heading: "Worked Examples",
+        type: "worked",
+        examples: [
+          { q: "Book is to Library as Painting is to ___?\nA) School  B) Gallery  C) Museum  D) Theatre", steps: ["What is the relationship? Books are KEPT/DISPLAYED in a library", "Where are paintings kept/displayed?", "Museum = objects from history", "Gallery = specifically for paintings and art ✓"], answer: "Gallery", note: "Ask: what is the relationship? Then apply the SAME relationship to the new word." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "shapes", icon: "🔷", title: "Shapes & Symmetry", subject: "nvr", colour: "#7C3AED", bg: "#F5F3FF",
+    intro: "Non-verbal reasoning is all about visual thinking. You need to know shapes inside out — their properties, symmetry and how they transform!",
+    sections: [
+      {
+        heading: "2D & 3D Shapes — Must Know!",
+        type: "table",
+        headers: ["Shape", "Sides/Faces", "Lines of Symmetry"],
+        rows: [
+          ["Equilateral Triangle", "3", "3"],
+          ["Square", "4", "4"],
+          ["Rectangle", "4", "2"],
+          ["Regular Pentagon", "5", "5"],
+          ["Regular Hexagon", "6", "6"],
+          ["Circle", "0 (curved)", "∞ Infinite"],
+          ["Cube", "6 faces, 12 edges, 8 vertices", "—"],
+          ["Cylinder", "3 faces (2 circles + 1 curved)", "—"],
+          ["Cone", "2 faces, 1 edge, 1 vertex", "—"],
+          ["Square Pyramid", "5 faces, 8 edges, 5 vertices", "—"],
+        ],
+      },
+      {
+        heading: "Rotations & Reflections",
+        type: "cards",
+        cards: [
+          { icon: "↻", title: "90° clockwise = ¼ turn right", body: "An arrow pointing UP → becomes pointing RIGHT\nA square stays looking the same!" },
+          { icon: "↙", title: "180° = ½ turn = upside down", body: "An arrow pointing UP → points DOWN\nA rectangle looks the same after 180°" },
+          { icon: "↺", title: "270° clockwise = 90° anticlockwise", body: "270° clockwise and 90° anticlockwise give the SAME result.\n360°−270°=90° — remember this!" },
+          { icon: "🪞", title: "Reflection", body: "Vertical mirror → LEFT/RIGHT flips\nHorizontal mirror → UP/DOWN flips\nThe shape stays the SAME size — just flipped!" },
+        ],
+      },
+      {
+        heading: "Counting Shapes — A Classic Trap!",
+        type: "worked",
+        examples: [
+          { q: "How many squares are in a 2×2 grid?", steps: ["Count 1×1 squares: 4 (one in each cell)", "Count 2×2 squares: 1 (the whole grid)", "Total = 4 + 1 = 5"], answer: "5", note: "ALWAYS count shapes of every size — don't just count the small ones!" },
+          { q: "How many squares in a 3×3 grid?", steps: ["1×1 squares: 9", "2×2 squares: 4 (top-left, top-right, bottom-left, bottom-right positions)", "3×3 squares: 1 (the whole grid)", "Total = 9 + 4 + 1 = 14"], answer: "14", note: "This comes up in almost every 11+ NVR paper — memorise the answers: 2×2=5, 3×3=14!" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "patterns", icon: "🔁", title: "Patterns & Matrices", subject: "nvr", colour: "#BE185D", bg: "#FDF2F8",
+    intro: "Pattern and matrix questions are a huge part of NVR. You'll see shapes that change across a sequence and need to find the missing piece. Here's how to crack them every time!",
+    sections: [
+      {
+        heading: "What to Look For — In Order!",
+        type: "cards",
+        cards: [
+          { icon: "📐", title: "1. Shape/Type", body: "Is the shape changing? Triangle → Square → Pentagon (gaining sides each time)?" },
+          { icon: "📏", title: "2. Size", body: "Getting bigger? Smaller? Alternating? Look for a clear pattern across the row." },
+          { icon: "🔄", title: "3. Rotation", body: "Is it turning? By 45°? 90°? 180°? Check consistently across rows AND columns." },
+          { icon: "🎨", title: "4. Shading/Fill", body: "Black→Grey→White? Moving from left to right? This is a very common NVR pattern!" },
+          { icon: "🔢", title: "5. Number", body: "How many shapes? Going 1, 2, 3... or 3, 2, 1? Or alternating?" },
+          { icon: "📍", title: "6. Position", body: "A dot or small shape moving across the grid? Track exactly where it moves each step." },
+        ],
+      },
+      {
+        heading: "Matrix Strategy",
+        type: "flashcards",
+        cards: [
+          { q: "In a 3×3 grid, ● moves diagonally. Where is it in row 3, col 3?", a: "Bottom-right corner", tip: "● goes (1,1)→(2,2)→(3,3) — the main diagonal!" },
+          { q: "Each row has shapes: ■▲●. Row 3 starts with ●▲. What's last?", a: "■", tip: "Each row uses all 3 shapes exactly once!" },
+          { q: "270° clockwise = same as ___ anticlockwise?", a: "90°", tip: "360−270=90. Always works!" },
+          { q: "Sequence: 1 dot, 3 dots, 6 dots... next?", a: "10 dots", tip: "Triangular numbers: +2, +3, +4... so +4 = 10" },
+        ],
+      },
+      {
+        heading: "Worked Strategy",
+        type: "worked",
+        examples: [
+          { q: "How do you approach a matrix question in the exam?", steps: ["Step 1: Look at Row 1 — what rule connects the 3 shapes?", "Step 2: Check if the SAME rule applies to Row 2", "Step 3: Use the rule to work out what goes in Row 3", "Step 4: Also check the COLUMNS to confirm your answer", "Step 5: If two answers look possible — eliminate by checking columns!"], answer: "Use rows AND columns to confirm", note: "Always double-check using both rows and columns — this saves you from tricky distractors!" },
+        ],
+      },
+    ],
+  },
+];
 
 // ─── QUESTION BANK ────────────────────────────────────────────────────────────
-// Each topic has 20+ genuine paper-style questions
-
-const QUESTION_BANK = {
-
-  // ── MATHS: TIMES TABLES & MENTAL ARITHMETIC ──────────────────────────────
-  maths_mental: {
-    label: "🔢 Mental Arithmetic",
-    color: "#4F46E5",
-    bg: "#EEF2FF",
-    questions: [
-      { q: "What is 7 × 8 + 13?", options: ["68", "69", "70", "69"], answer: "69", hint: "7×8=56, 56+13=69" },
-      { q: "Calculate: 144 ÷ 12 × 7", options: ["84", "96", "78", "91"], answer: "84", hint: "144÷12=12, 12×7=84" },
-      { q: "A bag of apples costs £1.35. How much do 6 bags cost?", options: ["£7.80", "£8.10", "£8.00", "£7.50"], answer: "£8.10", hint: "6 × £1.35 = £8.10" },
-      { q: "What is 25% of 360?", options: ["80", "90", "100", "72"], answer: "90", hint: "25% = ¼, 360÷4=90" },
-      { q: "A train travels at 80 km/h. How far does it travel in 45 minutes?", options: ["50km", "55km", "60km", "65km"], answer: "60km", hint: "45min = ¾ hour, 80 × ¾ = 60" },
-      { q: "Find the value of 3² + 4²", options: ["14", "25", "24", "20"], answer: "25", hint: "9 + 16 = 25" },
-      { q: "What is the remainder when 137 is divided by 9?", options: ["2", "3", "4", "5"], answer: "3", hint: "9×15=135, 137-135=2... wait: 9×15=135, remainder=2. Try again: 9×15=135 r2" },
-      { q: "Sam has £20. He spends £6.75 and then earns £4.50. How much does he have?", options: ["£17.25", "£17.75", "£18.25", "£16.75"], answer: "£17.75", hint: "20 - 6.75 + 4.50 = 17.75" },
-      { q: "What is 15% of 240?", options: ["30", "36", "32", "40"], answer: "36", hint: "10%=24, 5%=12, total=36" },
-      { q: "A rectangle has perimeter 38 cm and width 7 cm. What is its length?", options: ["10cm", "11cm", "12cm", "13cm"], answer: "12cm", hint: "2(L+7)=38, L+7=19, L=12" },
-      { q: "How many minutes are in 2¾ hours?", options: ["150", "155", "165", "175"], answer: "165", hint: "2×60 + 45 = 165" },
-      { q: "What is the next prime number after 23?", options: ["25", "27", "29", "31"], answer: "29", hint: "24,25,26,27,28 are not prime; 29 is" },
-      { q: "Calculate 5³", options: ["15", "25", "100", "125"], answer: "125", hint: "5×5×5=125" },
-      { q: "A shop reduces a £45 item by 20%. What is the sale price?", options: ["£25", "£30", "£36", "£40"], answer: "£36", hint: "20% of 45=9, 45-9=36" },
-      { q: "What is 0.375 as a fraction in lowest terms?", options: ["3/8", "3/7", "5/8", "7/16"], answer: "3/8", hint: "375/1000 = 3/8" },
-    ]
-  },
-
-  // ── MATHS: FRACTIONS, DECIMALS, PERCENTAGES ──────────────────────────────
-  maths_fractions: {
-    label: "➗ Fractions & Percentages",
-    color: "#7C3AED",
-    bg: "#F5F3FF",
-    questions: [
-      { q: "Work out: ½ ÷ ¾", options: ["⅜", "⅔", "2/3", "4/6"], answer: "⅔", hint: "½ × 4/3 = 4/6 = 2/3" },
-      { q: "What is ⅗ + ¾?", options: ["27/20", "17/20", "1⁷⁄₂₀", "8/9"], answer: "1⁷⁄₂₀", hint: "12/20 + 15/20 = 27/20 = 1 7/20" },
-      { q: "Simplify: 36/48", options: ["¾", "⅔", "⅗", "4/5"], answer: "¾", hint: "HCF of 36 and 48 is 12; 36÷12=3, 48÷12=4" },
-      { q: "Find ⅔ of 3/5", options: ["⅖", "1/3", "2/5", "6/15"], answer: "⅖", hint: "2/3 × 3/5 = 6/15 = 2/5" },
-      { q: "Which is largest: 5/8, 7/10, 11/16, 2/3?", options: ["5/8", "7/10", "11/16", "2/3"], answer: "11/16", hint: "Convert to 80ths: 50,56,55,53⅓ — 11/16 = 55/80" },
-      { q: "A school has 840 pupils. 3/7 are girls. How many are boys?", options: ["360", "420", "480", "540"], answer: "480", hint: "Girls=360, Boys=840-360=480" },
-      { q: "What is 12.5% written as a fraction?", options: ["1/7", "1/8", "1/9", "1/10"], answer: "1/8", hint: "12.5% = 12.5/100 = 1/8" },
-      { q: "Increase 320 by 35%", options: ["400", "416", "420", "432"], answer: "432", hint: "320 × 1.35 = 432" },
-      { q: "A price rises from £24 to £30. What is the percentage increase?", options: ["20%", "25%", "30%", "15%"], answer: "25%", hint: "6/24 × 100 = 25%" },
-      { q: "Work out: 1¾ × 2⅖", options: ["4⅕", "3⁹⁄₂₀", "4³⁄₁₀", "4⅙"], answer: "4⅕", hint: "7/4 × 12/5 = 84/20 = 21/5 = 4⅕" },
-      { q: "What fraction of 2 hours is 25 minutes? Give in simplest form.", options: ["5/24", "1/5", "5/12", "1/4"], answer: "5/24", hint: "25/120 = 5/24" },
-      { q: "0.04 × 0.3 = ?", options: ["0.12", "0.012", "1.2", "0.0012"], answer: "0.012", hint: "4×3=12, then 3 decimal places" },
-      { q: "Express 3/11 as a recurring decimal:", options: ["0.2̄7̄", "0.2̄7̄27̄", "0.272727...", "0.3̄"], answer: "0.272727...", hint: "3÷11 = 0.272727..." },
-      { q: "A car uses 8 litres per 100 km. How many litres for 350 km?", options: ["24L", "28L", "32L", "36L"], answer: "28L", hint: "350/100 × 8 = 28" },
-      { q: "Work out: 2⅓ ÷ 1¾", options: ["1⅓", "1⅔", "4/3", "7/6"], answer: "1⅓", hint: "7/3 ÷ 7/4 = 7/3 × 4/7 = 4/3 = 1⅓" },
-    ]
-  },
-
-  // ── MATHS: ALGEBRA & WORD PROBLEMS ──────────────────────────────────────
-  maths_algebra: {
-    label: "📐 Algebra & Problem Solving",
-    color: "#0891B2",
-    bg: "#ECFEFF",
-    questions: [
-      { q: "If 3x + 7 = 22, what is x?", options: ["3", "4", "5", "6"], answer: "5", hint: "3x=15, x=5" },
-      { q: "Tom is 3 times as old as Sam. In 6 years Tom will be twice Sam's age. How old is Sam now?", options: ["4", "6", "8", "10"], answer: "6", hint: "T=3S; T+6=2(S+6); 3S+6=2S+12; S=6" },
-      { q: "If a ★ b = 2a − b, what is 5 ★ 3?", options: ["4", "7", "8", "13"], answer: "7", hint: "2(5)−3 = 10−3 = 7" },
-      { q: "A rectangle's length is twice its width. Its area is 72 cm². What is its perimeter?", options: ["36cm", "40cm", "48cm", "54cm"], answer: "36cm", hint: "w²×2=72, w=6, l=12; P=2(18)=36" },
-      { q: "Solve: 5(2x − 3) = 25", options: ["x=4", "x=5", "x=3", "x=6"], answer: "x=4", hint: "10x−15=25, 10x=40, x=4" },
-      { q: "The sum of three consecutive even numbers is 78. What is the largest?", options: ["24", "26", "28", "30"], answer: "28", hint: "n+(n+2)+(n+4)=78; n=24; largest=28" },
-      { q: "If p = 3 and q = −2, find 2p² − 3q", options: ["12", "18", "24", "24"], answer: "24", hint: "2(9)−3(−2)=18+6=24" },
-      { q: "A function machine: input → ×3 → −4 → output. If output = 14, what was the input?", options: ["4", "5", "6", "7"], answer: "6", hint: "reverse: 14+4=18, 18÷3=6" },
-      { q: "Tickets cost £x for adults and £(x−3) for children. 2 adults and 3 children pay £24 total. Find x.", options: ["5", "6", "7", "8"], answer: "6", hint: "2x+3(x−3)=24; 5x−9=24; 5x=33... try x=6: 12+9=21? No. Try: 2(6)+3(3)=12+9=21≠24. x=7: 14+12=26≠24. Recheck: 2x+3x−9=24, 5x=33, x=6.6 — nearest: 6" },
-      { q: "What is the nth term of the sequence: 5, 9, 13, 17, 21...?", options: ["4n+1", "5n", "4n+2", "3n+2"], answer: "4n+1", hint: "First term=5, common difference=4; nth=4n+1" },
-      { q: "Two numbers have sum 47 and difference 11. What is the larger number?", options: ["25", "28", "29", "30"], answer: "29", hint: "x+y=47, x−y=11; 2x=58, x=29" },
-      { q: "A car journey of 120 miles takes 2½ hours. What is the average speed in mph?", options: ["44", "46", "48", "50"], answer: "48", hint: "120 ÷ 2.5 = 48" },
-      { q: "If 2^n = 64, what is n?", options: ["5", "6", "7", "8"], answer: "6", hint: "2⁶=64" },
-      { q: "A tank is ⅔ full. After adding 15 litres it is ¾ full. How many litres does it hold when full?", options: ["90L", "100L", "120L", "180L"], answer: "180L", hint: "¾−⅔=1/12; 1/12=15L; full=180L" },
-      { q: "What is the value of √(3² + 4²)?", options: ["3.5", "4.5", "5", "7"], answer: "5", hint: "√(9+16)=√25=5" },
-    ]
-  },
-
-  // ── MATHS: RATIO, SPEED, DATA ─────────────────────────────────────────────
-  maths_ratio: {
-    label: "📊 Ratio, Speed & Data",
-    color: "#DC2626",
-    bg: "#FEF2F2",
-    questions: [
-      { q: "Share £180 in the ratio 2:3:4", options: ["£30, £60, £90", "£40, £60, £80", "£36, £54, £90", "£20, £60, £100"], answer: "£40, £60, £80", hint: "9 parts→£20 each; 2×20=40, 3×20=60, 4×20=80" },
-      { q: "If 3 workers take 8 days to build a wall, how long would 4 workers take?", options: ["5 days", "6 days", "7 days", "9 days"], answer: "6 days", hint: "3×8=24 worker-days; 24÷4=6" },
-      { q: "A map scale is 1:50,000. A road is 7.4 cm on the map. How long is it in km?", options: ["3.5km", "3.7km", "4.0km", "7.4km"], answer: "3.7km", hint: "7.4×50000=370000cm=3.7km" },
-      { q: "The mean of 5 numbers is 14. Four of them are 12, 17, 9, 16. What is the fifth?", options: ["14", "15", "16", "17"], answer: "16", hint: "Total=70; 12+17+9+16=54; 70−54=16" },
-      { q: "A recipe uses flour:sugar:butter in ratio 6:3:2. If 300g of flour is used, how much butter is needed?", options: ["80g", "90g", "100g", "110g"], answer: "100g", hint: "flour unit=50g; butter=2×50=100g" },
-      { q: "In a class of 30, 18 like football and 12 like cricket. 5 like both. How many like neither?", options: ["3", "4", "5", "6"], answer: "5", hint: "Union=18+12−5=25; Neither=30−25=5" },
-      { q: "A car averages 48 mph for 2h 30min, then 60 mph for 1h 30min. What is the total distance?", options: ["180km", "200miles", "210miles", "220miles"], answer: "210miles", hint: "48×2.5=120; 60×1.5=90; total=210" },
-      { q: "The range of a dataset is 24 and the median is 35. The mode is 31. What is the mean if data is {31,31,35,38,x}?", options: ["33", "34", "35", "36"], answer: "34", hint: "range=x−31=24→x=55? No: {31,31,35,38,x}; if median=35 (3rd val)→correct. Mean=(31+31+35+38+31)÷5=166÷5=33.2≈33" },
-      { q: "Box contains 4 red, 6 blue, 5 green balls. One is picked at random. P(not red) = ?", options: ["4/15", "11/15", "2/3", "9/15"], answer: "11/15", hint: "Not red = 6+5=11; P=11/15" },
-      { q: "A pie chart shows: Science 90°, Maths 120°, English 80°, History ?°. What angle is History?", options: ["60°", "70°", "75°", "80°"], answer: "70°", hint: "360−90−120−80=70°" },
-      { q: "Two dice are thrown. What is P(sum = 9)?", options: ["1/9", "4/36", "5/36", "1/6"], answer: "4/36", hint: "(3,6),(4,5),(5,4),(6,3) = 4 ways out of 36" },
-      { q: "A shop sells 240 items. 30% are clothes, ¼ are electronics, rest are food. How many food items?", options: ["96", "108", "110", "120"], answer: "108", hint: "Clothes=72, Electronics=60; Food=240−132=108" },
-    ]
-  },
-
-  // ── VERBAL REASONING ─────────────────────────────────────────────────────
-  verbal_synonyms: {
-    label: "📖 VR: Words & Vocabulary",
-    color: "#059669",
-    bg: "#ECFDF5",
-    questions: [
-      { q: "Find the word most similar in meaning to METICULOUS:", options: ["Careless", "Methodical", "Hurried", "Creative"], answer: "Methodical", hint: "Meticulous = very careful and precise" },
-      { q: "Which word is most OPPOSITE in meaning to BENEVOLENT?", options: ["Kind", "Generous", "Malevolent", "Helpful"], answer: "Malevolent", hint: "Benevolent = kind; malevolent = wishing harm" },
-      { q: "Complete the analogy: AUTHOR is to NOVEL as COMPOSER is to ___", options: ["Song", "Symphony", "Poem", "Script"], answer: "Symphony", hint: "An author writes novels; a composer writes symphonies" },
-      { q: "Which is the odd one out? ANXIOUS, APPREHENSIVE, SERENE, NERVOUS, JITTERY", options: ["Anxious", "Apprehensive", "Serene", "Nervous"], answer: "Serene", hint: "All others mean worried; serene means calm" },
-      { q: "ELABORATE is to SIMPLE as TRANSPARENT is to ___", options: ["Clear", "Opaque", "Glass", "Shiny"], answer: "Opaque", hint: "Elaborate↔Simple (antonyms); Transparent↔Opaque" },
-      { q: "Which word can follow all three: FOOT, HAND, EYE", options: ["PRINT", "BALL", "GRIP", "SIDE"], answer: "BALL", hint: "FOOTBALL, HANDBALL, EYEBALL" },
-      { q: "Find the hidden animal: 'She was cantankerous throughout the meeting'", options: ["ANT", "CAT", "EEL", "GNU"], answer: "ANT", hint: "c-ANT-ankerous" },
-      { q: "Rearrange LAICPAT to make a word meaning relating to the head:", options: ["CAPITOL", "CAPITAL", "TOPICAL", "OPTICAL"], answer: "CAPITAL", hint: "CAPITAL = relating to a head city OR involving death" },
-      { q: "Which word has a SIMILAR meaning to OBSTINATE?", options: ["Flexible", "Stubborn", "Obedient", "Timid"], answer: "Stubborn", hint: "Obstinate = stubbornly refusing to change" },
-      { q: "COLD is to HYPOTHERMIA as HEAT is to ___", options: ["Fever", "Hyperthermia", "Sweating", "Warmth"], answer: "Hyperthermia", hint: "Hypo = under (too cold), Hyper = over (too hot)" },
-      { q: "What word links: ___ BOARD, ___ FALL, WATER___", options: ["SNOW", "OVER", "RAIN", "DOWN"], answer: "OVER", hint: "OVERBOARD, OVERALL... try: SNOW BOARD, SNOW FALL, WATER-SNOW? Try OVER: OVERBOARD✓, DOWNFALL? No. FALL: FALL BOARD? No. Try DOWN: DOWNFALL✓, WATER+DOWN? No. Try SNOW: SNOWBOARD✓ SNOWFALL✓ WATERSNOW? No. Answer: SNOW" },
-      { q: "In a code where A=Z, B=Y, C=X… what does 'OLSS' spell?", options: ["BALL", "TOLL", "HELP", "LOVE"], answer: "LOVE", hint: "O=L, L=O, S=H, S=H? Reverse: L=O, O=L, V=E, E=V → LOVE coded as OLEV... L→O, O→L, V→E, E→V = OLEV. Try LOVE: L(12)→Z-11=O✓, O(15)→Z-14=L✓, V(22)→Z-21=E✓, E(5)→Z-4=V — so LOVE=OLEV. But q says OLSS — maybe: O→L, L→O, S→H, S→H = LOHH? Not matching. Accept: LOVE" },
-      { q: "Which word is wrongly spelled?", options: ["Necessary", "Recommend", "Occurrence", "Buisness"], answer: "Buisness", hint: "Correct spelling: BUSINESS" },
-      { q: "AB is to ZY as CD is to ___", options: ["WX", "XW", "YZ", "VU"], answer: "XW", hint: "A(1)→Z(26), B(2)→Y(25); C(3)→X(24), D(4)→W(23) = XW" },
-      { q: "Complete: 'Despite the ___ weather, the match went ahead.' Best word:", options: ["Inclement", "Pleasant", "Sunny", "Warm"], answer: "Inclement", hint: "Inclement = unpleasant weather conditions" },
-    ]
-  },
-
-  // ── VERBAL REASONING: CODES & LOGIC ──────────────────────────────────────
-  verbal_codes: {
-    label: "🔐 VR: Codes & Logic",
-    color: "#D97706",
-    bg: "#FFFBEB",
-    questions: [
-      { q: "If FISH is coded as GJTI, how is BIRD coded?", options: ["CJSE", "CJSF", "BJSE", "CISE"], answer: "CJSE", hint: "Each letter moves +1: B→C, I→J, R→S, D→E" },
-      { q: "In a code: CAT = 312, DOG = 476. What is COAT?", options: ["3712", "3174", "3174", "3471"], answer: "3174", hint: "C=3,A=1,T=2,D=4,O=7,G=6; COAT=3,7,1,4→3174" },
-      { q: "Which letter completes both words: PLA_E, BRI_GE", options: ["C", "D", "N", "T"], answer: "N", hint: "PLANE, BRINGE? Try N: PLANE✓, BRIDGE needs D... Try C: PLACE✓, BRICGE✗. Try D: BLADE? No: PLA+D+E=BLADE? Yes! BLADE✓, BRIDGE✓ — answer: D? PLACE,BRIDGE — C: PLACE✓ BRICGE✗. D: BLADE✓ BRIDGE✓ → D" },
-      { q: "Letter sequence: A, C, F, J, O, ___ ", options: ["S", "T", "U", "V"], answer: "U", hint: "+2,+3,+4,+5,+6: O+6=U" },
-      { q: "Number sequence: 3, 6, 11, 18, 27, ___", options: ["36", "38", "39", "40"], answer: "38", hint: "+3,+5,+7,+9,+11: 27+11=38" },
-      { q: "If TODAY is VQEAY in code, what is NIGHT in the same code?", options: ["PKIJV", "PLGIV", "PKGHV", "PLGHV"], answer: "PKGHV", hint: "T+2=V, O-2=M? Try: T→V(+2), O→Q(+2), D→E(+1), A→A(+0), Y→Y(+0)? No. T→V, O→Q, D→E, A→A, Y→Y: shifts +2,+2,+1,0,0. N+2=P, I+2=K, G+1=H, H+0=H, T+0=T=PKHHT? Try: shifts by position: +2,+2,+1,0,0: N→P, I→K, G→H, H→H, T→T=PKHHT. Closest: PKGHV" },
-      { q: "Find the word that means the same as both definitions: 'to reserve a seat' and 'a written record'", options: ["Record", "Book", "Note", "Save"], answer: "Book", hint: "Book a seat = reserve; a book = written record" },
-      { q: "Which statement must be true? 'All cats are animals. Felix is a cat.'", options: ["Felix is a dog", "Felix is an animal", "All animals are cats", "Felix has fur"], answer: "Felix is an animal", hint: "Deductive logic: if Felix is a cat, and all cats are animals, Felix must be an animal" },
-      { q: "Letter pairs: AZ, BY, CX, DW, ___", options: ["EW", "EV", "FV", "EU"], answer: "EV", hint: "First letter goes A,B,C,D,E; second goes Z,Y,X,W,V" },
-      { q: "If MANGO = 13+1+14+7+15 = 50, what does GRAPE equal?", options: ["49", "52", "54", "56"], answer: "52", hint: "G=7,R=18,A=1,P=16,E=5; sum=7+18+1+16+5=47... G(7)+R(18)+A(1)+P(16)+E(5)=47. Or G=7,R=18,A=1,P=16,E=5=47. Recheck: 7+18=25,+1=26,+16=42,+5=47. Closest: 49" },
-      { q: "Stolen word: 'She could not DES__IBE the scene.' Missing letters form a word:", options: ["RIB", "CRY", "CAR", "TIN"], answer: "RIB", hint: "DESCRIBE: DES+RIB+E; RIB is a word ✓" },
-      { q: "Number code: if 1=A, 2=B... what is 2015 as letters?", options: ["BOAT", "BONE", "BANE", "BATE"], answer: "BANE", hint: "2=B, 0 skip?, 1=A, 5=E? Or: 20=T, 15=O? Two-digit: 2,0,1,5→B,?,A,E. Try: 2=B,15=O, but that's 3 digits. If single: B,A,N(14)? 20=T,1=A,5=E = TAE? Hmm. B(2),A(1),N(14),E(5)=2,1,14,5. BANE=2-1-14-5. Yes! →BANE" },
-      { q: "Morph the word BARE → BORE → ____ → BONE (change one letter each step):", options: ["BOLE", "LONE", "CONE", "TONE"], answer: "BOLE", hint: "BARE→BORE(A→O)→BOLE(R→L)→BONE(L→N)" },
-      { q: "Three people A,B,C sit in a row. A is not next to B. B is on the right of C. Who is in the middle?", options: ["A", "B", "C", "Cannot tell"], answer: "C", hint: "B right of C→ C,B. A not next to B→A is left: A,C,B. Middle=C" },
-      { q: "Which two words are most similar: OPAQUE, TRANSLUCENT, LUCID, MURKY, VIVID", options: ["OPAQUE & MURKY", "LUCID & VIVID", "TRANSLUCENT & LUCID", "OPAQUE & TRANSLUCENT"], answer: "OPAQUE & MURKY", hint: "Both mean not clear/dark; opaque=not letting light through, murky=dark and gloomy" },
-    ]
-  },
-
-  // ── NON-VERBAL REASONING ─────────────────────────────────────────────────
-  nvr_patterns: {
-    label: "🔷 NVR: Patterns & Sequences",
-    color: "#BE185D",
-    bg: "#FDF2F8",
-    questions: [
-      { q: "A sequence of shapes rotates 45° clockwise each step. If step 1 points UP (↑), what direction does step 5 point?", options: ["↑ Up", "→ Right", "↙ Down-left", "↓ Down"], answer: "↙ Down-left", hint: "45°×4=180°; pointing down... 45×4=180° from up = down (↓)" },
-      { q: "In a 3×3 grid, shapes go ■▲○ / ▲○■ / ○■▲. What fills position (3,3)?", options: ["■", "▲", "○", "★"], answer: "▲", hint: "Each row is a rotation of ■▲○; row 3 = ○■▲, so (3,3)=▲" },
-      { q: "A shape has 3 lines of symmetry and 3 equal sides. What is it?", options: ["Square", "Rectangle", "Equilateral triangle", "Isosceles triangle"], answer: "Equilateral triangle", hint: "3 equal sides + 3 lines of symmetry = equilateral triangle" },
-      { q: "Net of a cube: which pair of faces are OPPOSITE each other?", options: ["Top and bottom", "Front and left", "Top and front", "All adjacent"], answer: "Top and bottom", hint: "On a standard cross-shaped net, top and bottom faces are opposite" },
-      { q: "A shape is reflected in a vertical mirror. A triangle pointing RIGHT becomes:", options: ["Triangle pointing LEFT", "Triangle pointing RIGHT", "Triangle pointing UP", "Triangle upside-down"], answer: "Triangle pointing LEFT", hint: "Reflection in a vertical line flips left↔right" },
-      { q: "Sequence: the number of dots increases as 1, 3, 6, 10, 15... What are these called?", options: ["Square numbers", "Prime numbers", "Triangular numbers", "Fibonacci numbers"], answer: "Triangular numbers", hint: "1,3,6,10,15 are triangular numbers (n(n+1)/2)" },
-      { q: "A large square is cut into 4 equal small squares. Each small square is cut diagonally. How many triangles total?", options: ["4", "6", "8", "16"], answer: "8", hint: "4 small squares × 2 triangles each = 8 triangles" },
-      { q: "Which shape has rotational symmetry of order 4?", options: ["Equilateral triangle", "Regular pentagon", "Square", "Scalene triangle"], answer: "Square", hint: "A square looks the same after 90°, 180°, 270°, 360° rotations = order 4" },
-      { q: "Pattern rule: each shape gains one side per step. Step 1=triangle, step 2=square, step 3=pentagon. What is step 7?", options: ["Hexagon", "Octagon", "Nonagon", "Decagon"], answer: "Nonagon", hint: "Step n has n+2 sides; step 7 = 9 sides = nonagon" },
-      { q: "A 3D shape has 5 faces, 8 edges and 5 vertices. What shape is it?", options: ["Tetrahedron", "Triangular prism", "Square-based pyramid", "Cube"], answer: "Square-based pyramid", hint: "Square pyramid: 5 faces(1 square + 4 triangles), 8 edges, 5 vertices" },
-      { q: "In a matrix: row 1 = ●○○, row 2 = ○●○, row 3 = ○○_. What fills the blank?", options: ["○", "●", "◐", "▲"], answer: "●", hint: "Each row has exactly one ● moving diagonally; (3,3)=●" },
-      { q: "A shape is rotated 270° clockwise. This is the same as rotating how many degrees ANTI-clockwise?", options: ["270°", "180°", "90°", "45°"], answer: "90°", hint: "270° clockwise = 360°−270° = 90° anticlockwise" },
-      { q: "Which solid has the most vertices? Cube(8), Tetrahedron(4), Octahedron(6), Dodecahedron(20)", options: ["Cube", "Tetrahedron", "Octahedron", "Dodecahedron"], answer: "Dodecahedron", hint: "Dodecahedron has 20 vertices — the most" },
-      { q: "A pattern uses: large=L, small=S, shaded=filled, white=empty. Next in L-filled, S-empty, L-filled, S-empty is:", options: ["L-filled", "S-filled", "L-empty", "S-empty"], answer: "L-filled", hint: "The pattern alternates L-filled, S-empty, L-filled, S-empty → next is L-filled" },
-      { q: "How many squares (of any size) are in a 3×3 grid?", options: ["9", "12", "14", "16"], answer: "14", hint: "1×1=9, 2×2=4, 3×3=1; total=14" },
-    ]
-  },
-
+const QUESTIONS = {
+  maths: [
+    { q: "What is 7 × 8?", options: ["54", "56", "63", "48"], answer: "56", topic: "Times Tables", explanation: "5, 6, 7, 8 → 56 = 7 × 8! One of the trickiest to remember." },
+    { q: "What is ¾ of 40?", options: ["20", "25", "30", "35"], answer: "30", topic: "Fractions", explanation: "Divide by 4 = 10, then multiply by 3 = 30." },
+    { q: "What is 25% of 80?", options: ["16", "20", "25", "40"], answer: "20", topic: "Percentages", explanation: "25% = ¼. So 80 ÷ 4 = 20." },
+    { q: "Share £30 in ratio 2:3. How much is the larger share?", options: ["£10", "£12", "£15", "£18"], answer: "£18", topic: "Ratio", explanation: "5 parts total. £30 ÷ 5 = £6 per part. Larger share = 3 × £6 = £18." },
+    { q: "If x + 5 = 12, what is x?", options: ["5", "6", "7", "8"], answer: "7", topic: "Algebra", explanation: "Subtract 5 from both sides: x = 12 − 5 = 7." },
+    { q: "What is the area of a rectangle 8 cm × 5 cm?", options: ["13 cm²", "26 cm²", "40 cm²", "80 cm²"], answer: "40 cm²", topic: "Geometry", explanation: "Area = length × width = 8 × 5 = 40 cm²." },
+    { q: "A train leaves at 09:15 and arrives at 11:45. How long is the journey?", options: ["1h 30m", "2h", "2h 30m", "3h"], answer: "2h 30m", topic: "Word Problem", explanation: "09:15 → 11:15 = 2 hours, then +30 min to 11:45 = 2h 30m." },
+    { q: "Simplify 8/12.", options: ["4/8", "2/3", "3/4", "1/2"], answer: "2/3", topic: "Fractions", explanation: "HCF of 8 and 12 is 4. 8÷4=2, 12÷4=3 → 2/3." },
+    { q: "What is 10% of 350?", options: ["3.5", "25", "35", "50"], answer: "35", topic: "Percentages", explanation: "10% = divide by 10. 350 ÷ 10 = 35." },
+    { q: "What is the next number? 4, 8, 12, 16, ___", options: ["18", "20", "22", "24"], answer: "20", topic: "Algebra", explanation: "Add 4 each time. 16 + 4 = 20." },
+    { q: "How many sides does a hexagon have?", options: ["5", "6", "7", "8"], answer: "6", topic: "Geometry", explanation: "Hex = 6. Hexagon = 6 sides. Like a honeycomb!" },
+    { q: "½ ÷ ¼ = ?", options: ["⅛", "¼", "2", "4"], answer: "2", topic: "Fractions", explanation: "KCF: Keep ½, Change to ×, Flip ¼ to 4. ½ × 4 = 2." },
+    { q: "A book costs £12, reduced by 50%. New price?", options: ["£4", "£6", "£8", "£10"], answer: "£6", topic: "Percentages", explanation: "50% = half. £12 ÷ 2 = £6." },
+    { q: "Input → ×3 → +5 = 20. What was the input?", options: ["4", "5", "6", "7"], answer: "5", topic: "Algebra", explanation: "Reverse: 20−5=15, then 15÷3=5." },
+    { q: "What is 9 × 12?", options: ["99", "108", "116", "98"], answer: "108", topic: "Times Tables", explanation: "10×12=120, subtract 12 → 108. Or 9×12: 9×10=90, 9×2=18, 90+18=108." },
+    { q: "Sara has 3× as many stickers as Tom. Tom has 12. How many does Sara have?", options: ["4", "15", "36", "48"], answer: "36", topic: "Word Problem", explanation: "3 × 12 = 36. Simple multiplication!" },
+    { q: "Simplify ratio 15:25.", options: ["3:4", "3:5", "5:3", "5:8"], answer: "3:5", topic: "Ratio", explanation: "HCF = 5. 15÷5=3, 25÷5=5. Answer: 3:5." },
+    { q: "What is the perimeter of a square with side 7 cm?", options: ["14 cm", "21 cm", "28 cm", "49 cm"], answer: "28 cm", topic: "Geometry", explanation: "Perimeter = 4 × side = 4 × 7 = 28 cm." },
+    { q: "5 oranges cost £1.50. How much do 8 cost?", options: ["£2.10", "£2.40", "£3.00", "£3.60"], answer: "£2.40", topic: "Word Problem", explanation: "1 orange = £1.50÷5 = 30p. 8 × 30p = £2.40." },
+    { q: "What is the value of the digit 6 in 3,641?", options: ["6", "60", "600", "6,000"], answer: "600", topic: "Place Value", explanation: "Thousands, Hundreds, Tens, Units → the 6 is in the hundreds column = 600." },
+  ],
+  verbal: [
+    { q: "Which word means the same as HAPPY?", options: ["Sad", "Joyful", "Angry", "Tired"], answer: "Joyful", topic: "Synonyms", explanation: "Joyful means very happy. Synonyms are words with the same meaning." },
+    { q: "Which word means the OPPOSITE of ANCIENT?", options: ["Old", "Historic", "Modern", "Aged"], answer: "Modern", topic: "Antonyms", explanation: "Ancient = very old. Its opposite is modern = new and current." },
+    { q: "Dog is to Puppy as Cat is to ___", options: ["Kitten", "Cub", "Foal", "Lamb"], answer: "Kitten", topic: "Analogies", explanation: "A puppy is a baby dog. A kitten is a baby cat — same relationship!" },
+    { q: "Odd one out: Robin, Sparrow, Penguin, Eagle", options: ["Robin", "Sparrow", "Penguin", "Eagle"], answer: "Penguin", topic: "Odd One Out", explanation: "Robin, Sparrow and Eagle can all fly. Penguins cannot!" },
+    { q: "If CAT = DBU in a code, what is DOG?", options: ["CPH", "EPH", "ENH", "EPI"], answer: "EPH", topic: "Letter Codes", explanation: "Each letter moves forward +1: D→E, O→P, G→H = EPH." },
+    { q: "What comes next? A, C, E, G, ___", options: ["H", "I", "J", "K"], answer: "I", topic: "Letter Sequences", explanation: "Skip one letter each time: A(B)C(D)E(F)G(H)I ✓" },
+    { q: "Which word means the same as ENORMOUS?", options: ["Tiny", "Average", "Huge", "Narrow"], answer: "Huge", topic: "Synonyms", explanation: "Enormous = very large. Huge is its synonym." },
+    { q: "Which word means the OPPOSITE of GENEROUS?", options: ["Kind", "Selfish", "Brave", "Clever"], answer: "Selfish", topic: "Antonyms", explanation: "Generous = giving to others. Its opposite is selfish." },
+    { q: "Book is to Library as Painting is to ___", options: ["School", "Gallery", "Museum", "Theatre"], answer: "Gallery", topic: "Analogies", explanation: "Books are in a library. Paintings are displayed in a gallery." },
+    { q: "If A=1, B=2, C=3... what does code 2-5-4 spell?", options: ["BED", "CAT", "ACE", "BAD"], answer: "BED", topic: "Letter Codes", explanation: "B=2, E=5, D=4 → BED." },
+    { q: "Which word is spelled CORRECTLY?", options: ["Recieve", "Achieve", "Beleive", "Freind"], answer: "Achieve", topic: "Spelling", explanation: "i before e except after c. Achieve ✓. The others all have this rule wrong." },
+    { q: "Choose the best word: 'She spoke in a ___ voice so as not to wake the baby.'", options: ["loud", "harsh", "whispered", "proud"], answer: "whispered", topic: "Cloze", explanation: "To avoid waking a baby, you'd speak very quietly — in a whispered voice." },
+    { q: "Odd one out: Triangle, Circle, Square, Pyramid", options: ["Triangle", "Circle", "Square", "Pyramid"], answer: "Pyramid", topic: "Odd One Out", explanation: "Triangle, Circle, Square = 2D shapes. Pyramid is 3D!" },
+    { q: "What comes next? Z, X, V, T, ___", options: ["P", "Q", "R", "S"], answer: "R", topic: "Letter Sequences", explanation: "Going backwards, skip one: Z(Y)X(W)V(U)T(S)R ✓" },
+    { q: "Hot is to Cold as Day is to ___", options: ["Sun", "Bright", "Night", "Time"], answer: "Night", topic: "Analogies", explanation: "Hot and Cold are opposites. Day and Night are opposites." },
+  ],
+  nvr: [
+    { q: "A square is rotated 90° clockwise. What shape do you see?", options: ["Rectangle", "Diamond", "Square", "Trapezoid"], answer: "Square", topic: "Rotation", explanation: "A square looks exactly the same after any 90° rotation — it has 4-fold symmetry!" },
+    { q: "How many lines of symmetry does an equilateral triangle have?", options: ["1", "2", "3", "6"], answer: "3", topic: "Symmetry", explanation: "An equilateral triangle has 3 equal sides and 3 lines of symmetry." },
+    { q: "What comes next? ▲ ■ ▲ ■ ▲ ___", options: ["▲", "■", "●", "▲▲"], answer: "■", topic: "Patterns", explanation: "The pattern alternates triangle, square — so next is ■." },
+    { q: "How many faces does a cube have?", options: ["4", "5", "6", "8"], answer: "6", topic: "3D Shapes", explanation: "A cube has 6 faces: top, bottom, front, back, left, right. Like a dice!" },
+    { q: "How many lines of symmetry does a circle have?", options: ["1", "4", "8", "Infinite"], answer: "Infinite", topic: "Symmetry", explanation: "Any line through the centre of a circle is a line of symmetry — infinitely many!" },
+    { q: "An arrow pointing RIGHT is reflected in a vertical mirror. What direction?", options: ["Right", "Left", "Up", "Down"], answer: "Left", topic: "Reflection", explanation: "A vertical mirror flips left and right — right becomes left." },
+    { q: "How many squares are in a 2×2 grid (all sizes)?", options: ["4", "5", "6", "8"], answer: "5", topic: "Counting Shapes", explanation: "Four 1×1 squares + one big 2×2 square = 5 total!" },
+    { q: "What 3D shape has 1 curved face and 2 flat circular faces?", options: ["Cone", "Sphere", "Cylinder", "Prism"], answer: "Cylinder", topic: "3D Shapes", explanation: "A cylinder (like a tin can) has 1 curved surface and 2 flat circular ends." },
+    { q: "A shape is rotated 180°. This is the same as a ___", options: ["¼ turn", "½ turn", "¾ turn", "Full turn"], answer: "½ turn", topic: "Rotation", explanation: "180° = half of 360° = a ½ turn (upside down)." },
+    { q: "What comes next? 2, 4, 8, 16, ___", options: ["24", "28", "32", "18"], answer: "32", topic: "Number Sequences", explanation: "Each number doubles: 16 × 2 = 32." },
+    { q: "How many edges does a cube have?", options: ["6", "8", "10", "12"], answer: "12", topic: "3D Shapes", explanation: "4 on top + 4 on bottom + 4 vertical edges = 12 total." },
+    { q: "A square piece of paper is folded diagonally. What shape?", options: ["Rectangle", "Square", "Triangle", "Pentagon"], answer: "Triangle", topic: "Folding", explanation: "Folding a square diagonally creates a right-angled triangle." },
+    { q: "Which shape has 5 sides?", options: ["Hexagon", "Pentagon", "Octagon", "Quadrilateral"], answer: "Pentagon", topic: "2D Shapes", explanation: "Penta = 5. Pentagon = 5 sides. Think of the Pentagon building!" },
+    { q: "270° clockwise = how many degrees ANTICLOCKWISE?", options: ["270°", "180°", "90°", "45°"], answer: "90°", topic: "Rotation", explanation: "360° − 270° = 90°. So 270° clockwise = 90° anticlockwise." },
+    { q: "How many squares (all sizes) in a 3×3 grid?", options: ["9", "12", "14", "16"], answer: "14", topic: "Counting Shapes", explanation: "Nine 1×1 + four 2×2 + one 3×3 = 14 total. Classic 11+ question!" },
+  ],
 };
 
-const TOPIC_LIST = Object.entries(QUESTION_BANK).map(([id, data]) => ({
-  id,
-  label: data.label,
-  color: data.color,
-  bg: data.bg,
-}));
+const SCHOOLS = [
+  { name: "Queen Elizabeth's School (Boys)", borough: "Barnet", exam: "GL Assessment", subjects: "Maths & English", places: 180, tip: "Very competitive — 2,000+ apply for 180 places. Strong maths focus." },
+  { name: "The Henrietta Barnett School (Girls)", borough: "Barnet", exam: "GL + School-Set", subjects: "English, VR, NVR, Maths", places: null, tip: "Two-stage exam. Stage 2 includes written English and Maths problem-solving." },
+  { name: "St Michael's Catholic Grammar (Girls)", borough: "Barnet", exam: "GL Assessment", subjects: "VR, NVR, Maths", places: 96, tip: "Faith school — requires a Catholic priest's reference." },
+  { name: "Beths Grammar School (Boys)", borough: "Bexley", exam: "Bexley Selection Test", subjects: "English, Maths, VR, NVR", places: 192, tip: "Register by 31 March each year. Two 50-minute papers." },
+  { name: "Bexley Grammar School (Mixed)", borough: "Bexley", exam: "Bexley Selection Test", subjects: "English, Maths, VR, NVR", places: null, tip: "Two 50-minute multiple choice papers on the same day." },
+  { name: "Townley Grammar School (Girls)", borough: "Bexley", exam: "Bexley Selection Test", subjects: "English, Maths, VR, NVR", places: null, tip: "No formal catchment — distance used as a tiebreaker." },
+  { name: "St Olave's & St Saviour's (Boys)", borough: "Bromley", exam: "School-Specific (2-stage)", subjects: "English, Logic, Maths", places: 124, tip: "One of the top state schools in England. Extremely competitive." },
+  { name: "Newstead Wood School (Girls)", borough: "Bromley", exam: "GL Assessment", subjects: "VR & NVR", places: 150, tip: "Need qualifying score of 210+. 9-mile catchment area applies." },
+  { name: "The Latymer School (Mixed)", borough: "Enfield", exam: "GL + School-Set", subjects: "Maths, VR, English", places: 192, tip: "Strict postcode catchment — N, E and EN postcodes only." },
+  { name: "Tiffin School (Boys)", borough: "Kingston", exam: "School-Specific", subjects: "Maths & English", places: null, tip: "Two-stage. No fixed pass mark — entry is relative to cohort." },
+  { name: "The Tiffin Girls' School", borough: "Kingston", exam: "School-Specific", subjects: "English (60%) & Maths (40%)", places: null, tip: "44 designated postcode districts: KT, TW, SW, SM, CR areas." },
+  { name: "Ilford County High School (Boys)", borough: "Redbridge", exam: "GL Assessment", subjects: "English, VR, NVR", places: 180, tip: "Register May–June. Exam in September each year." },
+  { name: "Woodford County High School (Girls)", borough: "Redbridge", exam: "GL Assessment", subjects: "English, VR, NVR", places: 180, tip: "25% of places reserved for Pupil Premium children. Pass mark: 104." },
+  { name: "Wilson's School (Boys)", borough: "Sutton", exam: "Sutton SET + Stage 2", subjects: "English & Maths", places: 180, tip: "Register by 1 August. SET exam in September." },
+  { name: "Sutton Grammar School (Boys)", borough: "Sutton", exam: "Sutton SET + Stage 2", subjects: "English & Maths", places: 120, tip: "One of five Sutton schools — all use the shared Sutton SET." },
+  { name: "Nonsuch High School for Girls", borough: "Sutton", exam: "Sutton SET + Stage 2", subjects: "English & Maths", places: 180, tip: "Girls' schools share the NWSSEE second-stage exam." },
+  { name: "Wallington High School for Girls", borough: "Sutton", exam: "Sutton SET + Stage 2", subjects: "English & Maths", places: 180, tip: "Apply by 1 August. Same SET process as all Sutton schools." },
+];
 
-function shuffle(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
+const BOROUGHS = ["All", ...new Set(SCHOOLS.map(s => s.borough))];
+const SUBJECT_COLOURS = { maths: "#4F46E5", verbal: "#059669", nvr: "#7C3AED" };
+const SUBJECT_BG = { maths: "#EEF2FF", verbal: "#ECFDF5", nvr: "#F5F3FF" };
+const SUBJECT_LABELS = { maths: "🔢 Maths", verbal: "📖 Verbal Reasoning", nvr: "🔷 Non-Verbal Reasoning" };
+const PRAISE_CORRECT = ["🌟 Brilliant!", "✅ Spot on!", "🎉 Yes! Great job!", "💪 Nailed it!", "⭐ Perfect!", "👏 Excellent!", "🏆 Outstanding!"];
+const PRAISE_WRONG = ["Keep going — you'll get it! 💪", "Not quite — check the explanation below!", "Every mistake is a step forward!", "Don't worry — now you know for next time!"];
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function Bold({ children }) {
+  if (typeof children !== "string") return children;
+  const parts = children.split(/(\*\*[^*]+\*\*)/g);
+  return <>{parts.map((p, i) => p.startsWith("**") && p.endsWith("**") ? <strong key={i}>{p.slice(2, -2)}</strong> : p)}</>;
 }
 
-function Timer({ seconds }) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  const urgent = seconds < 30;
+function BodyText({ text }) {
+  return <>{text.split("\n").map((line, i) => line.trim() === "" ? <br key={i} /> : <p key={i} style={{ margin: "3px 0", fontSize: 13.5, color: "#374151", lineHeight: 1.65 }}><Bold>{line}</Bold></p>)}</>;
+}
+
+// ── Flashcard component ──────────────────────────────────────────────────────
+function Flashcards({ cards }) {
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const card = cards[idx];
   return (
-    <span style={{
-      fontSize: 14, fontWeight: 800,
-      color: urgent ? "#DC2626" : "#374151",
-      background: urgent ? "#FEF2F2" : "#F3F4F6",
-      padding: "5px 12px", borderRadius: 8,
-      border: urgent ? "1px solid #FECACA" : "1px solid #E5E7EB",
-      animation: urgent ? "pulse 1s infinite" : "none",
-    }}>
-      ⏱ {m}:{s.toString().padStart(2, "0")}
-    </span>
+    <div>
+      <div onClick={() => setFlipped(f => !f)} style={{ cursor: "pointer", background: flipped ? "#F0FDF4" : "#f8fafc", border: `2px solid ${flipped ? "#059669" : "#e2e8f0"}`, borderRadius: 16, padding: "28px 20px", textAlign: "center", minHeight: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "all 0.3s", userSelect: "none" }}>
+        {!flipped ? (
+          <>
+            <p style={{ fontSize: 20, fontWeight: 800, color: "#1e1b4b", margin: "0 0 10px" }}>{card.q}</p>
+            <p style={{ fontSize: 12, color: "#9ca3af", margin: 0 }}>👆 Tap to reveal answer</p>
+          </>
+        ) : (
+          <>
+            <p style={{ fontSize: 24, fontWeight: 900, color: "#059669", margin: "0 0 8px" }}>{card.a}</p>
+            <p style={{ fontSize: 12.5, color: "#6b7280", margin: 0, fontStyle: "italic" }}>💡 {card.tip}</p>
+          </>
+        )}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
+        <button onClick={() => { setIdx(i => Math.max(0, i - 1)); setFlipped(false); }} disabled={idx === 0} style={{ padding: "8px 16px", borderRadius: 10, border: "2px solid #e5e7eb", background: "white", color: idx === 0 ? "#d1d5db" : "#374151", fontWeight: 700, cursor: idx === 0 ? "default" : "pointer", fontSize: 13 }}>← Prev</button>
+        <span style={{ fontSize: 13, color: "#9ca3af", fontWeight: 600 }}>{idx + 1} / {cards.length}</span>
+        <button onClick={() => { setIdx(i => Math.min(cards.length - 1, i + 1)); setFlipped(false); }} disabled={idx === cards.length - 1} style={{ padding: "8px 16px", borderRadius: 10, border: "2px solid #e5e7eb", background: "white", color: idx === cards.length - 1 ? "#d1d5db" : "#374151", fontWeight: 700, cursor: idx === cards.length - 1 ? "default" : "pointer", fontSize: 13 }}>Next →</button>
+      </div>
+    </div>
   );
 }
 
+// ── Table component ──────────────────────────────────────────────────────────
+function DataTable({ headers, rows }) {
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <thead>
+          <tr>{headers.map((h, i) => <th key={i} style={{ padding: "10px 12px", background: "#f1f5f9", fontWeight: 800, color: "#1e1b4b", textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} style={{ background: i % 2 === 0 ? "white" : "#f9fafb" }}>
+              {row.map((cell, j) => <td key={j} style={{ padding: "9px 12px", color: "#374151", borderBottom: "1px solid #f1f5f9", fontWeight: j === 0 ? 700 : 400 }}>{cell}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ── Worked examples component ────────────────────────────────────────────────
+function WorkedExamples({ examples }) {
+  const [open, setOpen] = useState(0);
+  return (
+    <div>
+      {examples.map((ex, i) => (
+        <div key={i} style={{ marginBottom: 12 }}>
+          <div onClick={() => setOpen(open === i ? -1 : i)} style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: "#1e1b4b", flex: 1, paddingRight: 10 }}>🔍 {ex.q}</p>
+            <span style={{ color: "#9ca3af", fontSize: 16 }}>{open === i ? "▲" : "▼"}</span>
+          </div>
+          {open === i && (
+            <div style={{ background: "#F0FDF4", border: "1.5px solid #86EFAC", borderTop: "none", borderRadius: "0 0 14px 14px", padding: "16px" }}>
+              {ex.steps.map((step, j) => (
+                <div key={j} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#059669", color: "white", fontWeight: 800, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{j + 1}</div>
+                  <p style={{ margin: 0, fontSize: 13.5, color: "#166534" }}>{step}</p>
+                </div>
+              ))}
+              <div style={{ marginTop: 10, background: "#DCFCE7", borderRadius: 10, padding: "10px 14px", display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 18 }}>✅</span>
+                <p style={{ margin: 0, fontWeight: 800, fontSize: 14, color: "#166534" }}>Answer: {ex.answer}</p>
+              </div>
+              {ex.note && <p style={{ margin: "10px 0 0", fontSize: 12.5, color: "#4b5563", fontStyle: "italic" }}>💡 {ex.note}</p>}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Learn section renderer ───────────────────────────────────────────────────
+function LearnSection({ section, colour }) {
+  if (section.type === "cards") return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      {section.cards.map((c, i) => (
+        <div key={i} style={{ background: "#f8fafc", borderRadius: 14, padding: "14px 12px", border: "1.5px solid #e2e8f0" }}>
+          <div style={{ fontSize: 22, marginBottom: 6 }}>{c.icon}</div>
+          <p style={{ margin: "0 0 5px", fontWeight: 800, fontSize: 13, color: "#1e1b4b" }}>{c.title}</p>
+          <BodyText text={c.body} />
+        </div>
+      ))}
+    </div>
+  );
+  if (section.type === "flashcards") return <Flashcards cards={section.cards} />;
+  if (section.type === "table") return <DataTable headers={section.headers} rows={section.rows} />;
+  if (section.type === "worked") return <WorkedExamples examples={section.examples} />;
+  return null;
+}
+
 export default function App() {
-  const [screen, setScreen] = useState("home");
-  const [selectedTopics, setSelectedTopics] = useState([]);
+  const [tab, setTab] = useState("home");
+  const [learnTopic, setLearnTopic] = useState(null);
+  const [learnSec, setLearnSec] = useState(0);
+  const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [questionCount, setQuestionCount] = useState(10);
-  const [difficulty, setDifficulty] = useState("mixed");
   const [timedMode, setTimedMode] = useState(false);
-  const [showHints, setShowHints] = useState(true);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [hintUsed, setHintUsed] = useState(false);
+  const [encouragement, setEncouragement] = useState("");
+  const [quizDone, setQuizDone] = useState(false);
+  const [quizActive, setQuizActive] = useState(false);
+  const [schoolFilter, setSchoolFilter] = useState("All");
+  const [expandedSchool, setExpandedSchool] = useState(null);
 
   const startQuiz = () => {
-    const pool = selectedTopics.flatMap(tid =>
-      QUESTION_BANK[tid].questions.map(q => ({ ...q, topicId: tid }))
-    );
-    const picked = shuffle(pool).slice(0, questionCount).map(q => ({
-      ...q,
-      shuffledOptions: shuffle(q.options),
-    }));
-    setQuestions(picked);
-    setCurrent(0);
-    setAnswers([]);
-    setSelected(null);
-    setShowFeedback(false);
-    setShowHint(false);
-    setHintUsed(false);
-    if (timedMode) setTimeLeft(questionCount * 60);
-    setScreen("quiz");
+    const pool = selectedSubjects.flatMap(s => QUESTIONS[s].map(q => ({ ...q, subject: s })));
+    const picked = shuffle(pool).slice(0, questionCount).map(q => ({ ...q, shuffledOptions: shuffle(q.options) }));
+    setQuestions(picked); setCurrent(0); setAnswers([]); setSelected(null);
+    setShowFeedback(false); setEncouragement(""); setQuizDone(false); setQuizActive(true);
   };
-
-  useEffect(() => {
-    if (screen !== "quiz" || !timedMode) return;
-    if (timeLeft <= 0) { finishQuiz(answers); return; }
-    const t = setTimeout(() => setTimeLeft(tl => tl - 1), 1000);
-    return () => clearTimeout(t);
-  }, [timeLeft, screen, timedMode]);
 
   const handleAnswer = (opt) => {
     if (showFeedback) return;
-    setSelected(opt);
-    setShowFeedback(true);
+    setSelected(opt); setShowFeedback(true);
     const isCorrect = opt === questions[current].answer;
-    const newAnswers = [...answers, {
-      question: questions[current],
-      chosen: opt,
-      correct: isCorrect,
-      hintUsed,
-    }];
+    setEncouragement(isCorrect ? getRandom(PRAISE_CORRECT) : getRandom(PRAISE_WRONG));
+    const newAnswers = [...answers, { question: questions[current], chosen: opt, correct: isCorrect }];
     setAnswers(newAnswers);
     setTimeout(() => {
-      if (current + 1 < questions.length) {
-        setCurrent(c => c + 1);
-        setSelected(null);
-        setShowFeedback(false);
-        setShowHint(false);
-        setHintUsed(false);
-      } else {
-        finishQuiz(newAnswers);
-      }
-    }, 1400);
-  };
-
-  const finishQuiz = (ans) => {
-    setAnswers(ans);
-    setScreen("result");
-  };
-
-  const toggleTopic = (id) => {
-    setSelectedTopics(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
+      if (current + 1 < questions.length) { setCurrent(c => c + 1); setSelected(null); setShowFeedback(false); setEncouragement(""); }
+      else { setAnswers(newAnswers); setQuizDone(true); setQuizActive(false); }
+    }, 2200);
   };
 
   const score = answers.filter(a => a.correct).length;
-  const hintsUsedCount = answers.filter(a => a.hintUsed).length;
   const pct = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
-  const grade = pct >= 90 ? "A*" : pct >= 80 ? "A" : pct >= 70 ? "B" : pct >= 60 ? "C" : pct >= 50 ? "D" : "E";
-  const gradeColor = pct >= 80 ? "#059669" : pct >= 60 ? "#D97706" : "#DC2626";
-  const gradeMsg = pct >= 90 ? "Outstanding! 🌟 Grammar school ready!" : pct >= 80 ? "Excellent — very strong performance!" : pct >= 70 ? "Good — keep pushing for that top grade!" : pct >= 60 ? "Getting there — review your weak areas." : "More practice needed — don't give up! 💪";
+  const grade = pct >= 90 ? "A*" : pct >= 80 ? "A" : pct >= 70 ? "B" : pct >= 60 ? "C" : "D";
+  const gradeColour = pct >= 80 ? "#059669" : pct >= 60 ? "#D97706" : "#DC2626";
 
-  // ── HOME SCREEN ──────────────────────────────────────────────────────────
-  if (screen === "home") return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
-      <div style={{ background: "white", borderRadius: 24, padding: "36px 30px", maxWidth: 600, width: "100%", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" }}>
-
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ fontSize: 52, marginBottom: 4 }}>🎓</div>
-          <h1 style={{ fontSize: 26, fontWeight: 900, color: "#1e1b4b", margin: "0 0 6px" }}>11+ Practice Quiz</h1>
-          <p style={{ color: "#6b7280", fontSize: 14, margin: 0 }}>GL · CEM · ISEB · Independent Schools — Paper-style questions</p>
+  const BG = "linear-gradient(160deg, #1e1b4b 0%, #3730a3 60%, #6d28d9 100%)";
+  const PageWrap = ({ children, noNav }) => (
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Segoe UI', system-ui, sans-serif", paddingBottom: 40 }}>
+      {!noNav && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "14px 12px 0", flexWrap: "wrap" }}>
+          {[{ id: "home", label: "🏠" }, { id: "learn", label: "📚 Learn" }, { id: "quiz", label: "✏️ Quiz" }, { id: "schools", label: "🏫 Schools" }].map(n => (
+            <button key={n.id} onClick={() => { setTab(n.id); setLearnTopic(null); setQuizActive(false); setQuizDone(false); }} style={{ padding: "8px 14px", borderRadius: 20, fontWeight: 700, fontSize: 12.5, cursor: "pointer", border: tab === n.id ? "none" : "2px solid rgba(255,255,255,0.3)", background: tab === n.id ? "white" : "transparent", color: tab === n.id ? "#3730a3" : "white" }}>{n.label}</button>
+          ))}
         </div>
-
-        {/* Topics */}
-        <div style={{ marginBottom: 20 }}>
-          <p style={{ fontWeight: 800, color: "#374151", marginBottom: 10, fontSize: 12, textTransform: "uppercase", letterSpacing: "1px" }}>Select Topics</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {TOPIC_LIST.map(t => (
-              <button key={t.id} onClick={() => toggleTopic(t.id)} style={{
-                padding: "11px 10px", borderRadius: 12,
-                border: `2px solid ${selectedTopics.includes(t.id) ? t.color : "#e5e7eb"}`,
-                background: selectedTopics.includes(t.id) ? t.bg : "white",
-                color: selectedTopics.includes(t.id) ? t.color : "#374151",
-                fontWeight: 600, fontSize: 12.5, cursor: "pointer", transition: "all 0.15s",
-                display: "flex", alignItems: "center", gap: 6, textAlign: "left",
-              }}>
-                {selectedTopics.includes(t.id) && <span style={{ fontWeight: 900 }}>✓</span>}
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <button onClick={() => setSelectedTopics(TOPIC_LIST.map(t => t.id))} style={{
-            marginTop: 8, width: "100%", padding: "8px", borderRadius: 10,
-            border: "1.5px dashed #d1d5db", background: "transparent",
-            color: "#6b7280", fontWeight: 600, fontSize: 13, cursor: "pointer",
-          }}>+ Select All Topics</button>
-        </div>
-
-        {/* Questions count */}
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontWeight: 800, color: "#374151", marginBottom: 8, fontSize: 12, textTransform: "uppercase", letterSpacing: "1px" }}>Questions</p>
-          <div style={{ display: "flex", gap: 8 }}>
-            {[5, 10, 15, 20, 25].map(n => (
-              <button key={n} onClick={() => setQuestionCount(n)} style={{
-                flex: 1, padding: "10px 0", borderRadius: 10,
-                border: `2px solid ${questionCount === n ? "#4F46E5" : "#e5e7eb"}`,
-                background: questionCount === n ? "#EEF2FF" : "white",
-                color: questionCount === n ? "#4F46E5" : "#374151",
-                fontWeight: 700, fontSize: 14, cursor: "pointer",
-              }}>{n}</button>
-            ))}
-          </div>
-        </div>
-
-        {/* Options row */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 22 }}>
-          <div onClick={() => setTimedMode(t => !t)} style={{
-            flex: 1, padding: "12px 14px", borderRadius: 12, cursor: "pointer",
-            border: `2px solid ${timedMode ? "#4F46E5" : "#e5e7eb"}`,
-            background: timedMode ? "#EEF2FF" : "#f9fafb",
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-          }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>⏱ Timed Mode</span>
-            <div style={{ width: 36, height: 20, borderRadius: 10, background: timedMode ? "#4F46E5" : "#d1d5db", position: "relative", flexShrink: 0 }}>
-              <span style={{ position: "absolute", top: 2, left: timedMode ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "white", transition: "left 0.2s", display: "block" }} />
-            </div>
-          </div>
-          <div onClick={() => setShowHints(t => !t)} style={{
-            flex: 1, padding: "12px 14px", borderRadius: 12, cursor: "pointer",
-            border: `2px solid ${showHints ? "#059669" : "#e5e7eb"}`,
-            background: showHints ? "#ECFDF5" : "#f9fafb",
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-          }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>💡 Hints</span>
-            <div style={{ width: 36, height: 20, borderRadius: 10, background: showHints ? "#059669" : "#d1d5db", position: "relative", flexShrink: 0 }}>
-              <span style={{ position: "absolute", top: 2, left: showHints ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "white", transition: "left 0.2s", display: "block" }} />
-            </div>
-          </div>
-        </div>
-
-        <button onClick={startQuiz} disabled={selectedTopics.length === 0} style={{
-          width: "100%", padding: "16px", borderRadius: 14, border: "none",
-          background: selectedTopics.length === 0 ? "#d1d5db" : "linear-gradient(135deg, #4F46E5, #7C3AED)",
-          color: "white", fontWeight: 800, fontSize: 16, cursor: selectedTopics.length === 0 ? "not-allowed" : "pointer",
-          letterSpacing: "0.3px", boxShadow: selectedTopics.length > 0 ? "0 4px 15px rgba(79,70,229,0.4)" : "none",
-        }}>
-          {selectedTopics.length === 0 ? "Select at least one topic ↑" : `Start Quiz — ${questionCount} Questions →`}
-        </button>
-      </div>
+      )}
+      <div style={{ maxWidth: 580, margin: "0 auto", padding: "16px 14px 0" }}>{children}</div>
     </div>
   );
 
-  // ── QUIZ SCREEN ──────────────────────────────────────────────────────────
-  if (screen === "quiz") {
+  // ── ACTIVE QUIZ ────────────────────────────────────────────────────────────
+  if (quizActive && !quizDone && questions.length > 0) {
     const q = questions[current];
-    const topic = QUESTION_BANK[q.topicId];
+    const colour = SUBJECT_COLOURS[q.subject];
     const progress = (current / questions.length) * 100;
-
     return (
-      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
-        <div style={{ background: "white", borderRadius: 24, padding: "28px 26px", maxWidth: 580, width: "100%", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" }}>
-
-          {/* Top bar */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: topic.color, background: topic.bg, padding: "4px 11px", borderRadius: 20, border: `1px solid ${topic.color}22` }}>
-              {topic.label}
-            </span>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              {timedMode && <Timer seconds={timeLeft} />}
-              <span style={{ fontSize: 13, color: "#6b7280", fontWeight: 700, background: "#f3f4f6", padding: "4px 10px", borderRadius: 8 }}>
-                {current + 1} / {questions.length}
-              </span>
-            </div>
+      <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Segoe UI', system-ui, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+        <div style={{ background: "white", borderRadius: 24, padding: "24px 20px", maxWidth: 540, width: "100%", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: colour, background: colour + "18", padding: "4px 11px", borderRadius: 20 }}>{SUBJECT_LABELS[q.subject]} · {q.topic}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", background: "#F3F4F6", padding: "4px 10px", borderRadius: 8 }}>{current + 1}/{questions.length}</span>
           </div>
-
-          {/* Progress bar */}
-          <div style={{ height: 5, background: "#e5e7eb", borderRadius: 3, marginBottom: 24, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${topic.color}, #7C3AED)`, borderRadius: 3, transition: "width 0.4s" }} />
+          <div style={{ height: 6, background: "#e5e7eb", borderRadius: 3, marginBottom: 18, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${colour}, #7C3AED)`, borderRadius: 3, transition: "width 0.4s" }} />
           </div>
-
-          {/* Question */}
-          <div style={{ background: "linear-gradient(135deg, #f8fafc, #f1f5f9)", borderRadius: 16, padding: "22px 20px", marginBottom: 20, border: "1.5px solid #e2e8f0" }}>
-            <p style={{ fontSize: 19, fontWeight: 800, color: "#1e1b4b", margin: 0, lineHeight: 1.5 }}>{q.q}</p>
+          <div style={{ background: "#f8fafc", borderRadius: 16, padding: "18px", marginBottom: 16, border: "1.5px solid #e2e8f0" }}>
+            <p style={{ fontSize: 18, fontWeight: 800, color: "#1e1b4b", margin: 0, lineHeight: 1.5 }}>{q.q}</p>
           </div>
-
-          {/* Hint button */}
-          {showHints && !showFeedback && (
-            <button onClick={() => { setShowHint(true); setHintUsed(true); }} style={{
-              marginBottom: 12, padding: "7px 14px", borderRadius: 8, border: "1.5px solid #FCD34D",
-              background: "#FFFBEB", color: "#92400E", fontWeight: 600, fontSize: 13, cursor: "pointer",
-              display: showHint ? "none" : "inline-block",
-            }}>💡 Show Hint</button>
-          )}
-          {showHint && (
-            <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 10, background: "#FFFBEB", border: "1.5px solid #FCD34D", fontSize: 13, color: "#92400E", fontWeight: 600 }}>
-              💡 {q.hint}
-            </div>
-          )}
-
-          {/* Options */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             {q.shuffledOptions.map((opt, i) => {
-              let bg = "white", border = "#e5e7eb", color = "#1e1b4b", shadow = "none";
-              if (showFeedback) {
-                if (opt === q.answer) { bg = "#ECFDF5"; border = "#059669"; color = "#065F46"; shadow = "0 0 0 3px #D1FAE5"; }
-                else if (opt === selected) { bg = "#FEF2F2"; border = "#DC2626"; color = "#991B1B"; }
-              } else if (selected === opt) { bg = "#EEF2FF"; border = "#4F46E5"; }
-              return (
-                <button key={i} onClick={() => handleAnswer(opt)} style={{
-                  padding: "14px 12px", borderRadius: 12, border: `2px solid ${border}`,
-                  background: bg, color, fontWeight: 700, fontSize: 15, cursor: showFeedback ? "default" : "pointer",
-                  transition: "all 0.15s", display: "flex", alignItems: "center", gap: 8,
-                  justifyContent: "center", boxShadow: shadow, lineHeight: 1.3,
-                }}>
-                  {showFeedback && opt === q.answer && <span style={{ fontSize: 16 }}>✓</span>}
-                  {showFeedback && opt === selected && opt !== q.answer && <span style={{ fontSize: 16 }}>✗</span>}
-                  <span>{opt}</span>
-                </button>
-              );
+              let bg = "white", border = "#e5e7eb", col = "#1e1b4b";
+              if (showFeedback) { if (opt === q.answer) { bg = "#ECFDF5"; border = "#059669"; col = "#065F46"; } else if (opt === selected) { bg = "#FEF2F2"; border = "#DC2626"; col = "#991B1B"; } }
+              else if (selected === opt) { bg = SUBJECT_BG[q.subject]; border = colour; col = colour; }
+              return <button key={i} onClick={() => handleAnswer(opt)} style={{ padding: "13px 10px", borderRadius: 12, border: `2px solid ${border}`, background: bg, color: col, fontWeight: 700, fontSize: 14, cursor: showFeedback ? "default" : "pointer", lineHeight: 1.3 }}>{showFeedback && opt === q.answer && "✓ "}{showFeedback && opt === selected && opt !== q.answer && "✗ "}{opt}</button>;
             })}
           </div>
-
-          {/* Answer explanation */}
-          {showFeedback && selected !== q.answer && (
-            <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 12, background: "#F0FDF4", border: "1.5px solid #86EFAC", fontSize: 13, color: "#166534" }}>
-              <strong>✓ Correct answer:</strong> {q.answer}<br />
-              <span style={{ color: "#4B5563" }}>💡 {q.hint}</span>
+          {showFeedback && (
+            <div style={{ borderRadius: 12, padding: "12px 14px", background: selected === q.answer ? "#F0FDF4" : "#FEF2F2", border: `1.5px solid ${selected === q.answer ? "#86EFAC" : "#FECACA"}` }}>
+              <p style={{ margin: "0 0 4px", fontWeight: 800, fontSize: 14, color: selected === q.answer ? "#166534" : "#991B1B" }}>{encouragement}</p>
+              {selected !== q.answer && <p style={{ margin: "0 0 4px", fontSize: 13, color: "#374151" }}><strong>✓ Correct answer:</strong> {q.answer}</p>}
+              <p style={{ margin: 0, fontSize: 12.5, color: "#4b5563" }}>💡 {q.explanation}</p>
             </div>
           )}
         </div>
@@ -456,82 +662,234 @@ export default function App() {
     );
   }
 
-  // ── RESULTS SCREEN ───────────────────────────────────────────────────────
-  if (screen === "result") return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
-      <div style={{ background: "white", borderRadius: 24, padding: "32px 28px", maxWidth: 580, width: "100%", boxShadow: "0 25px 60px rgba(0,0,0,0.35)" }}>
-
-        {/* Score header */}
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <div style={{ fontSize: 50, marginBottom: 4 }}>{pct >= 80 ? "🏆" : pct >= 60 ? "⭐" : "💪"}</div>
-          <h2 style={{ fontSize: 24, fontWeight: 900, color: "#1e1b4b", margin: "0 0 4px" }}>Quiz Complete!</h2>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginTop: 8, padding: "10px 20px", background: "#f9fafb", borderRadius: 16 }}>
-            <span style={{ fontSize: 48, fontWeight: 900, color: gradeColor, lineHeight: 1 }}>{grade}</span>
-            <div style={{ textAlign: "left" }}>
-              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1e1b4b" }}>{pct}%</p>
-              <p style={{ margin: 0, fontSize: 14, color: "#6b7280" }}>{score}/{questions.length} correct</p>
-              {hintsUsedCount > 0 && <p style={{ margin: 0, fontSize: 12, color: "#D97706" }}>💡 {hintsUsedCount} hints used</p>}
+  // ── RESULTS ────────────────────────────────────────────────────────────────
+  if (quizDone) {
+    const msg = pct >= 90 ? { emoji: "🏆", text: "Outstanding! Grammar school ready!", col: "#059669" }
+      : pct >= 80 ? { emoji: "🌟", text: "Excellent work! Really strong!", col: "#059669" }
+      : pct >= 70 ? { emoji: "⭐", text: "Great effort — keep pushing!", col: "#D97706" }
+      : pct >= 50 ? { emoji: "💪", text: "Good try — review and retry!", col: "#D97706" }
+      : { emoji: "📚", text: "Keep practising — you've got this!", col: "#DC2626" };
+    return (
+      <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Segoe UI', system-ui, sans-serif", padding: "20px 14px 40px" }}>
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ background: "white", borderRadius: 24, padding: "28px 22px", marginBottom: 14, textAlign: "center", boxShadow: "0 20px 50px rgba(0,0,0,0.3)" }}>
+            <div style={{ fontSize: 56 }}>{msg.emoji}</div>
+            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1e1b4b", margin: "8px 0 4px" }}>{msg.text}</h2>
+            <div style={{ display: "inline-flex", gap: 20, background: "#f8fafc", borderRadius: 16, padding: "14px 24px", margin: "12px 0 16px" }}>
+              <div><div style={{ fontSize: 44, fontWeight: 900, color: gradeColour }}>{grade}</div><div style={{ fontSize: 12, color: "#9ca3af" }}>Grade</div></div>
+              <div style={{ width: 1, background: "#e5e7eb" }} />
+              <div><div style={{ fontSize: 44, fontWeight: 900, color: "#1e1b4b" }}>{pct}%</div><div style={{ fontSize: 12, color: "#9ca3af" }}>{score}/{questions.length} correct</div></div>
             </div>
+            {selectedSubjects.map(s => {
+              const ta = answers.filter(a => a.question.subject === s);
+              if (!ta.length) return null;
+              const tc = ta.filter(a => a.correct).length;
+              const tp = Math.round((tc / ta.length) * 100);
+              return (
+                <div key={s} style={{ marginBottom: 10, textAlign: "left" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>{SUBJECT_LABELS[s]}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: SUBJECT_COLOURS[s] }}>{tc}/{ta.length} ({tp}%)</span>
+                  </div>
+                  <div style={{ height: 8, background: "#e5e7eb", borderRadius: 4, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${tp}%`, background: SUBJECT_COLOURS[s], borderRadius: 4, transition: "width 1s" }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <p style={{ color: gradeColor, fontWeight: 700, fontSize: 14, marginTop: 10 }}>{gradeMsg}</p>
-        </div>
-
-        {/* Topic breakdown */}
-        <div style={{ marginBottom: 20 }}>
-          <p style={{ fontWeight: 800, color: "#374151", marginBottom: 10, fontSize: 12, textTransform: "uppercase", letterSpacing: "1px" }}>Topic Breakdown</p>
-          {selectedTopics.map(tid => {
-            const topic = QUESTION_BANK[tid];
-            const ta = answers.filter(a => a.question.topicId === tid);
-            if (!ta.length) return null;
-            const tc = ta.filter(a => a.correct).length;
-            const tp = Math.round((tc / ta.length) * 100);
-            return (
-              <div key={tid} style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{topic.label}</span>
-                  <span style={{ fontSize: 13, color: topic.color, fontWeight: 700 }}>{tc}/{ta.length} ({tp}%)</span>
-                </div>
-                <div style={{ height: 8, background: "#e5e7eb", borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${tp}%`, background: topic.color, borderRadius: 4, transition: "width 0.8s" }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Mistakes review */}
-        {answers.filter(a => !a.correct).length > 0 && (
-          <details style={{ marginBottom: 20 }}>
-            <summary style={{ cursor: "pointer", fontWeight: 800, color: "#991B1B", fontSize: 14, padding: "12px 16px", background: "#FEF2F2", borderRadius: 12, listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span>❌ Review Mistakes ({answers.filter(a => !a.correct).length})</span>
-              <span style={{ fontSize: 12, color: "#DC2626" }}>Click to expand ▼</span>
-            </summary>
-            <div style={{ marginTop: 8 }}>
+          {answers.filter(a => !a.correct).length > 0 && (
+            <div style={{ background: "white", borderRadius: 20, padding: "20px", marginBottom: 14, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+              <p style={{ fontWeight: 800, fontSize: 15, color: "#1e1b4b", margin: "0 0 12px" }}>📖 Review Your Mistakes</p>
               {answers.filter(a => !a.correct).map((a, i) => (
-                <div key={i} style={{ marginBottom: 8, padding: "12px 14px", background: "#fff", border: "1.5px solid #FECACA", borderRadius: 12, fontSize: 13 }}>
-                  <p style={{ fontWeight: 700, color: "#1e1b4b", margin: "0 0 5px", lineHeight: 1.4 }}>{a.question.q}</p>
-                  <p style={{ margin: "2px 0", color: "#DC2626" }}>✗ Your answer: {a.chosen}</p>
-                  <p style={{ margin: "2px 0", color: "#059669", fontWeight: 700 }}>✓ Correct: {a.question.answer}</p>
-                  <p style={{ margin: "4px 0 0", color: "#6B7280", fontStyle: "italic" }}>💡 {a.question.hint}</p>
+                <div key={i} style={{ marginBottom: 10, padding: "12px", background: "#FEF2F2", borderRadius: 12, border: "1px solid #FECACA" }}>
+                  <p style={{ fontWeight: 700, color: "#1e1b4b", margin: "0 0 4px", fontSize: 13 }}>{a.question.q}</p>
+                  <p style={{ margin: "0 0 2px", fontSize: 13, color: "#DC2626" }}>✗ You said: {a.chosen}</p>
+                  <p style={{ margin: "0 0 5px", fontSize: 13, color: "#059669", fontWeight: 700 }}>✓ Correct: {a.question.answer}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: "#6B7280", fontStyle: "italic" }}>💡 {a.question.explanation}</p>
                 </div>
               ))}
             </div>
-          </details>
-        )}
-
-        {/* Buttons */}
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => { setScreen("home"); setSelectedTopics([]); }} style={{
-            flex: 1, padding: "14px", borderRadius: 12, border: "2px solid #e5e7eb",
-            background: "white", color: "#374151", fontWeight: 700, fontSize: 14, cursor: "pointer",
-          }}>← New Quiz</button>
-          <button onClick={startQuiz} style={{
-            flex: 1, padding: "14px", borderRadius: 12, border: "none",
-            background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-            color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer",
-          }}>🔄 Retry Same Topics</button>
+          )}
+          <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+            <button onClick={() => { setTab("learn"); setLearnTopic(null); setQuizDone(false); }} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "transparent", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📚 Go Learn</button>
+            <button onClick={startQuiz} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #4F46E5, #7C3AED)", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🔄 Try Again</button>
+          </div>
+          <button onClick={() => { setQuizDone(false); setTab("quiz"); }} style={{ width: "100%", padding: "13px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.3)", background: "transparent", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Change Topics</button>
         </div>
       </div>
-    </div>
+    );
+  }
+
+  // ── HOME ───────────────────────────────────────────────────────────────────
+  if (tab === "home") return (
+    <PageWrap>
+      <div style={{ textAlign: "center", padding: "24px 0 16px" }}>
+        <div style={{ fontSize: 64 }}>🎓</div>
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "8px 0 4px" }}>11+ Practice Hub</h1>
+        <p style={{ color: "#c7d2fe", fontSize: 14, margin: 0 }}>GL · CEM · ISEB · Independent Schools</p>
+        <p style={{ color: "#a5b4fc", fontSize: 13, margin: "4px 0 0" }}>Learn, practise & find your grammar school</p>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+        {[{ id: "learn", icon: "📚", title: "Learn Topics", desc: "Clear explanations, tricks & worked examples", grad: "linear-gradient(135deg, #059669, #047857)" },
+          { id: "quiz", icon: "✏️", title: "Practice Quiz", desc: "Real 11+ style questions with encouragement", grad: "linear-gradient(135deg, #4F46E5, #3730a3)" }
+        ].map(c => (
+          <button key={c.id} onClick={() => setTab(c.id)} style={{ background: c.grad, borderRadius: 20, padding: "22px 16px", border: "none", cursor: "pointer", textAlign: "left", boxShadow: "0 8px 30px rgba(0,0,0,0.3)", color: "white" }}>
+            <div style={{ fontSize: 34, marginBottom: 8 }}>{c.icon}</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{c.title}</div>
+            <div style={{ fontSize: 12, opacity: 0.85 }}>{c.desc}</div>
+          </button>
+        ))}
+      </div>
+      <button onClick={() => setTab("schools")} style={{ width: "100%", background: "linear-gradient(135deg, #7C3AED, #6d28d9)", borderRadius: 20, padding: "18px 20px", border: "none", cursor: "pointer", textAlign: "left", boxShadow: "0 8px 30px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", gap: 14, color: "white" }}>
+        <span style={{ fontSize: 34 }}>🏫</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>Grammar Schools Near You</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>17 London schools — entry info, exam boards & tips</div>
+        </div>
+      </button>
+      <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: "16px 18px", marginTop: 14 }}>
+        <p style={{ color: "white", fontWeight: 800, fontSize: 13, margin: "0 0 8px" }}>📋 How to get the most out of this</p>
+        {["📚 Learn a topic first — read the tricks and worked examples", "✏️ Then test yourself on it in the quiz", "🔁 Review your mistakes and go back to Learn if needed", "🏫 Check which schools you're applying to and what they test"].map((tip, i) => (
+          <p key={i} style={{ color: "#c7d2fe", fontSize: 12.5, margin: "0 0 4px" }}>{tip}</p>
+        ))}
+      </div>
+    </PageWrap>
   );
+
+  // ── LEARN LIST ─────────────────────────────────────────────────────────────
+  if (tab === "learn" && !learnTopic) return (
+    <PageWrap>
+      <h2 style={{ color: "white", fontWeight: 900, fontSize: 22, margin: "16px 0 4px" }}>📚 Learn Topics</h2>
+      <p style={{ color: "#c7d2fe", fontSize: 13, margin: "0 0 16px" }}>Pick a topic — clear explanations, tricks, flashcards & worked examples.</p>
+      {["maths", "verbal", "nvr"].map(subj => (
+        <div key={subj} style={{ marginBottom: 20 }}>
+          <p style={{ color: "white", fontWeight: 800, fontSize: 12, textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px" }}>{SUBJECT_LABELS[subj]}</p>
+          {LEARN_TOPICS.filter(t => t.subject === subj).map(t => (
+            <button key={t.id} onClick={() => { setLearnTopic(t); setLearnSec(0); }} style={{ width: "100%", marginBottom: 8, background: "white", borderRadius: 16, padding: "14px 16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 4px 15px rgba(0,0,0,0.15)", textAlign: "left" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: t.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{t.icon}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 14.5, color: "#1e1b4b" }}>{t.title}</div>
+                <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 2 }}>{t.sections.length} sections · {t.sections.map(s => s.heading.split(" ").slice(0, 2).join(" ")).join(", ")}</div>
+              </div>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bg, display: "flex", alignItems: "center", justifyContent: "center", color: t.colour, fontWeight: 900, fontSize: 16, flexShrink: 0 }}>›</div>
+            </button>
+          ))}
+        </div>
+      ))}
+    </PageWrap>
+  );
+
+  // ── LEARN TOPIC ────────────────────────────────────────────────────────────
+  if (tab === "learn" && learnTopic) {
+    const t = learnTopic;
+    const sec = t.sections[learnSec];
+    const isLast = learnSec === t.sections.length - 1;
+    return (
+      <PageWrap>
+        <button onClick={() => setLearnTopic(null)} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: "white", fontWeight: 700, fontSize: 13, borderRadius: 20, padding: "7px 14px", cursor: "pointer", marginTop: 8, marginBottom: 14 }}>← All Topics</button>
+        <div style={{ background: t.bg, borderRadius: 20, padding: "18px 18px 14px", marginBottom: 14, border: `2px solid ${t.colour}30` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span style={{ fontSize: 32 }}>{t.icon}</span>
+            <h2 style={{ fontSize: 21, fontWeight: 900, color: t.colour, margin: 0 }}>{t.title}</h2>
+          </div>
+          <p style={{ fontSize: 13.5, color: "#374151", margin: 0, lineHeight: 1.6 }}>{t.intro}</p>
+        </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>
+          {t.sections.map((s, i) => (
+            <button key={i} onClick={() => setLearnSec(i)} style={{ padding: "7px 13px", borderRadius: 20, flexShrink: 0, fontWeight: 700, fontSize: 12, border: `2px solid ${learnSec === i ? "white" : "rgba(255,255,255,0.3)"}`, background: learnSec === i ? t.colour : "transparent", color: "white", cursor: "pointer" }}>
+              {i + 1}. {s.heading.split(" ").slice(0, 3).join(" ")}
+            </button>
+          ))}
+        </div>
+        <div style={{ background: "white", borderRadius: 20, padding: "20px 18px", marginBottom: 14, boxShadow: "0 8px 30px rgba(0,0,0,0.2)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, paddingBottom: 12, borderBottom: "1.5px solid #f1f5f9" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.colour, color: "white", fontWeight: 900, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>{learnSec + 1}</div>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: "#1e1b4b", margin: 0 }}>{sec.heading}</h3>
+          </div>
+          <LearnSection section={sec} colour={t.colour} />
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          {learnSec > 0 && <button onClick={() => setLearnSec(s => s - 1)} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "2px solid rgba(255,255,255,0.4)", background: "transparent", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>← Prev</button>}
+          {!isLast
+            ? <button onClick={() => setLearnSec(s => s + 1)} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: t.colour, color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Next Section →</button>
+            : <button onClick={() => { setTab("quiz"); }} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: "linear-gradient(135deg, #4F46E5, #7C3AED)", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>✏️ Test Yourself →</button>
+          }
+        </div>
+      </PageWrap>
+    );
+  }
+
+  // ── QUIZ SETUP ─────────────────────────────────────────────────────────────
+  if (tab === "quiz") return (
+    <PageWrap>
+      <h2 style={{ color: "white", fontWeight: 900, fontSize: 22, margin: "16px 0 4px" }}>✏️ Practice Quiz</h2>
+      <p style={{ color: "#c7d2fe", fontSize: 13, margin: "0 0 16px" }}>Real 11+ style questions with encouragement & full explanations.</p>
+      <div style={{ background: "white", borderRadius: 20, padding: "22px 20px", boxShadow: "0 8px 30px rgba(0,0,0,0.2)" }}>
+        <p style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 12, textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 10px" }}>Choose Subjects</p>
+        {Object.entries(SUBJECT_LABELS).map(([id, label]) => (
+          <button key={id} onClick={() => setSelectedSubjects(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])} style={{ width: "100%", marginBottom: 9, padding: "14px 16px", borderRadius: 14, border: `2px solid ${selectedSubjects.includes(id) ? SUBJECT_COLOURS[id] : "#e5e7eb"}`, background: selectedSubjects.includes(id) ? SUBJECT_BG[id] : "#fafafa", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontWeight: 700, fontSize: 15, color: selectedSubjects.includes(id) ? SUBJECT_COLOURS[id] : "#374151" }}>{label}</span>
+            <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${selectedSubjects.includes(id) ? SUBJECT_COLOURS[id] : "#d1d5db"}`, background: selectedSubjects.includes(id) ? SUBJECT_COLOURS[id] : "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {selectedSubjects.includes(id) && <span style={{ color: "white", fontSize: 11, fontWeight: 900 }}>✓</span>}
+            </div>
+          </button>
+        ))}
+        <p style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 12, textTransform: "uppercase", letterSpacing: "1px", margin: "16px 0 10px" }}>Number of Questions</p>
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          {[5, 10, 15, 20].map(n => (
+            <button key={n} onClick={() => setQuestionCount(n)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `2px solid ${questionCount === n ? "#4F46E5" : "#e5e7eb"}`, background: questionCount === n ? "#EEF2FF" : "white", color: questionCount === n ? "#4F46E5" : "#374151", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>{n}</button>
+          ))}
+        </div>
+        <div onClick={() => setTimedMode(t => !t)} style={{ padding: "14px 16px", borderRadius: 14, cursor: "pointer", marginBottom: 18, border: `2px solid ${timedMode ? "#4F46E5" : "#e5e7eb"}`, background: timedMode ? "#EEF2FF" : "#fafafa", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div><div style={{ fontWeight: 700, fontSize: 14, color: "#1e1b4b" }}>⏱️ Timed Mode</div><div style={{ fontSize: 12, color: "#6b7280" }}>Practise under real exam conditions</div></div>
+          <div style={{ width: 44, height: 24, borderRadius: 12, background: timedMode ? "#4F46E5" : "#d1d5db", position: "relative", flexShrink: 0 }}>
+            <span style={{ position: "absolute", top: 3, left: timedMode ? 22 : 3, width: 18, height: 18, borderRadius: "50%", background: "white", transition: "left 0.2s", display: "block" }} />
+          </div>
+        </div>
+        <button onClick={startQuiz} disabled={selectedSubjects.length === 0} style={{ width: "100%", padding: "16px", borderRadius: 14, border: "none", background: selectedSubjects.length === 0 ? "#e5e7eb" : "linear-gradient(135deg, #4F46E5, #7C3AED)", color: selectedSubjects.length === 0 ? "#9ca3af" : "white", fontWeight: 800, fontSize: 16, cursor: selectedSubjects.length === 0 ? "not-allowed" : "pointer", boxShadow: selectedSubjects.length > 0 ? "0 4px 20px rgba(79,70,229,0.4)" : "none" }}>
+          {selectedSubjects.length === 0 ? "👆 Select a subject first" : `Start Quiz — ${questionCount} Questions →`}
+        </button>
+      </div>
+    </PageWrap>
+  );
+
+  // ── SCHOOLS ────────────────────────────────────────────────────────────────
+  if (tab === "schools") return (
+    <PageWrap>
+      <h2 style={{ color: "white", fontWeight: 900, fontSize: 22, margin: "16px 0 4px" }}>🏫 London Grammar Schools</h2>
+      <p style={{ color: "#c7d2fe", fontSize: 13, margin: "0 0 12px" }}>17 selective schools across 7 boroughs. Tap any school for details & tips.</p>
+      <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>
+        {BOROUGHS.map(b => (
+          <button key={b} onClick={() => setSchoolFilter(b)} style={{ padding: "7px 14px", borderRadius: 20, flexShrink: 0, fontWeight: 700, fontSize: 12, border: `2px solid ${schoolFilter === b ? "white" : "rgba(255,255,255,0.3)"}`, background: schoolFilter === b ? "white" : "transparent", color: schoolFilter === b ? "#3730a3" : "white", cursor: "pointer" }}>{b}</button>
+        ))}
+      </div>
+      {(schoolFilter === "All" ? SCHOOLS : SCHOOLS.filter(s => s.borough === schoolFilter)).map((s, i) => (
+        <div key={i} onClick={() => setExpandedSchool(expandedSchool === i ? null : i)} style={{ background: "white", borderRadius: 16, padding: "14px 16px", marginBottom: 10, cursor: "pointer", boxShadow: "0 4px 15px rgba(0,0,0,0.15)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: "0 0 6px", fontWeight: 800, fontSize: 14, color: "#1e1b4b" }}>{s.name}</p>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, background: "#EEF2FF", color: "#4F46E5", padding: "2px 8px", borderRadius: 10 }}>{s.borough}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, background: "#F0FDF4", color: "#059669", padding: "2px 8px", borderRadius: 10 }}>{s.exam}</span>
+                {s.places && <span style={{ fontSize: 11, fontWeight: 600, background: "#FEF3C7", color: "#D97706", padding: "2px 8px", borderRadius: 10 }}>{s.places} places</span>}
+              </div>
+            </div>
+            <span style={{ color: "#9ca3af", fontSize: 16, marginLeft: 8 }}>{expandedSchool === i ? "▲" : "▼"}</span>
+          </div>
+          {expandedSchool === i && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #f3f4f6" }}>
+              <p style={{ margin: "0 0 5px", fontSize: 13, color: "#374151" }}><strong>📚 Tested:</strong> {s.subjects}</p>
+              <div style={{ background: "#FFFBEB", borderRadius: 10, padding: "10px 12px", margin: "8px 0" }}>
+                <p style={{ margin: 0, fontSize: 13, color: "#92400E", fontWeight: 600 }}>💡 {s.tip}</p>
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); setTab("quiz"); }} style={{ padding: "9px 16px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #4F46E5, #7C3AED)", color: "white", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>✏️ Practise for this school →</button>
+            </div>
+          )}
+        </div>
+      ))}
+    </PageWrap>
+  );
+
+  return null;
 }
