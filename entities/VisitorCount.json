@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "count": {
+      "type": "number"
+    }
+  },
+  "type": "object",
+  "required": [],
+  "name": "VisitorCount"
+}

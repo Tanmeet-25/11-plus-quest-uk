@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { VisitorCount } from "../api/entities";
 
 // ─── LEARN CONTENT ────────────────────────────────────────────────────────────
 const LEARN_TOPICS = [
@@ -569,6 +570,22 @@ function LearnSection({ section, colour }) {
 
 export default function App() {
   const [tab, setTab] = useState("home");
+  const [visitorCount, setVisitorCount] = useState(null);
+
+  useEffect(() => {
+    async function trackVisit() {
+      try {
+        const records = await VisitorCount.list();
+        if (records && records.length > 0) {
+          const rec = records[0];
+          const newCount = (rec.count || 0) + 1;
+          await VisitorCount.update(rec.id, { count: newCount });
+          setVisitorCount(newCount);
+        }
+      } catch (e) {}
+    }
+    trackVisit();
+  }, []);
   const [learnTopic, setLearnTopic] = useState(null);
   const [learnSec, setLearnSec] = useState(0);
   const [selectedSubjects, setSelectedSubjects] = useState([]);
@@ -729,6 +746,12 @@ export default function App() {
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "8px 0 4px" }}>11+ Practice Hub</h1>
         <p style={{ color: "#c7d2fe", fontSize: 14, margin: 0 }}>GL · CEM · ISEB · Independent Schools</p>
         <p style={{ color: "#a5b4fc", fontSize: 13, margin: "4px 0 0" }}>Learn, practise & find your grammar school</p>
+        {visitorCount && (
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.12)", borderRadius: 20, padding: "6px 16px", marginTop: 10 }}>
+            <span style={{ fontSize: 16 }}>👥</span>
+            <span style={{ color: "white", fontWeight: 700, fontSize: 13 }}>{visitorCount.toLocaleString()} visit{visitorCount === 1 ? "" : "s"} all time</span>
+          </div>
+        )}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
         {[{ id: "learn", icon: "📚", title: "Learn Topics", desc: "Clear explanations, tricks & worked examples", grad: "linear-gradient(135deg, #059669, #047857)" },
