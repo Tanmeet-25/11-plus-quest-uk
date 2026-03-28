@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { VisitorCount } from "../api/entities";
+
 
 // ─── LEARN CONTENT ────────────────────────────────────────────────────────────
 const LEARN_TOPICS = [
@@ -575,13 +575,9 @@ export default function App() {
   useEffect(() => {
     async function trackVisit() {
       try {
-        const records = await VisitorCount.list();
-        if (records && records.length > 0) {
-          const rec = records[0];
-          const newCount = (rec.count || 0) + 1;
-          await VisitorCount.update(rec.id, { count: newCount });
-          setVisitorCount(newCount);
-        }
+        const res = await fetch("/functions/trackVisitor", { method: "POST" });
+        const data = await res.json();
+        if (data.count) setVisitorCount(data.count);
       } catch (e) {}
     }
     trackVisit();
