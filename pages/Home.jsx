@@ -746,12 +746,12 @@ export default function App() {
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "8px 0 4px" }}>11+ Practice Hub</h1>
         <p style={{ color: "#c7d2fe", fontSize: 14, margin: 0 }}>GL · CEM · ISEB · Independent Schools</p>
         <p style={{ color: "#a5b4fc", fontSize: 13, margin: "4px 0 0" }}>Learn, practise & find your grammar school</p>
-        {visitorCount && (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.12)", borderRadius: 20, padding: "6px 16px", marginTop: 10 }}>
-            <span style={{ fontSize: 16 }}>👥</span>
-            <span style={{ color: "white", fontWeight: 700, fontSize: 13 }}>{visitorCount.toLocaleString()} visit{visitorCount === 1 ? "" : "s"} all time</span>
-          </div>
-        )}
+      <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 16, padding: "14px 20px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, border: "1.5px solid rgba(255,255,255,0.25)" }}>
+        <span style={{ fontSize: 28 }}>👥</span>
+        <div style={{ textAlign: "left" }}>
+          <p style={{ margin: 0, color: "white", fontWeight: 900, fontSize: 22 }}>{visitorCount !== null ? visitorCount.toLocaleString() : "..."}</p>
+          <p style={{ margin: 0, color: "#c7d2fe", fontSize: 12, fontWeight: 600 }}>total visitors all time</p>
+        </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
         {[{ id: "learn", icon: "📚", title: "Learn Topics", desc: "Clear explanations, tricks & worked examples", grad: "linear-gradient(135deg, #059669, #047857)" },
