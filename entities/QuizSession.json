@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ]
+    },
+    "score": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "percentage": {
+      "type": "number"
+    },
+    "xp_earned": {
+      "type": "number"
+    },
+    "date": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "QuizSession"
+}

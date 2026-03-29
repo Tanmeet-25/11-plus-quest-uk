@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "total_questions": {
+      "type": "number"
+    },
+    "total_correct": {
+      "type": "number"
+    },
+    "streak_days": {
+      "type": "number"
+    },
+    "last_practice_date": {
+      "type": "string"
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "xp": {
+      "type": "number"
+    },
+    "level": {
+      "type": "number"
+    },
+    "subject_stats": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "UserProgress"
+}

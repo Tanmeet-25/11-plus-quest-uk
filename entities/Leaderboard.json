@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "xp": {
+      "type": "number"
+    },
+    "streak_days": {
+      "type": "number"
+    },
+    "total_correct": {
+      "type": "number"
+    },
+    "badges_count": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "Leaderboard"
+}
