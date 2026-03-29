@@ -4,9 +4,6 @@
   "pages": {
     "Home": {
       "title": "Home"
-    },
-    "Login": {
-      "title": "Login"
     }
   }
 }

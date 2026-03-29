@@ -672,13 +672,7 @@ export default function App() {
         <div><div style={{fontWeight:800,fontSize:15}}>Grammar Schools</div><div style={{fontSize:11,opacity:0.85}}>17 London schools — entry info & tips</div></div>
       </button>
 
-      {!user&&(
-        <div style={{background:"rgba(255,255,255,0.1)",borderRadius:16,padding:"16px",marginTop:12,textAlign:"center"}}>
-          <p style={{color:"white",fontWeight:800,fontSize:14,margin:"0 0 4px"}}>🔒 Sign in to unlock:</p>
-          <p style={{color:"#c7d2fe",fontSize:12,margin:"0 0 10px"}}>Progress saving · Streaks · Badges · Leaderboard</p>
-          <button onClick={()=>window.location.href="https://11-quest-uk.base44.app/login"} style={{padding:"10px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
-        </div>
-      )}
+
       {user&&(
         <button onClick={logout} style={{width:"100%",marginTop:12,padding:"10px",borderRadius:12,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:"rgba(255,255,255,0.6)",fontWeight:600,fontSize:12,cursor:"pointer"}}>Sign Out</button>
       )}
