@@ -676,7 +676,7 @@ export default function App() {
         <div style={{background:"rgba(255,255,255,0.1)",borderRadius:16,padding:"16px",marginTop:12,textAlign:"center"}}>
           <p style={{color:"white",fontWeight:800,fontSize:14,margin:"0 0 4px"}}>🔒 Sign in to unlock:</p>
           <p style={{color:"#c7d2fe",fontSize:12,margin:"0 0 10px"}}>Progress saving · Streaks · Badges · Leaderboard</p>
-          <button onClick={()=>window.location.href="/login"} style={{padding:"10px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
+          <button onClick={()=>window.location.href="https://11-quest-uk.base44.app/login"} style={{padding:"10px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
         </div>
       )}
       {user&&(
@@ -783,7 +783,7 @@ export default function App() {
           <div style={{fontSize:56,marginBottom:16}}>🔒</div>
           <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Sign in to see your stats</h2>
           <p style={{color:"#c7d2fe",fontSize:14,margin:"0 0 20px"}}>Track your progress, streaks and badges!</p>
-          <button onClick={()=>window.location.href="/login"} style={{padding:"12px 28px",borderRadius:14,background:"white",color:"#3730a3",fontWeight:800,fontSize:15,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
+          <button onClick={()=>window.location.href="https://11-quest-uk.base44.app/login"} style={{padding:"12px 28px",borderRadius:14,background:"white",color:"#3730a3",fontWeight:800,fontSize:15,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
         </div>
       </PageWrap>
     );
@@ -874,7 +874,7 @@ export default function App() {
           );
         })}
       </div>
-      {!user&&<div style={{background:"rgba(255,255,255,0.1)",borderRadius:14,padding:"14px",marginTop:12,textAlign:"center"}}><p style={{color:"white",fontWeight:700,fontSize:13,margin:"0 0 8px"}}>Sign in to appear on the leaderboard!</p><button onClick={()=>window.location.href="/login"} style={{padding:"9px 20px",borderRadius:10,background:"white",color:"#3730a3",fontWeight:800,fontSize:13,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In →</button></div>}
+      {!user&&<div style={{background:"rgba(255,255,255,0.1)",borderRadius:14,padding:"14px",marginTop:12,textAlign:"center"}}><p style={{color:"white",fontWeight:700,fontSize:13,margin:"0 0 8px"}}>Sign in to appear on the leaderboard!</p><button onClick={()=>window.location.href="https://11-quest-uk.base44.app/login"} style={{padding:"9px 20px",borderRadius:10,background:"white",color:"#3730a3",fontWeight:800,fontSize:13,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In →</button></div>}
     </PageWrap>
   );
 
