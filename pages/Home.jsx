@@ -613,7 +613,7 @@ export default function App() {
             </div>
           </div>
         ):(
-          <p style={{color:"#a5b4fc",fontSize:12,margin:"8px 0 0"}}>Sign in to save your progress & compete!</p>
+          <p style={{color:"#a5b4fc",fontSize:12,margin:"8px 0 0"}}></p>
         )}
       </div>
 
