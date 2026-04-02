@@ -4,10 +4,13 @@
     "user_id": {
       "type": "string"
     },
-    "total_questions": {
+    "xp": {
       "type": "number"
     },
-    "total_correct": {
+    "coins": {
+      "type": "number"
+    },
+    "level": {
       "type": "number"
     },
     "streak_days": {
@@ -16,20 +19,41 @@
     "last_practice_date": {
       "type": "string"
     },
+    "completed_missions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "badges": {
       "type": "array",
       "items": {
         "type": "string"
       }
     },
-    "xp": {
-      "type": "number"
-    },
-    "level": {
-      "type": "number"
-    },
     "subject_stats": {
       "type": "object"
+    },
+    "daily_missions_done": {
+      "type": "number"
+    },
+    "daily_date": {
+      "type": "string"
+    },
+    "total_questions": {
+      "type": "number"
+    },
+    "total_correct": {
+      "type": "number"
+    },
+    "subscription": {
+      "type": "string",
+      "enum": [
+        "none",
+        "trial",
+        "active",
+        "cancelled"
+      ]
     }
   },
   "required": [],

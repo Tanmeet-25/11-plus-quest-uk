@@ -452,6 +452,71 @@ function BadgePop({badge,onClose}){
 }
 
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
+
+// ─── STRIPE PAYMENT LINK ──────────────────────────────────────────────────────
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_5kQ7sK1Kn2BU9FE5jV77O00";
+const PRICE_MONTHLY = "£4.99/month";
+
+// Which worlds/missions are free vs premium
+// Free: first 2 missions of Math Mountain only
+// Premium: everything else
+function isMissionFree(worldId, missionId) {
+  const freeMissions = ["m_tables", "m_fracs"];
+  return worldId === "maths" && freeMissions.includes(missionId);
+}
+
+// ─── PREMIUM MODAL ────────────────────────────────────────────────────────────
+function PremiumModal({onClose, user, onSignIn}){
+  const [loading, setLoading] = useState(false);
+
+  function startTrial(){
+    if(!user){ onSignIn(); return; }
+    setLoading(true);
+    // Build URL with prefilled email
+    const email = user?.email || "";
+    const url = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
+    window.open(url, "_blank");
+    setTimeout(()=>setLoading(false), 2000);
+  }
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:2500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+      <div style={{background:"linear-gradient(135deg,#1e1b4b,#312e81)",borderRadius:28,padding:"32px 24px",width:"100%",maxWidth:380,textAlign:"center",animation:"popIn 0.35s ease",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",border:"1px solid rgba(124,58,237,0.4)"}}>
+        <button onClick={onClose} style={{position:"absolute",top:16,right:20,background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:20,cursor:"pointer"}}>✕</button>
+        <div style={{fontSize:52,marginBottom:8}}>👑</div>
+        <div style={{color:"#FCD34D",fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"2px",marginBottom:8}}>11+ Quest Premium</div>
+        <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 6px",lineHeight:1.3}}>Start Your Free Month</h2>
+        <p style={{color:"rgba(255,255,255,0.6)",fontSize:14,margin:"0 0 20px",lineHeight:1.5}}>Then just {PRICE_MONTHLY} — cancel anytime. No charge during your trial.</p>
+
+        <div style={{background:"rgba(255,255,255,0.07)",borderRadius:16,padding:"16px",marginBottom:20,textAlign:"left"}}>
+          {[
+            ["🗺","All 4 worlds & 28+ missions"],
+            ["⚔️","Boss Battles & timed challenges"],
+            ["🔑","All 15 Tricks & Hacks"],
+            ["🏆","Leaderboard & rank system"],
+            ["📊","Full progress tracking"],
+            ["🆓","1 month completely free"],
+          ].map(([icon,text],i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<5?10:0}}>
+              <span style={{fontSize:18,width:24,textAlign:"center"}}>{icon}</span>
+              <span style={{color:"white",fontSize:14,fontWeight:600}}>{text}</span>
+              <span style={{marginLeft:"auto",color:"#4ADE80",fontSize:14}}>✓</span>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={startTrial} disabled={loading}
+          style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",marginBottom:10,opacity:loading?0.7:1,boxShadow:"0 4px 20px rgba(252,211,77,0.4)"}}>
+          {loading?"Opening Stripe...":"🚀 Start Free Trial →"}
+        </button>
+        <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:0}}>
+          Test card: 4242 4242 4242 4242 · Any future date · Any CVC
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function BottomNav({screen,goTo}){
   const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"progress",icon:"📊",label:"Stats"}];
   return(
@@ -521,6 +586,7 @@ export default function App(){
   const {user,logout}=useAppContext();
   const [screen,setScreen]=useState("home");
   const [showAuth,setShowAuth]=useState(false);
+  const [showPremium,setShowPremium]=useState(false);
   const [activeWorld,setActiveWorld]=useState(null);
   const [popBadge,setPopBadge]=useState(null);
   const [floatMsg,setFloatMsg]=useState(null);
@@ -544,6 +610,11 @@ export default function App(){
   const [leaderboard,setLeaderboard]=useState([]);
 
   const today=new Date().toISOString().split("T")[0];
+  // Premium: check URL param (post-checkout redirect) or stored subscription
+  const urlParams = new URLSearchParams(window.location.search);
+  const justSubscribed = urlParams.get("subscribed") === "true";
+  const isPremium = justSubscribed || (player.subscription === "active") || (player.subscription === "trial");
+
   const {level:curLevel}=calcLevel(player.xp);
   const curRank=getRank(curLevel);
   const dailyChallenge=DAILY[new Date().getDay()];
@@ -551,6 +622,23 @@ export default function App(){
   useEffect(()=>{
     (async()=>{try{const r=await VisitorCount.list();if(r.length===0){const v=await VisitorCount.create({count:1});setVisitorCount(v.count);}else{const v=await VisitorCount.update(r[0].id,{count:(r[0].count||0)+1});setVisitorCount(v.count);}}catch{}})();
   },[]);
+
+  // Mark subscription on return from Stripe
+  useEffect(()=>{
+    if(justSubscribed && user){
+      (async()=>{
+        try{
+          const existing=await UserProgress.filter({user_id:user.id});
+          const data={user_id:user.id,subscription:"trial"};
+          if(existing[0])await UserProgress.update(existing[0].id,{...existing[0],...data});
+          else await UserProgress.create(data);
+          setPlayer(p=>({...p,subscription:"trial"}));
+          // clean URL
+          window.history.replaceState({},"","/Home");
+        }catch{}
+      })();
+    }
+  },[user,justSubscribed]);
 
   useEffect(()=>{
     if(!user)return;
@@ -580,6 +668,11 @@ export default function App(){
 
   function startMission(mission,worldId){
     SFX.click();
+    // Paywall: non-premium users can only play free missions
+    if(!isPremium && !isMissionFree(worldId, mission.id)){
+      setShowPremium(true);
+      return;
+    }
     const pool=[...(QBANK[worldId]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
     if(!pool.length)return;
     setActiveMission({...mission,_worldId:worldId});
@@ -965,6 +1058,7 @@ export default function App(){
   return(
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
       {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
+      {showPremium&&<PremiumModal onClose={()=>setShowPremium(false)} user={user} onSignIn={()=>{setShowPremium(false);setShowAuth(true);}}/>}
       {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
 
       {/* Top bar */}
@@ -993,6 +1087,23 @@ export default function App(){
           </div>
         </div>
 
+        {/* Premium banner (non-premium users) */}
+        {!isPremium&&(
+          <div onClick={()=>setShowPremium(true)} style={{background:"linear-gradient(135deg,rgba(124,58,237,0.25),rgba(79,70,229,0.25))",border:"1px solid rgba(124,58,237,0.45)",borderRadius:18,padding:"14px 16px",marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
+            <div style={{fontSize:32}}>👑</div>
+            <div style={{flex:1}}>
+              <div style={{color:"#FCD34D",fontWeight:800,fontSize:13}}>Try Premium Free for 1 Month</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>All worlds, missions & tricks — then {PRICE_MONTHLY}</div>
+            </div>
+            <div style={{color:"white",fontWeight:800,fontSize:13,background:"rgba(124,58,237,0.6)",borderRadius:10,padding:"6px 12px",flexShrink:0}}>Try Free →</div>
+          </div>
+        )}
+        {isPremium&&(
+          <div style={{background:"linear-gradient(135deg,rgba(5,150,105,0.2),rgba(4,120,87,0.2))",border:"1px solid rgba(5,150,105,0.4)",borderRadius:18,padding:"10px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:22}}>👑</span>
+            <div><div style={{color:"#4ADE80",fontWeight:800,fontSize:13}}>Premium Active</div><div style={{color:"rgba(255,255,255,0.5)",fontSize:11}}>Full access to all worlds & missions</div></div>
+          </div>
+        )}
         {/* Daily challenge */}
         <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(239,68,68,0.14))",border:"1px solid rgba(245,158,11,0.28)",borderRadius:18,padding:"14px 16px",marginBottom:16,animation:"pulse 3s infinite"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1034,6 +1145,7 @@ export default function App(){
                       <div style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:locked?0:8}}>{world.desc}</div>
                     </div>
                     {locked&&<div style={{background:"rgba(0,0,0,0.38)",borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.45)",flexShrink:0,marginLeft:8}}>🔒 Lv.{world.unlockLevel}</div>}
+                    {!locked&&!isPremium&&world.id!=="maths"&&<div style={{background:"rgba(124,58,237,0.5)",borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700,color:"#FCD34D",flexShrink:0,marginLeft:8}}>👑 Premium</div>}
                     {!locked&&done===total&&<div style={{color:"#FCD34D",fontSize:12,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
                   </div>
                   {!locked&&(
