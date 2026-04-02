@@ -517,8 +517,356 @@ function PremiumModal({onClose, user, onSignIn}){
   );
 }
 
+
+// ─── UK GRAMMAR SCHOOLS ──────────────────────────────────────────────────────
+const UK_GRAMMAR_SCHOOLS = [
+  // KENT (largest grammar school area)
+  { name:"Tonbridge Grammar School", area:"Tonbridge, Kent", type:"GL", url:"https://www.tonbridgegrammar.org.uk", gender:"Girls" },
+  { name:"Judd School", area:"Tonbridge, Kent", type:"GL", url:"https://www.judd.kent.sch.uk", gender:"Boys" },
+  { name:"Skinners' School", area:"Tunbridge Wells, Kent", type:"GL", url:"https://www.skinners.kent.sch.uk", gender:"Boys" },
+  { name:"Tunbridge Wells Grammar School for Boys", area:"Tunbridge Wells, Kent", type:"GL", url:"https://twgsb.org.uk", gender:"Boys" },
+  { name:"Tunbridge Wells Girls' Grammar School", area:"Tunbridge Wells, Kent", type:"GL", url:"https://www.twggs.kent.sch.uk", gender:"Girls" },
+  { name:"Dartford Grammar School", area:"Dartford, Kent", type:"GL", url:"https://www.dartfordgrammarschool.org.uk", gender:"Boys" },
+  { name:"Dartford Grammar School for Girls", area:"Dartford, Kent", type:"GL", url:"https://www.dgsg.kent.sch.uk", gender:"Girls" },
+  { name:"Simon Langton Grammar School for Boys", area:"Canterbury, Kent", type:"GL", url:"https://www.langtonboys.kent.sch.uk", gender:"Boys" },
+  { name:"Simon Langton Girls' Grammar School", area:"Canterbury, Kent", type:"GL", url:"https://www.langton.kent.sch.uk", gender:"Girls" },
+  { name:"Folkestone School for Girls", area:"Folkestone, Kent", type:"GL", url:"https://www.folkestoneschool.org", gender:"Girls" },
+  { name:"Harvey Grammar School", area:"Folkestone, Kent", type:"GL", url:"https://harveygrammar.co.uk", gender:"Boys" },
+  { name:"Gravesend Grammar School", area:"Gravesend, Kent", type:"GL", url:"https://www.gravesendgrammar.org.uk", gender:"Boys" },
+  { name:"Weald of Kent Grammar School", area:"Tonbridge, Kent", type:"GL", url:"https://www.wealdofkent.kent.sch.uk", gender:"Girls" },
+  { name:"The Maidstone Grammar School", area:"Maidstone, Kent", type:"GL", url:"https://www.maidstonegrammar.com", gender:"Boys" },
+  { name:"Maidstone Grammar School for Girls", area:"Maidstone, Kent", type:"GL", url:"https://mgsg.org.uk", gender:"Girls" },
+  { name:"Invicta Grammar School", area:"Maidstone, Kent", type:"GL", url:"https://www.invicta.kent.sch.uk", gender:"Girls" },
+  { name:"Barton Court Grammar School", area:"Canterbury, Kent", type:"GL", url:"https://www.bartoncourt.org", gender:"Mixed" },
+  { name:"Chatham & Clarendon Grammar School", area:"Ramsgate, Kent", type:"GL", url:"https://www.chathamandclarendon.co.uk", gender:"Mixed" },
+  { name:"Sir Roger Manwood's School", area:"Sandwich, Kent", type:"GL", url:"https://www.srmanwoods.co.uk", gender:"Mixed" },
+  { name:"Cranbrook School", area:"Cranbrook, Kent", type:"GL", url:"https://www.cranbrook.kent.sch.uk", gender:"Mixed" },
+  { name:"The Norton Knatchbull School", area:"Ashford, Kent", type:"GL", url:"https://www.nortonknatchbull.org", gender:"Boys" },
+  { name:"Highworth Grammar School", area:"Ashford, Kent", type:"GL", url:"https://www.highworth.kent.sch.uk", gender:"Girls" },
+  { name:"Borden Grammar School", area:"Sittingbourne, Kent", type:"GL", url:"https://www.bordengrammar.kent.sch.uk", gender:"Boys" },
+  { name:"Homewood School (Sixth Form Centre)", area:"Tenterden, Kent", type:"GL", gender:"Mixed" },
+  { name:"Swadelands School", area:"Lenham, Kent", type:"GL", gender:"Mixed" },
+
+  // MEDWAY
+  { name:"Rochester Grammar School", area:"Rochester, Medway", type:"GL", url:"https://www.rochestergrammar.org.uk", gender:"Girls" },
+  { name:"Strood Academy", area:"Strood, Medway", type:"GL", gender:"Mixed" },
+  { name:"Rainham Mark Grammar School", area:"Gillingham, Medway", type:"GL", url:"https://www.rmgs.org.uk", gender:"Boys" },
+  { name:"Fort Pitt Grammar School", area:"Chatham, Medway", type:"GL", url:"https://www.fortpitt.medway.sch.uk", gender:"Girls" },
+  { name:"Holcombe Grammar School", area:"Chatham, Medway", type:"GL", gender:"Boys" },
+  { name:"The Hundred of Hoo Academy", area:"Rochester, Medway", type:"GL", gender:"Mixed" },
+
+  // BIRMINGHAM / WALSALL (MIDLANDS)
+  { name:"King Edward VI Camp Hill School for Boys", area:"Birmingham", type:"CEM", url:"https://www.camphillboys.bham.sch.uk", gender:"Boys" },
+  { name:"King Edward VI Camp Hill School for Girls", area:"Birmingham", type:"CEM", url:"https://www.camphillgirls.bham.sch.uk", gender:"Girls" },
+  { name:"King Edward VI Handsworth Grammar School", area:"Birmingham", type:"CEM", url:"https://www.handsworth.bham.sch.uk", gender:"Boys" },
+  { name:"King Edward VI Five Ways School", area:"Birmingham", type:"CEM", url:"https://www.fiveways.bham.sch.uk", gender:"Mixed" },
+  { name:"King Edward VI Aston School", area:"Birmingham", type:"CEM", url:"https://www.aston.bham.sch.uk", gender:"Boys" },
+  { name:"King Edward VI Handsworth School for Girls", area:"Birmingham", type:"CEM", gender:"Girls" },
+  { name:"Sutton Coldfield Grammar School for Girls", area:"Sutton Coldfield, Birmingham", type:"CEM", url:"https://www.scggs.co.uk", gender:"Girls" },
+  { name:"Bishop Vesey's Grammar School", area:"Sutton Coldfield, Birmingham", type:"CEM", url:"https://www.bishopveseys.co.uk", gender:"Boys" },
+  { name:"Walsall Girls' High School", area:"Walsall, West Midlands", type:"CEM", gender:"Girls" },
+  { name:"Queen Mary's Grammar School", area:"Walsall, West Midlands", type:"CEM", url:"https://www.qmgs.walsall.sch.uk", gender:"Boys" },
+  { name:"Queen Mary's High School", area:"Walsall, West Midlands", type:"CEM", url:"https://www.qmhs.walsall.sch.uk", gender:"Girls" },
+
+  // ESSEX
+  { name:"Chelmsford County High School for Girls", area:"Chelmsford, Essex", type:"CEM", url:"https://www.cchs.co.uk", gender:"Girls" },
+  { name:"King Edward VI Grammar School", area:"Chelmsford, Essex", type:"CEM", url:"https://www.kegs.org.uk", gender:"Boys" },
+  { name:"Colchester Royal Grammar School", area:"Colchester, Essex", type:"GL", url:"https://www.crgs.co.uk", gender:"Boys" },
+  { name:"Colchester County High School for Girls", area:"Colchester, Essex", type:"GL", url:"https://www.cchs4g.co.uk", gender:"Girls" },
+  { name:"Westcliff High School for Boys", area:"Westcliff-on-Sea, Essex", type:"CEM", url:"https://www.whsb.essex.sch.uk", gender:"Boys" },
+  { name:"Westcliff High School for Girls", area:"Westcliff-on-Sea, Essex", type:"CEM", url:"https://www.whsg.info", gender:"Girls" },
+  { name:"Southend High School for Boys", area:"Southend-on-Sea, Essex", type:"CEM", url:"https://www.shsb.org.uk", gender:"Boys" },
+  { name:"Southend High School for Girls", area:"Southend-on-Sea, Essex", type:"CEM", url:"https://www.shsg.org", gender:"Girls" },
+  { name:"Brentwood County High School", area:"Brentwood, Essex", type:"CEM", gender:"Mixed" },
+  { name:"Shenfield High School", area:"Brentwood, Essex", type:"CEM", gender:"Mixed" },
+
+  // HERTFORDSHIRE
+  { name:"Watford Grammar School for Boys", area:"Watford, Hertfordshire", type:"GL", url:"https://www.wgsb.co.uk", gender:"Boys" },
+  { name:"Watford Grammar School for Girls", area:"Watford, Hertfordshire", type:"GL", url:"https://www.wgsb.co.uk", gender:"Girls" },
+  { name:"Rickmansworth School", area:"Rickmansworth, Hertfordshire", type:"GL", gender:"Mixed" },
+  { name:"Dame Alice Owen's School", area:"Potters Bar, Hertfordshire", type:"GL", url:"https://www.damealiceowen.herts.sch.uk", gender:"Mixed" },
+  { name:"The Parmiter's School", area:"Watford, Hertfordshire", type:"GL", gender:"Mixed" },
+  { name:"St Clement Danes School", area:"Chorleywood, Hertfordshire", type:"GL", gender:"Mixed" },
+
+  // BUCKINGHAMSHIRE
+  { name:"Aylesbury Grammar School", area:"Aylesbury, Buckinghamshire", type:"GL", url:"https://www.ags.bucks.sch.uk", gender:"Boys" },
+  { name:"Aylesbury High School", area:"Aylesbury, Buckinghamshire", type:"GL", url:"https://www.ahs.bucks.sch.uk", gender:"Girls" },
+  { name:"Royal Grammar School, High Wycombe", area:"High Wycombe, Buckinghamshire", type:"GL", url:"https://www.rgshw.com", gender:"Boys" },
+  { name:"Wycombe High School", area:"High Wycombe, Buckinghamshire", type:"GL", url:"https://www.wycombeigh.bucks.sch.uk", gender:"Girls" },
+  { name:"Dr Challoner's Grammar School", area:"Amersham, Buckinghamshire", type:"GL", url:"https://www.challoners.com", gender:"Boys" },
+  { name:"Dr Challoner's High School", area:"Little Chalfont, Buckinghamshire", type:"GL", url:"https://www.challonershigh.com", gender:"Girls" },
+  { name:"Chesham Grammar School", area:"Chesham, Buckinghamshire", type:"GL", url:"https://www.cheshamgrammar.co.uk", gender:"Mixed" },
+  { name:"Burnham Grammar School", area:"Burnham, Buckinghamshire", type:"GL", gender:"Mixed" },
+  { name:"Sir Henry Floyd Grammar School", area:"Aylesbury, Buckinghamshire", type:"GL", gender:"Mixed" },
+  { name:"John Hampden Grammar School", area:"High Wycombe, Buckinghamshire", type:"GL", gender:"Boys" },
+  { name:"Beaconsfield High School", area:"Beaconsfield, Buckinghamshire", type:"GL", gender:"Girls" },
+  { name:"The Misbourne School", area:"Great Missenden, Buckinghamshire", type:"GL", gender:"Mixed" },
+  { name:"Cottesloe School", area:"Wing, Buckinghamshire", type:"GL", gender:"Mixed" },
+  { name:"The Mandeville School", area:"Aylesbury, Buckinghamshire", type:"GL", gender:"Mixed" },
+
+  // LINCOLNSHIRE
+  { name:"Lincoln Christ's Hospital School", area:"Lincoln, Lincolnshire", type:"GL", url:"https://www.lincolnchrists.org.uk", gender:"Mixed" },
+  { name:"The Priory Academy LSST", area:"Lincoln, Lincolnshire", type:"GL", gender:"Mixed" },
+  { name:"Caistor Grammar School", area:"Caistor, Lincolnshire", type:"GL", url:"https://www.caistor-grammar.co.uk", gender:"Mixed" },
+  { name:"King Edward VI Grammar School (Louth)", area:"Louth, Lincolnshire", type:"GL", gender:"Mixed" },
+  { name:"Queen Elizabeth's Grammar School", area:"Alford, Lincolnshire", type:"GL", gender:"Mixed" },
+  { name:"Market Rasen Queen Elizabeth's Grammar", area:"Market Rasen, Lincolnshire", type:"GL", gender:"Mixed" },
+  { name:"Spalding Grammar School", area:"Spalding, Lincolnshire", type:"GL", url:"https://www.spaldinggrammar.lincs.sch.uk", gender:"Boys" },
+  { name:"Bourne Grammar School", area:"Bourne, Lincolnshire", type:"GL", url:"https://www.bournegrammar.com", gender:"Mixed" },
+  { name:"Kesteven and Grantham Girls' School", area:"Grantham, Lincolnshire", type:"GL", gender:"Girls" },
+  { name:"The King's School", area:"Grantham, Lincolnshire", type:"GL", gender:"Boys" },
+  { name:"Boston Grammar School", area:"Boston, Lincolnshire", type:"GL", gender:"Boys" },
+  { name:"Haven High Academy", area:"Boston, Lincolnshire", type:"GL", gender:"Mixed" },
+  { name:"Sleaford Joint Sixth Form", area:"Sleaford, Lincolnshire", type:"GL", gender:"Mixed" },
+
+  // DEVON / TORQUAY
+  { name:"Torquay Boys' Grammar School", area:"Torquay, Devon", type:"GL", url:"https://www.tbgs.co.uk", gender:"Boys" },
+  { name:"Torquay Girls' Grammar School", area:"Torquay, Devon", type:"GL", url:"https://www.tggs.co.uk", gender:"Girls" },
+  { name:"Colyton Grammar School", area:"Colyton, Devon", type:"GL", url:"https://www.colytongrammar.com", gender:"Mixed" },
+
+  // GLOUCESTERSHIRE / CHELTENHAM
+  { name:"Pate's Grammar School", area:"Cheltenham, Gloucestershire", type:"GL", url:"https://www.pates.gloucs.sch.uk", gender:"Mixed" },
+  { name:"The Crypt School", area:"Gloucester, Gloucestershire", type:"GL", url:"https://www.cryptschool.co.uk", gender:"Boys" },
+  { name:"Denmark Road High School", area:"Gloucester, Gloucestershire", type:"GL", gender:"Girls" },
+  { name:"Sir Thomas Rich's School", area:"Gloucester, Gloucestershire", type:"GL", url:"https://www.str.gloucs.sch.uk", gender:"Boys" },
+  { name:"Ribston Hall High School", area:"Gloucester, Gloucestershire", type:"GL", gender:"Girls" },
+
+  // SUPER-SELECTIVE / LONDON AREA
+  { name:"Henrietta Barnett School", area:"Hampstead Garden Suburb, London", type:"GL", url:"https://www.hbschool.org.uk", gender:"Girls" },
+  { name:"Queen Elizabeth's School, Barnet", area:"Barnet, London", type:"GL", url:"https://www.qebarnet.co.uk", gender:"Boys" },
+  { name:"St Olave's Grammar School", area:"Orpington, London (Bromley)", type:"GL", url:"https://www.saintolaves.net", gender:"Boys" },
+  { name:"Newstead Wood School", area:"Orpington, London (Bromley)", type:"GL", url:"https://www.newsteadwood.co.uk", gender:"Girls" },
+  { name:"Wilson's School", area:"Sutton, London", type:"GL", url:"https://www.wilsons.school", gender:"Boys" },
+  { name:"Wallington County Grammar School", area:"Wallington, London", type:"GL", url:"https://www.wcgs.org.uk", gender:"Boys" },
+  { name:"Wallington High School for Girls", area:"Wallington, London", type:"GL", url:"https://www.wallingtonhigh.org.uk", gender:"Girls" },
+  { name:"Nonsuch High School for Girls", area:"Cheam, London (Sutton)", type:"GL", url:"https://www.nonsuch.school", gender:"Girls" },
+  { name:"Sutton Grammar School", area:"Sutton, London", type:"GL", url:"https://www.suttongrammar.sutton.sch.uk", gender:"Boys" },
+  { name:"Greenshaw High School", area:"Sutton, London", type:"GL", gender:"Mixed" },
+  { name:"The Tiffin School", area:"Kingston upon Thames, London", type:"GL", url:"https://www.tiffin.kingston.sch.uk", gender:"Boys" },
+  { name:"Tiffin Girls' School", area:"Kingston upon Thames, London", type:"GL", url:"https://www.tiffingirls.org", gender:"Girls" },
+  { name:"Latymer School", area:"Edmonton, London (Enfield)", type:"GL", url:"https://www.latymer-ed.org", gender:"Mixed" },
+  { name:"Enfield Grammar School", area:"Enfield, London", type:"GL", url:"https://www.enfieldgrammar.net", gender:"Boys" },
+  { name:"Chace Community School", area:"Enfield, London", type:"GL", gender:"Mixed" },
+
+  // TRAFFORD (MANCHESTER)
+  { name:"Altrincham Grammar School for Boys", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.agsb.co.uk", gender:"Boys" },
+  { name:"Altrincham Grammar School for Girls", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.aggs.trafford.sch.uk", gender:"Girls" },
+  { name:"Sale Grammar School", area:"Sale, Greater Manchester", type:"CEM", url:"https://www.salegrammar.co.uk", gender:"Mixed" },
+  { name:"Stretford Grammar School", area:"Stretford, Greater Manchester", type:"CEM", url:"https://www.stretfordgrammar.com", gender:"Mixed" },
+  { name:"Urmston Grammar School", area:"Urmston, Greater Manchester", type:"CEM", url:"https://www.urmstongrammar.co.uk", gender:"Mixed" },
+  { name:"Loreto Grammar School", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.loreto.trafford.sch.uk", gender:"Girls" },
+  { name:"St Ambrose College", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.stambroseCollege.co.uk", gender:"Boys" },
+
+  // WIRRAL / MERSEYSIDE
+  { name:"Birkenhead School", area:"Birkenhead, Merseyside", type:"GL", gender:"Boys" },
+  { name:"Wirral Grammar School for Boys", area:"Bebington, Merseyside", type:"GL", url:"https://www.wirralgrammar.co.uk", gender:"Boys" },
+  { name:"Wirral Grammar School for Girls", area:"Bebington, Merseyside", type:"GL", url:"https://www.wirralgrammarforgirlss.co.uk", gender:"Girls" },
+  { name:"Calday Grange Grammar School", area:"West Kirby, Merseyside", type:"GL", url:"https://www.caldaygrammar.co.uk", gender:"Boys" },
+  { name:"West Kirby Grammar School", area:"West Kirby, Merseyside", type:"GL", url:"https://www.westkirbygrammar.co.uk", gender:"Girls" },
+
+  // SLOUGH / BERKSHIRE
+  { name:"Upton Court Grammar School", area:"Slough, Berkshire", type:"GL", url:"https://www.uptoncourtgrammar.co.uk", gender:"Mixed" },
+  { name:"Langley Grammar School", area:"Langley, Berkshire", type:"GL", url:"https://www.langleygrammar.com", gender:"Mixed" },
+  { name:"Herschel Grammar School", area:"Slough, Berkshire", type:"GL", url:"https://www.herschel.slough.sch.uk", gender:"Mixed" },
+  { name:"St Bernard's Catholic Grammar School", area:"Slough, Berkshire", type:"GL", url:"https://www.st-bernards.org", gender:"Mixed" },
+
+  // READING / BERKSHIRE
+  { name:"Reading School", area:"Reading, Berkshire", type:"GL", url:"https://www.reading-school.co.uk", gender:"Boys" },
+  { name:"Abbey School", area:"Reading, Berkshire", type:"GL", gender:"Girls" },
+  { name:"Kendrick School", area:"Reading, Berkshire", type:"GL", url:"https://www.kendrick.reading.sch.uk", gender:"Girls" },
+
+  // SHROPSHIRE
+  { name:"Haberdashers' Abraham Darby", area:"Telford, Shropshire", type:"GL", gender:"Mixed" },
+  { name:"Newport Girls' High School", area:"Newport, Shropshire", type:"GL", url:"https://www.newportgirlshigh.co.uk", gender:"Girls" },
+  { name:"Adams' Grammar School", area:"Newport, Shropshire", type:"GL", url:"https://www.adamsgrammar.org.uk", gender:"Boys" },
+
+  // STAFFORDSHIRE
+  { name:"Chase Grammar School", area:"Cannock, Staffordshire", type:"GL", gender:"Mixed" },
+  { name:"King Edward VI Grammar School", area:"Lichfield, Staffordshire", type:"GL", gender:"Mixed" },
+
+  // NORTHAMPTONSHIRE
+  { name:"Northampton School for Boys", area:"Northampton", type:"ISEB", url:"https://www.nsb.northants.sch.uk", gender:"Boys" },
+  { name:"Northampton High School", area:"Northampton", type:"ISEB", gender:"Girls" },
+
+  // RIPON / NORTH YORKSHIRE
+  { name:"Ripon Grammar School", area:"Ripon, North Yorkshire", type:"GL", url:"https://www.ripongrammar.co.uk", gender:"Mixed" },
+  { name:"Skipton Girls' High School", area:"Skipton, North Yorkshire", type:"GL", url:"https://www.skiptongirlshigh.com", gender:"Girls" },
+  { name:"Ermysted's Grammar School", area:"Skipton, North Yorkshire", type:"GL", url:"https://www.ermysteds.eu", gender:"Boys" },
+
+  // CUMBRIA
+  { name:"Queen Katherine School", area:"Kendal, Cumbria", type:"GL", gender:"Mixed" },
+  { name:"Kirkbie Kendal School", area:"Kendal, Cumbria", type:"GL", gender:"Mixed" },
+
+  // KENDAL
+  { name:"Stramongate School", area:"Kendal, Cumbria", type:"GL", gender:"Mixed" },
+
+  // WARWICKSHIRE
+  { name:"Lawrence Sheriff School", area:"Rugby, Warwickshire", type:"CEM", url:"https://www.lawrencesheriff.org.uk", gender:"Boys" },
+  { name:"Rugby High School", area:"Rugby, Warwickshire", type:"CEM", url:"https://www.rugbyhighschool.co.uk", gender:"Girls" },
+  { name:"Stratford-upon-Avon Grammar School", area:"Stratford-upon-Avon, Warwickshire", type:"CEM", url:"https://www.sags.org.uk", gender:"Boys" },
+  { name:"King Edward VI School", area:"Stratford-upon-Avon, Warwickshire", type:"CEM", gender:"Mixed" },
+
+  // DORSET
+  { name:"Bournemouth School", area:"Bournemouth, Dorset", type:"GL", url:"https://www.bournemouth-school.org", gender:"Boys" },
+  { name:"Bournemouth School for Girls", area:"Bournemouth, Dorset", type:"GL", url:"https://www.bsg.dorset.sch.uk", gender:"Girls" },
+  { name:"Poole Grammar School", area:"Poole, Dorset", type:"GL", url:"https://www.poolegrammar.com", gender:"Boys" },
+  { name:"Parkstone Grammar School", area:"Poole, Dorset", type:"GL", url:"https://www.parkstone.poole.sch.uk", gender:"Girls" },
+];
+
+const REGIONS = [...new Set(UK_GRAMMAR_SCHOOLS.map(s => s.area.split(",").slice(-1)[0].trim()))].sort();
+
+// ─── SUBSCRIPTION MODAL ──────────────────────────────────────────────────────
+function SubscriptionModal({user, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  function handleSubscribe() {
+    setLoading(true);
+    // Direct Stripe Payment Link - 30-day free trial, then £4.99/month
+    window.location.href = "https://buy.stripe.com/test_aFa6oGbkX2BUbNMaEf77O01";
+  }
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:2500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+      <div style={{background:"linear-gradient(135deg,#1e1b4b,#312e81)",borderRadius:28,padding:"32px 24px",width:"100%",maxWidth:380,boxShadow:"0 30px 80px rgba(0,0,0,0.7)",animation:"popIn 0.3s ease",textAlign:"center"}}>
+        <div style={{fontSize:56,marginBottom:8}}>👑</div>
+        <div style={{color:"#FCD34D",fontWeight:900,fontSize:12,textTransform:"uppercase",letterSpacing:"2px",marginBottom:6}}>11+ Quest Premium</div>
+        <h2 style={{color:"white",fontWeight:900,fontSize:24,margin:"0 0 6px",lineHeight:1.2}}>1 Month Free,<br/>Then £4.99/mo</h2>
+        <p style={{color:"rgba(255,255,255,0.6)",fontSize:13,margin:"0 0 24px",lineHeight:1.5}}>Start your free trial today. No charge for 30 days.<br/>Cancel anytime — no commitment.</p>
+        <div style={{background:"rgba(255,255,255,0.07)",borderRadius:16,padding:"16px",marginBottom:20,textAlign:"left"}}>
+          {[
+            ["🗺","All 4 worlds & 30+ missions"],
+            ["⚔️","Boss battles & timed challenges"],
+            ["🔑","All secret tricks & hacks unlocked"],
+            ["🏆","Leaderboard & streak tracking"],
+            ["🎓","All UK grammar school info"],
+            ["🆓","First month completely free"],
+          ].map(([icon,text],i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<5?10:0}}>
+              <span style={{fontSize:18,flexShrink:0}}>{icon}</span>
+              <span style={{color:"white",fontSize:13,fontWeight:600}}>{text}</span>
+            </div>
+          ))}
+        </div>
+        {err && <div style={{background:"rgba(220,38,38,0.2)",border:"1px solid rgba(220,38,38,0.4)",borderRadius:10,padding:"10px",marginBottom:14,color:"#FCA5A5",fontSize:13}}>{err}</div>}
+        <button onClick={handleSubscribe} disabled={loading}
+          style={{width:"100%",padding:"16px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",marginBottom:10,opacity:loading?0.7:1}}>
+          {loading ? "⏳ Loading..." : "Start Free Trial →"}
+        </button>
+        <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:"0 0 14px"}}>Powered by Stripe · Secure payment · Cancel anytime</p>
+        <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Maybe later</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCHOOLS SCREEN ──────────────────────────────────────────────────────────
+function SchoolsScreen({goTo}) {
+  const [search, setSearch] = useState("");
+  const [regionFilter, setRegionFilter] = useState("All");
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [genderFilter, setGenderFilter] = useState("All");
+
+  const regions = ["All", ...new Set(UK_GRAMMAR_SCHOOLS.map(s => {
+    const parts = s.area.split(",");
+    return parts.length > 1 ? parts[parts.length - 1].trim() : parts[0].trim();
+  }))].sort((a,b) => a==="All"?-1:a.localeCompare(b));
+
+  const filtered = UK_GRAMMAR_SCHOOLS.filter(s => {
+    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) || s.area.toLowerCase().includes(search.toLowerCase());
+    const matchRegion = regionFilter === "All" || s.area.includes(regionFilter);
+    const matchType = typeFilter === "All" || s.type === typeFilter;
+    const matchGender = genderFilter === "All" || s.gender === genderFilter;
+    return matchSearch && matchRegion && matchType && matchGender;
+  });
+
+  const typeColours = { GL:"#4F46E5", CEM:"#059669", ISEB:"#D97706" };
+  const typeDesc = { GL:"GL Assessment", CEM:"CEM 11+", ISEB:"ISEB" };
+
+  return (
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#1a1042)"}}>
+      <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+        {/* Header */}
+        <div style={{padding:"14px 0 10px",display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer",fontFamily:"inherit"}}>← Back</button>
+          <div>
+            <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>🏫 UK Grammar Schools</h2>
+            <p style={{color:"rgba(255,255,255,0.45)",fontSize:11,margin:0}}>{filtered.length} of {UK_GRAMMAR_SCHOOLS.length} schools</p>
+          </div>
+        </div>
+
+        {/* Type key */}
+        <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+          {Object.entries(typeColours).map(([t,c])=>(
+            <div key={t} style={{display:"flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.06)",borderRadius:8,padding:"5px 10px"}}>
+              <div style={{width:8,height:8,borderRadius:"50%",background:c}}/>
+              <span style={{color:"rgba(255,255,255,0.55)",fontSize:11,fontWeight:600}}>{typeDesc[t]}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Search school or area..."
+          style={{width:"100%",padding:"13px 16px",borderRadius:14,border:"1.5px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.07)",color:"white",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>
+
+        {/* Filters */}
+        <div style={{display:"flex",gap:8,marginBottom:14,overflowX:"auto",paddingBottom:4}}>
+          <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)}
+            style={{padding:"8px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.1)",color:"white",fontSize:12,fontFamily:"inherit",cursor:"pointer",flexShrink:0}}>
+            <option value="All">All Types</option>
+            <option value="GL">GL Assessment</option>
+            <option value="CEM">CEM 11+</option>
+            <option value="ISEB">ISEB</option>
+          </select>
+          <select value={genderFilter} onChange={e=>setGenderFilter(e.target.value)}
+            style={{padding:"8px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.1)",color:"white",fontSize:12,fontFamily:"inherit",cursor:"pointer",flexShrink:0}}>
+            <option value="All">All Genders</option>
+            <option value="Boys">Boys</option>
+            <option value="Girls">Girls</option>
+            <option value="Mixed">Mixed</option>
+          </select>
+          <select value={regionFilter} onChange={e=>setRegionFilter(e.target.value)}
+            style={{padding:"8px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.1)",color:"white",fontSize:12,fontFamily:"inherit",cursor:"pointer",flexShrink:0}}>
+            {regions.map(r=><option key={r} value={r}>{r}</option>)}
+          </select>
+        </div>
+
+        {/* School cards */}
+        {filtered.length === 0 && (
+          <div style={{textAlign:"center",padding:"40px 20px"}}>
+            <div style={{fontSize:48,marginBottom:12}}>🔍</div>
+            <p style={{color:"rgba(255,255,255,0.4)",fontSize:15}}>No schools found. Try different filters.</p>
+          </div>
+        )}
+        {filtered.map((school,i)=>(
+          <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px 16px",marginBottom:8,border:"1px solid rgba(255,255,255,0.07)",animation:`slideUp ${0.05+Math.min(i,10)*0.03}s ease`}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{color:"white",fontWeight:800,fontSize:14,marginBottom:3,lineHeight:1.3}}>{school.name}</div>
+                <div style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>{school.area}</div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4,flexShrink:0}}>
+                <span style={{background:typeColours[school.type]||"#6B7280",color:"white",fontSize:10,fontWeight:800,borderRadius:6,padding:"3px 7px"}}>{school.type}</span>
+                <span style={{background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.5)",fontSize:10,fontWeight:600,borderRadius:6,padding:"3px 7px"}}>
+                  {school.gender==="Boys"?"👦":school.gender==="Girls"?"👧":"👨‍👩‍👧‍👦"} {school.gender}
+                </span>
+              </div>
+            </div>
+            {school.url && (
+              <a href={school.url} target="_blank" rel="noopener noreferrer"
+                style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:8,color:"#818CF8",fontSize:12,fontWeight:600,textDecoration:"none"}}>
+                🌐 Visit website →
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"progress",icon:"📊",label:"Stats"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"schools",icon:"🏫",label:"Schools"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"progress",icon:"📊",label:"Stats"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
@@ -586,6 +934,7 @@ export default function App(){
   const {user,logout}=useAppContext();
   const [screen,setScreen]=useState("home");
   const [showAuth,setShowAuth]=useState(false);
+  const [showSub,setShowSub]=useState(false);
   const [showPremium,setShowPremium]=useState(false);
   const [activeWorld,setActiveWorld]=useState(null);
   const [popBadge,setPopBadge]=useState(null);
@@ -965,100 +1314,13 @@ export default function App(){
     </div>
   );
 
-  // ── PROGRESS ───────────────────────────────────────────────────────────────
-  if(screen==="progress")return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)"}}>
-      <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
-        <div style={{padding:"14px 0 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>← Back</button>
-            <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>📊 Progress</h2>
-          </div>
-          {user&&<button onClick={()=>{logout();setPlayer({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});}} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"rgba(255,255,255,0.5)",fontSize:12,borderRadius:10,padding:"6px 12px",cursor:"pointer",fontFamily:"inherit"}}>Sign out</button>}
-        </div>
-        {!user?<div style={{textAlign:"center",padding:"60px 20px"}}>
-          <div style={{fontSize:56,marginBottom:12}}>🔒</div>
-          <p style={{color:"white",fontWeight:800,fontSize:18}}>Sign in to track progress</p>
-          <button onClick={()=>setShowAuth(true)} style={{marginTop:12,padding:"12px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In →</button>
-        </div>:(
-          <>
-            <div style={{background:"linear-gradient(135deg,rgba(79,70,229,0.3),rgba(124,58,237,0.2))",border:"1px solid rgba(255,255,255,0.12)",borderRadius:22,padding:"20px",marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                <div>
-                  <div style={{color:"rgba(255,255,255,0.45)",fontSize:11,textTransform:"uppercase",letterSpacing:"1px"}}>Rank</div>
-                  <div style={{color:"white",fontWeight:900,fontSize:22}}>{curRank.icon} {curRank.title}</div>
-                  <div style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>Level {curLevel} · {user.full_name||user.email}</div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{color:"#FCD34D",fontWeight:900,fontSize:17}}>🪙 {player.coins}</div>
-                  <div style={{color:"#F97316",fontSize:13,fontWeight:700,marginTop:2}}>🔥 {player.streak} streak</div>
-                </div>
-              </div>
-              <XPBar xp={player.xp}/>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:14}}>
-                {[{v:player.completed_missions.length,l:"Missions",c:"#FCD34D"},{v:player.xp,l:"Total XP",c:"#60A5FA"},{v:(player.badges||[]).length,l:"Badges",c:"#A78BFA"},{v:player.streak,l:"Streak 🔥",c:"#F97316"}].map((s,i)=>(
-                  <div key={i} style={{textAlign:"center",background:"rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 4px"}}>
-                    <div style={{fontSize:16,fontWeight:900,color:s.c}}>{s.v}</div>
-                    <div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>{s.l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{background:"rgba(255,255,255,0.04)",borderRadius:20,padding:"16px",marginBottom:14,border:"1px solid rgba(255,255,255,0.07)"}}>
-              <div style={{color:"white",fontWeight:800,fontSize:15,marginBottom:14}}>🗺 Skill Tree</div>
-              {WORLDS.map(world=>{
-                const done=world.missions.filter(m=>isCompleted(m.id)).length;
-                const total=world.missions.length;
-                const pct=Math.round((done/total)*100);
-                const locked=curLevel<world.unlockLevel;
-                return <div key={world.id} style={{marginBottom:16}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{fontSize:16}}>{world.icon}</span>
-                      <span style={{color:locked?"rgba(255,255,255,0.28)":"white",fontWeight:700,fontSize:14}}>{world.name}</span>
-                      {locked&&<span style={{color:"rgba(255,255,255,0.28)",fontSize:10}}>🔒 Lv.{world.unlockLevel}</span>}
-                    </div>
-                    <span style={{color:world.colour,fontWeight:800,fontSize:12}}>{done}/{total}</span>
-                  </div>
-                  <div style={{height:7,background:"rgba(255,255,255,0.07)",borderRadius:4,overflow:"hidden",marginBottom:6}}>
-                    <div style={{height:"100%",width:`${pct}%`,background:world.colour,borderRadius:4,transition:"width 1.2s"}}/>
-                  </div>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                    {world.missions.map(m=>(
-                      <div key={m.id} title={m.name} style={{width:30,height:30,borderRadius:"50%",background:isCompleted(m.id)?"#FCD34D":isMissionUnlocked(world,m)?"rgba(255,255,255,0.12)":"rgba(0,0,0,0.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,border:isCompleted(m.id)?"2px solid #F59E0B":"1px solid rgba(255,255,255,0.08)"}}>
-                        {isCompleted(m.id)?"✅":m.icon}
-                      </div>
-                    ))}
-                  </div>
-                </div>;
-              })}
-            </div>
-            <div style={{background:"rgba(255,255,255,0.04)",borderRadius:20,padding:"16px",border:"1px solid rgba(255,255,255,0.07)"}}>
-              <div style={{color:"white",fontWeight:800,fontSize:15,marginBottom:12}}>🏅 Badges ({(player.badges||[]).length})</div>
-              {(player.badges||[]).length===0&&<p style={{color:"rgba(255,255,255,0.3)",fontSize:13,textAlign:"center"}}>Complete missions to earn badges!</p>}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
-                {(player.badges||[]).map((bid,i)=>{
-                  const defs={first_quest:{icon:"🎯",name:"First Quest"},streak_3:{icon:"🔥",name:"On Fire"},streak_7:{icon:"💎",name:"Diamond"},perfect:{icon:"⭐",name:"Flawless"},boss_slayer:{icon:"👹",name:"Boss Slayer"},level_5:{icon:"🚀",name:"Lv.5"},level_10:{icon:"👑",name:"Lv.10"},ten_missions:{icon:"💯",name:"Veteran"}};
-                  const b=defs[bid]||{icon:"🏅",name:bid};
-                  return <div key={i} style={{background:"rgba(252,211,77,0.09)",borderRadius:12,padding:"10px 4px",textAlign:"center",border:"1px solid rgba(252,211,77,0.2)"}}>
-                    <div style={{fontSize:22}}>{b.icon}</div>
-                    <div style={{fontSize:10,fontWeight:700,color:"#FCD34D",marginTop:3}}>{b.name}</div>
-                  </div>;
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      <BottomNav screen={screen} goTo={goTo}/>
-    </div>
-  );
-
+  // ── SCHOOLS ────────────────────────────────────────────────────────────────
+  if(screen==="schools")return <SchoolsScreen goTo={goTo}/>;
   // ── HOME ───────────────────────────────────────────────────────────────────
   return(
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
       {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
-      {showPremium&&<PremiumModal onClose={()=>setShowPremium(false)} user={user} onSignIn={()=>{setShowPremium(false);setShowAuth(true);}}/>}
+      {showSub&&<SubscriptionModal user={user} onClose={()=>setShowSub(false)}/>}
       {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
 
       {/* Top bar */}
@@ -1079,6 +1341,17 @@ export default function App(){
       </div>
 
       <div style={{maxWidth:520,margin:"0 auto",padding:"14px 16px 100px"}}>
+        {/* Subscribed success banner */}
+        {typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("subscribed")==="true"&&(
+          <div style={{background:"linear-gradient(135deg,rgba(5,150,105,0.3),rgba(4,120,87,0.2))",border:"1px solid rgba(5,150,105,0.4)",borderRadius:16,padding:"14px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:28}}>🎉</span>
+            <div>
+              <div style={{color:"#4ADE80",fontWeight:800,fontSize:14}}>You're now Premium! Free trial active.</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>Enjoy all worlds, missions & tricks for free for 30 days.</div>
+            </div>
+          </div>
+        )}
+
         {/* Welcome */}
         <div style={{textAlign:"center",marginBottom:14}}>
           {user&&<p style={{color:"white",fontWeight:800,fontSize:17,margin:"0 0 6px"}}>👋 Hey, {user.full_name?.split(" ")[0]||"Explorer"}!</p>}
@@ -1087,23 +1360,18 @@ export default function App(){
           </div>
         </div>
 
-        {/* Premium banner (non-premium users) */}
-        {!isPremium&&(
-          <div onClick={()=>setShowPremium(true)} style={{background:"linear-gradient(135deg,rgba(124,58,237,0.25),rgba(79,70,229,0.25))",border:"1px solid rgba(124,58,237,0.45)",borderRadius:18,padding:"14px 16px",marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
-            <div style={{fontSize:32}}>👑</div>
-            <div style={{flex:1}}>
-              <div style={{color:"#FCD34D",fontWeight:800,fontSize:13}}>Try Premium Free for 1 Month</div>
-              <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>All worlds, missions & tricks — then {PRICE_MONTHLY}</div>
-            </div>
-            <div style={{color:"white",fontWeight:800,fontSize:13,background:"rgba(124,58,237,0.6)",borderRadius:10,padding:"6px 12px",flexShrink:0}}>Try Free →</div>
+        {/* Premium CTA banner */}
+        <div onClick={()=>setShowSub(true)} style={{background:"linear-gradient(135deg,rgba(124,58,237,0.35),rgba(79,70,229,0.25))",border:"1px solid rgba(124,58,237,0.4)",borderRadius:18,padding:"14px 16px",marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div>
+            <div style={{color:"#A78BFA",fontWeight:800,fontSize:11,textTransform:"uppercase",letterSpacing:"1px",marginBottom:3}}>👑 Premium</div>
+            <div style={{color:"white",fontWeight:800,fontSize:14}}>1 Month Free Trial</div>
+            <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>Then £4.99/month · Cancel anytime</div>
           </div>
-        )}
-        {isPremium&&(
-          <div style={{background:"linear-gradient(135deg,rgba(5,150,105,0.2),rgba(4,120,87,0.2))",border:"1px solid rgba(5,150,105,0.4)",borderRadius:18,padding:"10px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:22}}>👑</span>
-            <div><div style={{color:"#4ADE80",fontWeight:800,fontSize:13}}>Premium Active</div><div style={{color:"rgba(255,255,255,0.5)",fontSize:11}}>Full access to all worlds & missions</div></div>
+          <div style={{background:"linear-gradient(135deg,#FCD34D,#F59E0B)",borderRadius:12,padding:"10px 16px",flexShrink:0}}>
+            <div style={{color:"#1e1b4b",fontWeight:900,fontSize:13}}>Try Free →</div>
           </div>
-        )}
+        </div>
+
         {/* Daily challenge */}
         <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(239,68,68,0.14))",border:"1px solid rgba(245,158,11,0.28)",borderRadius:18,padding:"14px 16px",marginBottom:16,animation:"pulse 3s infinite"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1145,7 +1413,6 @@ export default function App(){
                       <div style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:locked?0:8}}>{world.desc}</div>
                     </div>
                     {locked&&<div style={{background:"rgba(0,0,0,0.38)",borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.45)",flexShrink:0,marginLeft:8}}>🔒 Lv.{world.unlockLevel}</div>}
-                    {!locked&&!isPremium&&world.id!=="maths"&&<div style={{background:"rgba(124,58,237,0.5)",borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700,color:"#FCD34D",flexShrink:0,marginLeft:8}}>👑 Premium</div>}
                     {!locked&&done===total&&<div style={{color:"#FCD34D",fontSize:12,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
                   </div>
                   {!locked&&(
