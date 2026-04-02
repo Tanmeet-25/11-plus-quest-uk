@@ -1,3 +1,4 @@
+// v2.1 - 2026-04-02
 import { useState, useEffect, useRef } from "react";
 import { UserProgress, QuizSession, Leaderboard, VisitorCount } from "../api/entities";
 import { useAppContext } from "../api/app-context";
