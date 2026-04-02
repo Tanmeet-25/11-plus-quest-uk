@@ -1,295 +1,415 @@
-// v2.1 - 2026-04-02
+// v4.1 - GAMIFIED 11+ QUEST | FIXED AUTH | EXPANDED | ANIMATIONS | SOUND
 import { useState, useEffect, useRef } from "react";
-import { UserProgress, QuizSession, Leaderboard, VisitorCount } from "../api/entities";
+import { UserProgress, QuizSession, VisitorCount } from "../api/entities";
 import { useAppContext } from "../api/app-context";
 
-// ─── BADGES ───────────────────────────────────────────────────────────────────
-const BADGES = [
-  { id:"first_quiz",    icon:"🎯", name:"First Steps",        desc:"Complete your first quiz",              xp:10  },
-  { id:"streak_3",      icon:"🔥", name:"On Fire",            desc:"3-day practice streak",                 xp:30  },
-  { id:"streak_7",      icon:"💎", name:"Diamond Streak",     desc:"7-day practice streak",                 xp:100 },
-  { id:"streak_14",     icon:"🌟", name:"Fortnight Force",    desc:"14-day practice streak",                xp:200 },
-  { id:"streak_30",     icon:"👑", name:"Month Master",       desc:"30-day practice streak",                xp:500 },
-  { id:"perfect_10",    icon:"⭐", name:"Perfect 10",         desc:"Score 100% on a 10-question quiz",      xp:50  },
-  { id:"perfect_hard",  icon:"💥", name:"Flawless Hard",      desc:"Score 100% on a Hard quiz",             xp:120 },
-  { id:"century",       icon:"💯", name:"Century",            desc:"Answer 100 questions total",            xp:75  },
-  { id:"five_hundred",  icon:"🚀", name:"500 Club",           desc:"Answer 500 questions total",            xp:200 },
-  { id:"maths_master",  icon:"🔢", name:"Maths Master",       desc:"Score 80%+ on 5 maths quizzes",         xp:60  },
-  { id:"verbal_ace",    icon:"📖", name:"Verbal Ace",         desc:"Score 80%+ on 5 verbal quizzes",        xp:60  },
-  { id:"nvr_ninja",     icon:"🔷", name:"NVR Ninja",          desc:"Score 80%+ on 5 NVR quizzes",           xp:60  },
-  { id:"english_star",  icon:"✍️", name:"English Star",       desc:"Score 80%+ on 5 English quizzes",       xp:60  },
-  { id:"all_rounder",   icon:"🌈", name:"All Rounder",        desc:"Complete a quiz in all 4 subjects",     xp:80  },
-  { id:"hard_mode",     icon:"🏆", name:"Hard Mode Hero",     desc:"Complete a Hard difficulty quiz",        xp:80  },
-  { id:"level_5",       icon:"🚀", name:"Rising Star",        desc:"Reach Level 5",                         xp:0   },
-  { id:"level_10",      icon:"👑", name:"Grammar Champion",   desc:"Reach Level 10",                        xp:0   },
-  { id:"early_bird",    icon:"🌅", name:"Early Bird",         desc:"Practice before 8am",                   xp:25  },
-  { id:"night_owl",     icon:"🦉", name:"Night Owl",          desc:"Practice after 9pm",                    xp:25  },
+// ─── INJECT ANIMATIONS ────────────────────────────────────────────────────────
+const CSS=`
+@keyframes popIn{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes slideUp{0%{transform:translateY(24px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(252,211,77,0.3)}50%{box-shadow:0 0 24px rgba(252,211,77,0.8)}}
+@keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
+@keyframes starBurst{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+@keyframes bossGlow{0%,100%{box-shadow:0 0 12px rgba(220,38,38,0.3)}50%{box-shadow:0 0 40px rgba(220,38,38,0.8)}}
+@keyframes worldFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes flashGreen{0%,100%{background:transparent}30%{background:rgba(5,150,105,0.18)}}
+@keyframes flashRed{0%,100%{background:transparent}30%{background:rgba(220,38,38,0.18)}}
+`;
+if(!document.getElementById("q11css")){const s=document.createElement("style");s.id="q11css";s.textContent=CSS;document.head.appendChild(s);}
+
+// ─── SOUND ENGINE ─────────────────────────────────────────────────────────────
+const SFX={
+  correct:()=>{try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(523,a.currentTime);o.frequency.setValueAtTime(659,a.currentTime+0.1);o.frequency.setValueAtTime(784,a.currentTime+0.2);g.gain.setValueAtTime(0.25,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.5);o.start();o.stop(a.currentTime+0.5);}catch{}},
+  wrong:()=>{try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator();const g=a.createGain();o.type="sawtooth";o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(200,a.currentTime);o.frequency.setValueAtTime(140,a.currentTime+0.15);g.gain.setValueAtTime(0.2,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.35);o.start();o.stop(a.currentTime+0.35);}catch{}},
+  levelup:()=>{try{const a=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;g.gain.setValueAtTime(0.25,a.currentTime+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+i*0.12+0.3);o.start(a.currentTime+i*0.12);o.stop(a.currentTime+i*0.12+0.3);});}catch{}},
+  unlock:()=>{try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(400,a.currentTime);o.frequency.exponentialRampToValueAtTime(900,a.currentTime+0.3);g.gain.setValueAtTime(0.25,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4);o.start();o.stop(a.currentTime+0.4);}catch{}},
+  click:()=>{try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator();const g=a.createGain();o.frequency.value=800;g.gain.setValueAtTime(0.08,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.05);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+0.05);}catch{}},
+};
+
+// ─── RANKS ────────────────────────────────────────────────────────────────────
+const RANKS=[
+  {minLevel:1, title:"Explorer",      icon:"🌱",colour:"#6B7280"},
+  {minLevel:3, title:"Apprentice",    icon:"📖",colour:"#059669"},
+  {minLevel:5, title:"Scholar",       icon:"🎓",colour:"#2563EB"},
+  {minLevel:8, title:"Logic Warrior", icon:"⚔️",colour:"#7C3AED"},
+  {minLevel:12,title:"Champion",      icon:"🏆",colour:"#D97706"},
+  {minLevel:16,title:"11+ Master",    icon:"👑",colour:"#DC2626"},
+  {minLevel:20,title:"Legend",        icon:"🌟",colour:"#0EA5E9"},
 ];
-
-// ─── XP & LEVELS ─────────────────────────────────────────────────────────────
-function xpForLevel(lvl) { return lvl * 100; }
-function calcLevel(xp) {
-  let l=1, x=xp;
-  while(x>=xpForLevel(l)){x-=xpForLevel(l);l++;}
-  return {level:l,xpInLevel:x,xpNeeded:xpForLevel(l)};
-}
-
-// ─── SUBJECT CONFIG ───────────────────────────────────────────────────────────
-const SUBJECT_LABELS  = { maths:"🔢 Maths", english:"✍️ English", verbal:"📖 Verbal Reasoning", nvr:"🔷 Non-Verbal Reasoning" };
-const SUBJECT_COLOURS = { maths:"#4F46E5", english:"#059669", verbal:"#D97706", nvr:"#DC2626" };
-const SUBJECT_BG      = { maths:"#EEF2FF", english:"#ECFDF5", verbal:"#FFFBEB", nvr:"#FEF2F2" };
-const DIFF_COLOURS    = { easy:"#059669", medium:"#D97706", hard:"#DC2626" };
-const DIFF_XP         = { easy:5, medium:10, hard:20 };
+function getRank(l){let r=RANKS[0];for(const x of RANKS)if(l>=x.minLevel)r=x;return r;}
+function xpForLevel(l){return l*120;}
+function calcLevel(xp){let l=1,x=xp;while(x>=xpForLevel(l)){x-=xpForLevel(l);l++;}return{level:l,xpInLevel:x,xpNeeded:xpForLevel(l)};}
 
 // ─── QUESTIONS ────────────────────────────────────────────────────────────────
-const QUESTIONS = {
+const QBANK={
   maths:{
-    easy:[
-      {q:"What is 6 × 7?",         options:["36","42","48","54"],      answer:"42",   topic:"Times Tables",  explanation:"6 × 7 = 42. One of the trickiest tables — practise it daily!"},
-      {q:"What is ½ of 40?",        options:["10","15","20","25"],      answer:"20",   topic:"Fractions",     explanation:"Half of 40 = 40 ÷ 2 = 20."},
-      {q:"What is 10% of 80?",      options:["4","8","10","16"],        answer:"8",    topic:"Percentages",   explanation:"10% = divide by 10. 80 ÷ 10 = 8."},
-      {q:"What is 25 + 37?",        options:["52","62","63","72"],      answer:"62",   topic:"Addition",      explanation:"25+37: 20+30=50, 5+7=12, 50+12=62."},
-      {q:"What is 9 × 3?",          options:["21","24","27","30"],      answer:"27",   topic:"Times Tables",  explanation:"9×3=27. Tip: 10×3=30, minus 3=27."},
-      {q:"Sides on a pentagon?",    options:["4","5","6","7"],          answer:"5",    topic:"Shapes",        explanation:"Penta=5. Pentagon=5 sides."},
-      {q:"What is 100 − 37?",       options:["53","63","73","83"],      answer:"63",   topic:"Subtraction",   explanation:"Count up from 37: +3=40, +60=100 → total 63."},
-      {q:"What is ¼ of 20?",        options:["4","5","8","10"],         answer:"5",    topic:"Fractions",     explanation:"¼ of 20 = 20 ÷ 4 = 5."},
-      {q:"What is 8 × 6?",          options:["42","46","48","52"],      answer:"48",   topic:"Times Tables",  explanation:"8×6=48. Or 8×5=40, +8=48."},
-      {q:"Perimeter of 5cm×3cm?",   options:["8cm","13cm","15cm","16cm"], answer:"16cm", topic:"Geometry",  explanation:"Perimeter=2×(5+3)=2×8=16cm."},
+    "Times Tables":[
+      {q:"6 × 7 = ?",options:["36","42","48","54"],answer:"42",explanation:"6×7=42. Tip: 5×7=35, +7=42."},
+      {q:"9 × 3 = ?",options:["21","24","27","30"],answer:"27",explanation:"10×3=30, minus 3=27."},
+      {q:"8 × 6 = ?",options:["42","46","48","52"],answer:"48",explanation:"8×5=40, +8=48."},
+      {q:"7 × 8 = ?",options:["54","56","63","48"],answer:"56",explanation:"Remember: 5,6,7,8 → 56=7×8!"},
+      {q:"9 × 12 = ?",options:["99","108","116","98"],answer:"108",explanation:"10×12=120, subtract 12=108."},
+      {q:"12 × 11 = ?",options:["121","122","132","142"],answer:"132",explanation:"12×11=110+22=132."},
+      {q:"7 × 7 = ?",options:["42","47","49","56"],answer:"49",explanation:"7²=49."},
+      {q:"8 × 8 = ?",options:["56","62","64","72"],answer:"64",explanation:"8²=64."},
+      {q:"9 × 9 = ?",options:["72","81","84","90"],answer:"81",explanation:"9²=81. Finger trick: fold 9 → 8 left, 1 right!"},
+      {q:"12 × 12 = ?",options:["120","132","140","144"],answer:"144",explanation:"12×12=144."},
+      {q:"6 × 8 = ?",options:["42","48","54","56"],answer:"48",explanation:"6×8=48."},
+      {q:"11 × 7 = ?",options:["70","77","78","84"],answer:"77",explanation:"11×7: repeat the digit → 77."},
     ],
-    medium:[
-      {q:"What is 7 × 8?",          options:["54","56","63","48"],      answer:"56",   topic:"Times Tables",  explanation:"5,6,7,8 → 56=7×8! Sing it."},
-      {q:"What is ¾ of 40?",        options:["20","25","30","35"],      answer:"30",   topic:"Fractions",     explanation:"¼ of 40=10. ¾=3×10=30."},
-      {q:"What is 25% of 80?",      options:["16","20","25","40"],      answer:"20",   topic:"Percentages",   explanation:"25%=¼. 80÷4=20."},
-      {q:"Ratio 2:3 of £30. Larger share?", options:["£10","£12","£15","£18"], answer:"£18", topic:"Ratio", explanation:"5 parts. £6 each. 3×£6=£18."},
-      {q:"If x + 5 = 12, x = ?",    options:["5","6","7","8"],          answer:"7",    topic:"Algebra",       explanation:"x=12−5=7."},
-      {q:"Area of 8cm × 5cm rect?", options:["13cm²","26cm²","40cm²","80cm²"], answer:"40cm²", topic:"Geometry", explanation:"Area=length×width=8×5=40cm²."},
-      {q:"What is 9 × 12?",         options:["99","108","116","98"],    answer:"108",  topic:"Times Tables",  explanation:"10×12=120, subtract 12=108."},
-      {q:"Simplify 8/12.",          options:["4/8","2/3","3/4","1/2"],  answer:"2/3",  topic:"Fractions",     explanation:"HCF=4. 8÷4=2, 12÷4=3 → 2/3."},
-      {q:"Train: 09:15→11:45. Duration?", options:["1h30m","2h","2h30m","3h"], answer:"2h30m", topic:"Time", explanation:"09:15→11:15=2h, +30min=2h30m."},
-      {q:"What is 10% of 350?",     options:["3.5","25","35","50"],     answer:"35",   topic:"Percentages",   explanation:"350÷10=35."},
+    "Fractions":[
+      {q:"½ of 40?",options:["10","15","20","25"],answer:"20",explanation:"40÷2=20."},
+      {q:"¼ of 20?",options:["4","5","8","10"],answer:"5",explanation:"20÷4=5."},
+      {q:"¾ of 40?",options:["20","25","30","35"],answer:"30",explanation:"¼=10, so ¾=30."},
+      {q:"Simplify 8/12.",options:["4/8","2/3","3/4","1/2"],answer:"2/3",explanation:"HCF=4. 8÷4=2, 12÷4=3 → 2/3."},
+      {q:"¾ of a number = 36. Number?",options:["24","27","48","54"],answer:"48",explanation:"¼=12, whole=48."},
+      {q:"⅔ of 18?",options:["6","9","12","15"],answer:"12",explanation:"18÷3=6 (⅓). ×2=12."},
+      {q:"½ + ¼ = ?",options:["1/6","2/6","3/4","2/4"],answer:"3/4",explanation:"2/4+1/4=3/4."},
+      {q:"⅗ of 25?",options:["10","12","15","20"],answer:"15",explanation:"25÷5=5. 5×3=15."},
+      {q:"Simplify 15/20.",options:["3/5","5/6","3/4","4/5"],answer:"3/4",explanation:"HCF=5. 15÷5=3, 20÷5=4."},
+      {q:"2/3 + 1/6?",options:["3/9","1/2","5/6","4/6"],answer:"5/6",explanation:"4/6+1/6=5/6."},
+      {q:"1⅓ as improper fraction?",options:["3/4","4/3","2/3","5/3"],answer:"4/3",explanation:"1×3+1=4 → 4/3."},
+      {q:"½ × ¼ = ?",options:["1/2","1/4","1/6","1/8"],answer:"1/8",explanation:"Multiply tops and bottoms: 1×1=1, 2×4=8."},
     ],
-    hard:[
-      {q:"Sum of 3 consecutive numbers = 63. Smallest?", options:["19","20","21","22"], answer:"20", topic:"Algebra", explanation:"n+(n+1)+(n+2)=63 → 3n+3=63 → n=20."},
-      {q:"£80 jacket, 35% off. Sale price?", options:["£44","£48","£52","£56"], answer:"£52", topic:"Percentages", explanation:"35% of £80=£28. £80−£28=£52."},
-      {q:"OJ:lemonade=2:5. Total 350ml. Lemonade?", options:["100ml","150ml","200ml","250ml"], answer:"250ml", topic:"Ratio", explanation:"7 parts. 350÷7=50ml. 5×50=250ml."},
-      {q:"nth term of 5,8,11,14...?", options:["n+4","2n+3","3n+2","4n+1"], answer:"3n+2", topic:"Sequences", explanation:"Difference=3. n=1: 3+2=5 ✓"},
-      {q:"¾ of a number = 36. Number?", options:["24","27","48","54"],   answer:"48",   topic:"Fractions",     explanation:"¾=36 → ¼=12 → whole=48."},
-      {q:"£40→£50. % increase?",    options:["10%","20%","25%","30%"],  answer:"25%",  topic:"Percentages",   explanation:"Change=£10. (10÷40)×100=25%."},
-      {q:"Squares (all sizes) in 3×3 grid?", options:["9","12","14","16"], answer:"14", topic:"Shapes",        explanation:"9(1×1)+4(2×2)+1(3×3)=14."},
+    "Percentages":[
+      {q:"10% of 80?",options:["4","8","10","16"],answer:"8",explanation:"80÷10=8."},
+      {q:"25% of 80?",options:["16","20","25","40"],answer:"20",explanation:"25%=¼. 80÷4=20."},
+      {q:"10% of 350?",options:["3.5","25","35","50"],answer:"35",explanation:"350÷10=35."},
+      {q:"35% off £80?",options:["£44","£48","£52","£56"],answer:"£52",explanation:"35% of £80=£28. £80-£28=£52."},
+      {q:"£40→£50. % increase?",options:["10%","20%","25%","30%"],answer:"25%",explanation:"(10÷40)×100=25%."},
+      {q:"15% of 60?",options:["6","9","12","15"],answer:"9",explanation:"10%=6, 5%=3. 6+3=9."},
+      {q:"VAT 20% on £40?",options:["£4","£6","£8","£10"],answer:"£8",explanation:"20% of £40=£8."},
+      {q:"50% of 126?",options:["53","63","73","126"],answer:"63",explanation:"126÷2=63."},
+      {q:"£60→£75. % increase?",options:["15%","20%","25%","30%"],answer:"25%",explanation:"(15÷60)×100=25%."},
+      {q:"30% of 90?",options:["18","27","30","36"],answer:"27",explanation:"10%=9, 30%=27."},
+    ],
+    "Ratio & Proportion":[
+      {q:"Ratio 2:3 of £30. Larger?",options:["£10","£12","£15","£18"],answer:"£18",explanation:"5 parts, £6 each. 3×£6=£18."},
+      {q:"OJ:lemon=2:5. 350ml total. Lemon?",options:["100ml","150ml","200ml","250ml"],answer:"250ml",explanation:"7 parts, 50ml each. 5×50=250ml."},
+      {q:"Share £40 in 3:5. Smaller?",options:["£10","£12","£15","£20"],answer:"£15",explanation:"8 parts, £5 each. 3×£5=£15."},
+      {q:"Ratio 1:4. Total=25. Larger?",options:["5","10","15","20"],answer:"20",explanation:"5 parts. 25÷5=5. 4×5=20."},
+      {q:"Recipe for 4: 200g flour. For 6?",options:["250g","300g","350g","400g"],answer:"300g",explanation:"200÷4=50g/person. 6×50=300g."},
+      {q:"Map 1:50000. 3cm = ?",options:["1.5km","1km","2km","3km"],answer:"1.5km",explanation:"3×50000=150000cm=1.5km."},
+    ],
+    "Algebra":[
+      {q:"x + 5 = 12. x = ?",options:["5","6","7","8"],answer:"7",explanation:"x=12-5=7."},
+      {q:"3 consecutive = 63. Smallest?",options:["19","20","21","22"],answer:"20",explanation:"3n+3=63 → n=20."},
+      {q:"nth term 5,8,11,14?",options:["n+4","2n+3","3n+2","4n+1"],answer:"3n+2",explanation:"Diff=3. 3(1)+2=5 ✓"},
+      {q:"2x - 3 = 7. x = ?",options:["2","5","7","8"],answer:"5",explanation:"2x=10 → x=5."},
+      {q:"3x + 4 = 19. x = ?",options:["3","4","5","6"],answer:"5",explanation:"3x=15 → x=5."},
+      {q:"y=2x+1. x=4, y=?",options:["7","8","9","10"],answer:"9",explanation:"2×4+1=9."},
+      {q:"Expand 3(x+4)",options:["3x+4","3x+7","3x+12","x+12"],answer:"3x+12",explanation:"3×x=3x, 3×4=12."},
+      {q:"Solve x/3=4",options:["1.3","7","12","16"],answer:"12",explanation:"x=4×3=12."},
+      {q:"Factorise 2x+6",options:["x+3","2(x+3)","2x(3)","x(2+3)"],answer:"2(x+3)",explanation:"HCF=2."},
+      {q:"nth term n²+1: n=3?",options:["7","8","9","10"],answer:"10",explanation:"3²+1=10."},
+    ],
+    "Geometry":[
+      {q:"Perimeter of 5×3cm?",options:["8cm","13cm","15cm","16cm"],answer:"16cm",explanation:"2×(5+3)=16cm."},
+      {q:"Area of 8×5cm?",options:["13cm²","26cm²","40cm²","80cm²"],answer:"40cm²",explanation:"8×5=40cm²."},
+      {q:"Area of triangle base=6, h=4?",options:["10cm²","12cm²","24cm²","48cm²"],answer:"12cm²",explanation:"½×6×4=12cm²."},
+      {q:"Angles in triangle sum to?",options:["90°","180°","270°","360°"],answer:"180°",explanation:"Always 180°."},
+      {q:"Volume of cuboid 4×3×2?",options:["9","18","24","48"],answer:"24",explanation:"4×3×2=24cm³."},
+      {q:"Circumference r=7 (π≈3.14)?",options:["21.98","43.96","22","44"],answer:"43.96",explanation:"2πr=2×3.14×7=43.96."},
+      {q:"Area of circle r=5 (π≈3.14)?",options:["31.4","78.5","15.7","25"],answer:"78.5",explanation:"πr²=3.14×25=78.5."},
+      {q:"Interior angle of regular hexagon?",options:["108°","120°","135°","150°"],answer:"120°",explanation:"(6-2)×180÷6=120°."},
+      {q:"Triangle angles 60° and 70°. Third?",options:["40°","50°","60°","70°"],answer:"50°",explanation:"180-60-70=50°."},
+      {q:"Pythagoras: a=3, b=4. Hyp?",options:["5","6","7","8"],answer:"5",explanation:"√(9+16)=√25=5."},
+    ],
+    "Statistics":[
+      {q:"Mean of 3,5,7,9,1?",options:["4","5","6","7"],answer:"5",explanation:"Sum=25. 25÷5=5."},
+      {q:"Median of 2,5,1,8,4?",options:["2","4","5","8"],answer:"4",explanation:"Ordered: 1,2,4,5,8. Middle=4."},
+      {q:"Mode of 3,5,3,7,3,5?",options:["3","5","7","3 and 5"],answer:"3",explanation:"3 appears 3 times (most)."},
+      {q:"Range of 4,11,2,9,6?",options:["5","7","9","11"],answer:"9",explanation:"11-2=9."},
+      {q:"Mean of 10,20,30?",options:["15","20","25","30"],answer:"20",explanation:"60÷3=20."},
+      {q:"Mean=6, values: 3,7,?,9. Missing?",options:["3","4","5","6"],answer:"5",explanation:"Total=24. 3+7+9=19. Missing=5."},
+    ],
+    "Number Properties":[
+      {q:"Primes less than 20? Count them.",options:["6","7","8","9"],answer:"8",explanation:"2,3,5,7,11,13,17,19 = 8 primes."},
+      {q:"Factors of 24?",options:["6","8","10","12"],answer:"8",explanation:"1,2,3,4,6,8,12,24 = 8 factors."},
+      {q:"LCM of 4 and 6?",options:["8","10","12","24"],answer:"12",explanation:"4,8,12 and 6,12 → LCM=12."},
+      {q:"HCF of 12 and 18?",options:["3","4","6","9"],answer:"6",explanation:"Common factors: 1,2,3,6 → HCF=6."},
+      {q:"Is 91 prime?",options:["Yes","No — 7×13","No — 9×10","No — 11×8"],answer:"No — 7×13",explanation:"91=7×13. Always test to √n."},
+      {q:"3³ = ?",options:["6","9","18","27"],answer:"27",explanation:"3×3×3=27."},
+      {q:"√144 = ?",options:["11","12","13","14"],answer:"12",explanation:"12²=144."},
+      {q:"2⁵ = ?",options:["10","16","32","64"],answer:"32",explanation:"2×2×2×2×2=32."},
+    ],
+    "BOSS":[
+      {q:"7 × 8 = ?",options:["54","56","63","48"],answer:"56",explanation:"56=7×8!"},
+      {q:"25% of 80?",options:["16","20","25","40"],answer:"20",explanation:"80÷4=20."},
+      {q:"nth term 5,8,11,14?",options:["n+4","2n+3","3n+2","4n+1"],answer:"3n+2",explanation:"3n+2."},
+      {q:"35% off £80?",options:["£44","£48","£52","£56"],answer:"£52",explanation:"£80-£28=£52."},
+      {q:"Area triangle base=10, h=6?",options:["30cm²","60cm²","16cm²","20cm²"],answer:"30cm²",explanation:"½×10×6=30."},
+      {q:"Mean of 4,8,12,16?",options:["8","10","12","14"],answer:"10",explanation:"40÷4=10."},
+      {q:"3x+4=19. x=?",options:["3","4","5","6"],answer:"5",explanation:"3x=15, x=5."},
+      {q:"LCM of 4 and 6?",options:["8","10","12","24"],answer:"12",explanation:"LCM=12."},
+      {q:"Pythagoras: 3,4. Hyp?",options:["5","6","7","8"],answer:"5",explanation:"√25=5."},
+      {q:"¾ of a number=36. Number?",options:["24","27","48","54"],answer:"48",explanation:"¼=12, ×4=48."},
     ],
   },
   english:{
-    easy:[
-      {q:"Which sentence uses the correct punctuation?", options:["Its raining outside.","It's raining outside.","Its' raining outside.","Its raining, outside."], answer:"It's raining outside.", topic:"Punctuation", explanation:"'It's' is a contraction of 'it is'. Use an apostrophe to show where the letters are missing."},
-      {q:"What type of word is 'quickly'?", options:["Noun","Verb","Adjective","Adverb"], answer:"Adverb", topic:"Grammar", explanation:"Adverbs describe how something is done. 'Quickly' describes how you do an action."},
-      {q:"Which is the correct plural of 'child'?", options:["Childs","Childes","Children","Childrens"], answer:"Children", topic:"Spelling", explanation:"'Children' is an irregular plural — it doesn't follow the usual -s rule."},
-      {q:"What does the prefix 'un-' mean?", options:["Again","Not","Before","After"], answer:"Not", topic:"Vocabulary", explanation:"'Un-' means not. Unhappy=not happy, unkind=not kind."},
-      {q:"Which word is a synonym of 'brave'?", options:["Cowardly","Fearful","Courageous","Timid"], answer:"Courageous", topic:"Synonyms", explanation:"Courageous means showing bravery — it's a synonym of brave."},
-      {q:"What is a simile?", options:["A describing word","A comparison using 'like' or 'as'","A word that sounds like its meaning","A type of verb"], answer:"A comparison using 'like' or 'as'", topic:"Literacy", explanation:"Similes compare two things using 'like' or 'as'. E.g. 'as fast as lightning'."},
-      {q:"Which word is a noun?", options:["Run","Beautiful","Happiness","Quickly"], answer:"Happiness", topic:"Grammar", explanation:"Nouns are naming words — things, people, places, feelings. 'Happiness' is a noun."},
-      {q:"Correct spelling?", options:["Seperate","Separate","Seperate","Separete"], answer:"Separate", topic:"Spelling", explanation:"SEParate — remember: there's 'a rat' in separate!"},
+    "Grammar":[
+      {q:"Type of word: 'quickly'?",options:["Noun","Verb","Adjective","Adverb"],answer:"Adverb",explanation:"Adverbs describe HOW something is done."},
+      {q:"Which is a noun?",options:["Run","Beautiful","Happiness","Quickly"],answer:"Happiness",explanation:"Nouns are naming words — things, feelings, places."},
+      {q:"'He and I went' or 'Me and him went'?",options:["He and I went","Me and him went","Him and I went","Me and he went"],answer:"He and I went",explanation:"Subject pronouns: he, I (not me, him)."},
+      {q:"'Which was broken' is what clause?",options:["Main","Subordinate","Noun","Adverbial"],answer:"Subordinate",explanation:"Cannot stand alone — needs a main clause."},
+      {q:"'The cake was eaten.' Active or passive?",options:["Active","Passive","Neither","Both"],answer:"Passive",explanation:"'Was eaten' = passive voice — subject receives action."},
+      {q:"What is a conjunction?",options:["Naming word","Joining word","Describing word","Doing word"],answer:"Joining word",explanation:"Conjunctions join clauses: and, but, because, although."},
+      {q:"Which is an adjective?",options:["Swim","Gently","Enormous","Under"],answer:"Enormous",explanation:"Adjectives describe nouns. 'Enormous' = describing size."},
+      {q:"Verb in: 'The bird sang beautifully'?",options:["bird","sang","beautifully","The"],answer:"sang",explanation:"Verbs = doing/being words. 'Sang' is the action."},
     ],
-    medium:[
-      {q:"What is an oxymoron?", options:["A figure of speech using contradictory terms","A type of poem","A word with the same spelling but different meaning","A comparison without 'like'"], answer:"A figure of speech using contradictory terms", topic:"Literacy", explanation:"Oxymorons combine opposites for effect: 'deafening silence', 'bittersweet'."},
-      {q:"Which sentence is in the passive voice?", options:["The dog chased the cat.","The cat was chased by the dog.","The dog is chasing.","A dog chases cats."], answer:"The cat was chased by the dog.", topic:"Grammar", explanation:"In passive voice, the subject receives the action. 'Was chased' tells us the cat had something done to it."},
-      {q:"What does 'ambiguous' mean?", options:["Completely clear","Open to more than one meaning","Extremely difficult","Very long"], answer:"Open to more than one meaning", topic:"Vocabulary", explanation:"Ambiguous means unclear — it could be interpreted in more than one way."},
-      {q:"Which literary device is used in: 'The thunder roared'?", options:["Simile","Metaphor","Personification","Alliteration"], answer:"Personification", topic:"Literacy", explanation:"Personification gives human qualities to non-human things. Thunder can't actually roar."},
-      {q:"What is the root of 'transportation'?", options:["Trans","Port","Ation","Sport"], answer:"Port", topic:"Vocabulary", explanation:"'Port' (Latin: portare) means to carry. Transport = carry across."},
-      {q:"Correct sentence?", options:["Me and him went to the shop.","Him and me went to the shop.","He and I went to the shop.","I and him went to the shop."], answer:"He and I went to the shop.", topic:"Grammar", explanation:"Use 'he' and 'I' when they are the subject of the sentence."},
-      {q:"What type of clause is 'which was broken'?", options:["Main clause","Subordinate clause","Noun clause","Adverbial clause"], answer:"Subordinate clause", topic:"Grammar", explanation:"A subordinate clause cannot stand alone — it depends on a main clause to make sense."},
+    "Punctuation":[
+      {q:"'Its raining' or 'It's raining'?",options:["Its raining","It's raining","Its' raining","Its, raining"],answer:"It's raining",explanation:"It's = it is. Apostrophe shows missing letter."},
+      {q:"One dog's lead — correct?",options:["dogs' lead","dog's lead","dogs's lead","dogs lead"],answer:"dog's lead",explanation:"One dog = dog's. Apostrophe before the s."},
+      {q:"Several boys' coats — correct?",options:["boy's coats","boys' coats","boys's coats","boys coats"],answer:"boys' coats",explanation:"Plural already has s → apostrophe after."},
+      {q:"Correct colon use?",options:["I need: to go","I need: milk, eggs","I: need milk","I need milk:"],answer:"I need: milk, eggs",explanation:"Colon introduces a list or explanation."},
+      {q:"Where does comma go: 'Although she was tired she kept going'?",options:["After tired","After she","After was","No comma"],answer:"After tired",explanation:"Comma after the subordinate clause."},
+      {q:"Correct speech marks?",options:["He said 'stop'","He said, 'Stop.'","He said 'Stop','","He said Stop."],answer:"He said, 'Stop.'",explanation:"Comma before speech, full stop inside marks."},
     ],
-    hard:[
-      {q:"What is the effect of starting sentences with 'But' or 'And'?", options:["It is always incorrect","It creates emphasis and informal tone","It makes writing more formal","It is only used in poetry"], answer:"It creates emphasis and informal tone", topic:"Literacy", explanation:"Starting with 'But' or 'And' can create emphasis and a conversational feel — a deliberate stylistic choice."},
-      {q:"'The soldier was like a lion in battle.' This is a:", options:["Metaphor","Simile","Hyperbole","Personification"], answer:"Simile", topic:"Literacy", explanation:"This uses 'like' to compare — making it a simile, not a metaphor."},
-      {q:"What does 'pedantic' mean?", options:["Rude and arrogant","Overly concerned with minor details","Extremely creative","Very lazy"], answer:"Overly concerned with minor details", topic:"Vocabulary", explanation:"A pedantic person focuses excessively on small, unimportant rules or details."},
-      {q:"Which word best completes: 'Despite being _____, she smiled.'?", options:["joyful","ecstatic","exhausted","energetic"], answer:"exhausted", topic:"Comprehension", explanation:"'Despite' signals a contrast. Smiling despite being exhausted creates a meaningful contrast."},
-      {q:"What is the tone of: 'The empty street echoed with silence'?", options:["Joyful","Mysterious/melancholic","Angry","Humorous"], answer:"Mysterious/melancholic", topic:"Literacy", explanation:"'Empty', 'echoed', and 'silence' all create a lonely, atmospheric tone."},
+    "Vocabulary":[
+      {q:"Prefix 'un-' means?",options:["Again","Not","Before","After"],answer:"Not",explanation:"Un- = not. Unhappy = not happy."},
+      {q:"'Ambiguous' means?",options:["Clear","Open to more than one meaning","Difficult","Very long"],answer:"Open to more than one meaning",explanation:"Ambiguous = could be interpreted multiple ways."},
+      {q:"Root word of 'transportation'?",options:["Trans","Port","Ation","Sport"],answer:"Port",explanation:"Port = carry (Latin: portare)."},
+      {q:"'Pedantic' means?",options:["Rude","Overly focused on minor details","Creative","Lazy"],answer:"Overly focused on minor details",explanation:"Pedantic = obsessive about small rules."},
+      {q:"Synonym of 'brave'?",options:["Cowardly","Fearful","Courageous","Timid"],answer:"Courageous",explanation:"Courageous = brave. Same meaning."},
+      {q:"Prefix 'bi-' means?",options:["One","Two","Three","Half"],answer:"Two",explanation:"Bi- = two. Bicycle = two wheels."},
+      {q:"'Benevolent' means?",options:["Evil","Kind/generous","Clever","Lazy"],answer:"Kind/generous",explanation:"Bene = good. Benevolent = well-meaning."},
+      {q:"Suffix '-ology' means?",options:["Fear of","Study of","Lack of","Full of"],answer:"Study of",explanation:"Biology = study of life. Geology = study of earth."},
+    ],
+    "Literary Devices":[
+      {q:"What is a simile?",options:["Describing word","Comparison using like/as","Sound like its meaning","Verb type"],answer:"Comparison using like/as",explanation:"'Fast as lightning' = simile."},
+      {q:"'The thunder roared.' Which device?",options:["Simile","Metaphor","Personification","Alliteration"],answer:"Personification",explanation:"Thunder given human quality = personification."},
+      {q:"What is an oxymoron?",options:["Contradictory terms","A poem type","Homophone","Verb form"],answer:"Contradictory terms",explanation:"'Deafening silence' = oxymoron."},
+      {q:"'Soldier like a lion.' This is?",options:["Metaphor","Simile","Hyperbole","Personification"],answer:"Simile",explanation:"Uses 'like' = simile."},
+      {q:"Tone of 'The empty street echoed with silence'?",options:["Joyful","Mysterious/melancholic","Angry","Humorous"],answer:"Mysterious/melancholic",explanation:"'Empty', 'echoed', 'silence' = lonely atmosphere."},
+      {q:"'Peter Piper picked a peck...' is?",options:["Assonance","Alliteration","Onomatopoeia","Metaphor"],answer:"Alliteration",explanation:"Repeated 'p' sound = alliteration."},
+      {q:"'The wind whispered.' This is?",options:["Simile","Metaphor","Personification","Hyperbole"],answer:"Personification",explanation:"Wind given human action (whispered)."},
+      {q:"'I've told you a million times!' is?",options:["Fact","Simile","Metaphor","Hyperbole"],answer:"Hyperbole",explanation:"Exaggeration for effect = hyperbole."},
+    ],
+    "BOSS":[
+      {q:"Which is a noun?",options:["Run","Quickly","Happiness","Beautiful"],answer:"Happiness",explanation:"Nouns = naming words."},
+      {q:"'It's raining' apostrophe means?",options:["Possession","Contraction","Plural","Emphasis"],answer:"Contraction",explanation:"It's = it is."},
+      {q:"'The thunder roared.' Device?",options:["Simile","Metaphor","Personification","Alliteration"],answer:"Personification",explanation:"Human action given to thunder."},
+      {q:"Root of 'transportation'?",options:["Trans","Port","Ation","Sport"],answer:"Port",explanation:"Port = carry."},
+      {q:"'He and I went' — correct?",options:["Yes","No, say 'Me and him'","No, say 'Him and I'","No, say 'I and him'"],answer:"Yes",explanation:"He and I = subject pronouns ✓"},
+      {q:"'Peter Piper picked...' is?",options:["Assonance","Alliteration","Onomatopoeia","Simile"],answer:"Alliteration",explanation:"Repeated p sound."},
+      {q:"'I've told you a million times!' is?",options:["Fact","Simile","Metaphor","Hyperbole"],answer:"Hyperbole",explanation:"Exaggeration for effect."},
+      {q:"Which clause can stand alone?",options:["Because she ran","When it rained","The dog barked","Although tired"],answer:"The dog barked",explanation:"Main clause = stands alone."},
     ],
   },
   verbal:{
-    easy:[
-      {q:"Which word means the same as HAPPY?",       options:["Sad","Joyful","Angry","Tired"],          answer:"Joyful",   topic:"Synonyms",    explanation:"Joyful = very happy. Synonyms have the same meaning."},
-      {q:"Opposite of BIG?",                          options:["Large","Huge","Small","Wide"],           answer:"Small",    topic:"Antonyms",    explanation:"Big and small are opposites (antonyms)."},
-      {q:"Dog : Puppy :: Cat : ___",                  options:["Kitten","Cub","Foal","Lamb"],            answer:"Kitten",   topic:"Analogies",   explanation:"Puppy=baby dog. Kitten=baby cat."},
-      {q:"Odd one out: Robin, Sparrow, Penguin, Eagle",options:["Robin","Sparrow","Penguin","Eagle"],    answer:"Penguin",  topic:"Odd One Out", explanation:"Robin, Sparrow, Eagle fly. Penguins cannot!"},
-      {q:"Correctly spelled?",                        options:["Recieve","Achieve","Beleive","Freind"],  answer:"Achieve",  topic:"Spelling",    explanation:"i before e except after c. Achieve ✓"},
-      {q:"Next: A, C, E, G, ___",                     options:["H","I","J","K"],                        answer:"I",        topic:"Sequences",   explanation:"Skip one letter: A(B)C(D)E(F)G(H)I."},
-      {q:"Which word means the same as SAD?",         options:["Gleeful","Mournful","Cheerful","Elated"], answer:"Mournful", topic:"Synonyms",   explanation:"Mournful means full of sorrow — a synonym for sad."},
+    "Synonyms & Antonyms":[
+      {q:"Synonym of HAPPY?",options:["Sad","Joyful","Angry","Tired"],answer:"Joyful",explanation:"Joyful = very happy."},
+      {q:"Synonym of ENORMOUS?",options:["Tiny","Average","Huge","Narrow"],answer:"Huge",explanation:"Enormous = huge."},
+      {q:"Most similar to METICULOUS?",options:["Careless","Precise","Hasty","Vague"],answer:"Precise",explanation:"Meticulous = very careful."},
+      {q:"Antonym of BENEVOLENT?",options:["Kind","Generous","Malevolent","Brave"],answer:"Malevolent",explanation:"Benevolent=kind. Malevolent=evil."},
+      {q:"Antonym of ANCIENT?",options:["Old","Historic","Modern","Aged"],answer:"Modern",explanation:"Ancient=old. Opposite=modern."},
+      {q:"Antonym of TRANSPARENT?",options:["Clear","Bright","Opaque","Shiny"],answer:"Opaque",explanation:"Transparent↔Opaque."},
+      {q:"Synonym of COURAGEOUS?",options:["Timid","Valiant","Fearful","Weak"],answer:"Valiant",explanation:"Valiant = brave/courageous."},
+      {q:"Antonym of SUMMIT?",options:["Top","Peak","Valley","Hill"],answer:"Valley",explanation:"Summit=top. Opposite=valley."},
+      {q:"Synonym of MELANCHOLY?",options:["Joyful","Cheerful","Sorrowful","Energetic"],answer:"Sorrowful",explanation:"Melancholy = deep sadness."},
+      {q:"Antonym of TURBULENT?",options:["Stormy","Chaotic","Calm","Violent"],answer:"Calm",explanation:"Turbulent=rough. Opposite=calm."},
     ],
-    medium:[
-      {q:"Opposite of ANCIENT?",                     options:["Old","Historic","Modern","Aged"],         answer:"Modern",   topic:"Antonyms",    explanation:"Ancient=very old. Opposite=modern."},
-      {q:"If CAT=DBU, what is DOG?",                  options:["CPH","EPH","ENH","EPI"],                answer:"EPH",      topic:"Codes",       explanation:"+1 each letter: D→E, O→P, G→H=EPH."},
-      {q:"Book : Library :: Painting : ___",          options:["School","Gallery","Museum","Theatre"],   answer:"Gallery",  topic:"Analogies",   explanation:"Books in library. Paintings in gallery."},
-      {q:"Next: Z, X, V, T, ___",                     options:["P","Q","R","S"],                        answer:"R",        topic:"Sequences",   explanation:"Backwards, skip one: Z(Y)X(W)V(U)T(S)R."},
-      {q:"Odd one out: Triangle, Circle, Square, Pyramid",options:["Triangle","Circle","Square","Pyramid"],answer:"Pyramid",topic:"Odd One Out", explanation:"Triangle/Circle/Square=2D. Pyramid=3D."},
-      {q:"Synonym of ENORMOUS?",                      options:["Tiny","Average","Huge","Narrow"],        answer:"Huge",     topic:"Synonyms",    explanation:"Enormous=very large=huge."},
-      {q:"If A=1,B=2... what does 2-5-4 spell?",     options:["BED","CAT","ACE","BAD"],                 answer:"BED",      topic:"Codes",       explanation:"B=2, E=5, D=4 → BED."},
+    "Analogies":[
+      {q:"Dog : Puppy :: Cat : ?",options:["Kitten","Cub","Foal","Lamb"],answer:"Kitten",explanation:"Puppy=baby dog. Kitten=baby cat."},
+      {q:"Book : Library :: Painting : ?",options:["School","Gallery","Museum","Theatre"],answer:"Gallery",explanation:"Books live in library. Paintings in gallery."},
+      {q:"Scalpel : Surgeon :: Gavel : ?",options:["Builder","Judge","Teacher","Artist"],answer:"Judge",explanation:"Tool of the profession."},
+      {q:"Bird : Flock :: Fish : ?",options:["Pack","Swarm","Shoal","Herd"],answer:"Shoal",explanation:"Group of fish = shoal."},
+      {q:"Hot : Cold :: Light : ?",options:["Sun","Bright","Heavy","Dark"],answer:"Heavy",explanation:"Hot↔Cold. Light↔Heavy."},
+      {q:"King : Queen :: Prince : ?",options:["King","Duke","Princess","Duchess"],answer:"Princess",explanation:"Male→Female equivalent."},
+      {q:"Pen : Write :: Knife : ?",options:["Cook","Cut","Eat","Sharp"],answer:"Cut",explanation:"A pen writes. A knife cuts."},
+      {q:"Glove : Hand :: Boot : ?",options:["Leg","Foot","Shoe","Sock"],answer:"Foot",explanation:"Glove covers hand. Boot covers foot."},
     ],
-    hard:[
-      {q:"Most similar to METICULOUS?",               options:["Careless","Precise","Hasty","Vague"],    answer:"Precise",  topic:"Synonyms",    explanation:"Meticulous=very careful and precise."},
-      {q:"Antonym of BENEVOLENT?",                    options:["Kind","Generous","Malevolent","Brave"],  answer:"Malevolent",topic:"Antonyms",   explanation:"Benevolent=good/kind. Malevolent=evil/wishing harm."},
-      {q:"Next: A, D, G, J, ___",                     options:["K","L","M","N"],                        answer:"M",        topic:"Sequences",   explanation:"+3 positions: A→D→G→J→M."},
-      {q:"Scalpel : Surgeon :: Gavel : ___",          options:["Builder","Judge","Teacher","Artist"],    answer:"Judge",    topic:"Analogies",   explanation:"A scalpel is a surgeon's tool. A gavel is a judge's tool."},
-      {q:"Antonym of TRANSPARENT?",                   options:["Clear","Bright","Opaque","Shiny"],       answer:"Opaque",   topic:"Antonyms",    explanation:"Transparent=see-through. Opaque=cannot see through."},
+    "Codes & Ciphers":[
+      {q:"If CAT=DBU, what is DOG?",options:["CPH","EPH","ENH","EPI"],answer:"EPH",explanation:"+1 each letter: D→E, O→P, G→H."},
+      {q:"A=1, B=2... 2-5-4 spells?",options:["BED","CAT","ACE","BAD"],answer:"BED",explanation:"B=2, E=5, D=4."},
+      {q:"If FISH=GJTI, what is CAT?",options:["DBU","CBT","DAV","EBU"],answer:"DBU",explanation:"+1 each: C→D, A→B, T→U."},
+      {q:"Mirror code A=Z, B=Y... D=?",options:["W","X","Y","V"],answer:"W",explanation:"D is 4th. From end: Z,Y,X,W → D=W."},
+      {q:"If BIG=AHF, what is CAT?",options:["BZS","BAT","BZU","DZS"],answer:"BZS",explanation:"-1 each: C→B, A→Z, T→S."},
+    ],
+    "Sequences":[
+      {q:"Next: A, C, E, G, ?",options:["H","I","J","K"],answer:"I",explanation:"Skip one letter each time."},
+      {q:"Next: Z, X, V, T, ?",options:["P","Q","R","S"],answer:"R",explanation:"Backwards, skip one."},
+      {q:"Next: A, D, G, J, ?",options:["K","L","M","N"],answer:"M",explanation:"+3 letters each time."},
+      {q:"Odd one out: Triangle, Circle, Square, Pyramid?",options:["Triangle","Circle","Square","Pyramid"],answer:"Pyramid",explanation:"Only 3D shape."},
+      {q:"Odd one out: Robin, Sparrow, Penguin, Eagle?",options:["Robin","Sparrow","Penguin","Eagle"],answer:"Penguin",explanation:"Only one that can't fly."},
+      {q:"Next: 2, 6, 18, 54, ?",options:["108","162","81","72"],answer:"162",explanation:"×3 each time. 54×3=162."},
+      {q:"Next: AZ, BY, CX, ?",options:["DV","DW","EW","EV"],answer:"DW",explanation:"Forward A→D + Backward Z→W."},
+    ],
+    "BOSS":[
+      {q:"Dog : Puppy :: Cat : ?",options:["Kitten","Cub","Foal","Lamb"],answer:"Kitten",explanation:"Baby cat = kitten."},
+      {q:"Antonym of BENEVOLENT?",options:["Kind","Generous","Malevolent","Brave"],answer:"Malevolent",explanation:"Benevolent=kind, Malevolent=evil."},
+      {q:"If CAT=DBU, what is DOG?",options:["CPH","EPH","ENH","EPI"],answer:"EPH",explanation:"+1 each letter."},
+      {q:"Next: A, D, G, J, ?",options:["K","L","M","N"],answer:"M",explanation:"+3 each time."},
+      {q:"Synonym of ENORMOUS?",options:["Tiny","Average","Huge","Narrow"],answer:"Huge",explanation:"Enormous=huge."},
+      {q:"Odd one out: Triangle, Circle, Square, Pyramid?",options:["Triangle","Circle","Square","Pyramid"],answer:"Pyramid",explanation:"Only 3D."},
+      {q:"Scalpel : Surgeon :: Gavel : ?",options:["Builder","Judge","Teacher","Artist"],answer:"Judge",explanation:"Tool of profession."},
+      {q:"Antonym of TRANSPARENT?",options:["Clear","Bright","Opaque","Shiny"],answer:"Opaque",explanation:"Transparent↔Opaque."},
     ],
   },
   nvr:{
-    easy:[
-      {q:"How many sides does a hexagon have?",  options:["5","6","7","8"],               answer:"6",  topic:"Shapes",    explanation:"Hex=6. Hexagon=6 sides. Like a honeycomb!"},
-      {q:"How many faces does a cube have?",     options:["4","5","6","8"],               answer:"6",  topic:"3D Shapes", explanation:"Top, bottom, front, back, left, right = 6 faces."},
-      {q:"Which shape has all equal sides AND all equal angles?", options:["Rectangle","Rhombus","Square","Trapezium"], answer:"Square", topic:"Shapes", explanation:"A square has 4 equal sides and 4 right angles (90°)."},
-      {q:"If you rotate a square 90°, what do you get?", options:["Rectangle","Triangle","Square","Pentagon"], answer:"Square", topic:"Rotation", explanation:"A square looks the same after 90° rotation — rotational symmetry of order 4."},
-      {q:"How many lines of symmetry does a circle have?", options:["0","1","4","Infinite"], answer:"Infinite", topic:"Symmetry", explanation:"Any line through the centre of a circle is a line of symmetry — infinite lines!"},
-      {q:"What is the next shape: circle, square, triangle, circle, square, ___?", options:["Circle","Square","Triangle","Hexagon"], answer:"Triangle", topic:"Patterns", explanation:"The pattern repeats every 3 shapes: circle, square, triangle."},
+    "2D Shapes":[
+      {q:"Sides on a hexagon?",options:["5","6","7","8"],answer:"6",explanation:"Hex=6."},
+      {q:"Lines of symmetry in a square?",options:["2","3","4","8"],answer:"4",explanation:"2 straight + 2 diagonal = 4."},
+      {q:"Rotational order of a square?",options:["2","4","6","8"],answer:"4",explanation:"Looks same at 90°, 180°, 270°, 360°."},
+      {q:"Lines of symmetry in equilateral triangle?",options:["0","1","2","3"],answer:"3",explanation:"3 equal sides = 3 lines."},
+      {q:"Sides on octagon?",options:["6","7","8","9"],answer:"8",explanation:"Octa=8."},
+      {q:"Interior angle of equilateral triangle?",options:["45°","60°","90°","120°"],answer:"60°",explanation:"180°÷3=60°."},
+      {q:"Interior angle of square?",options:["45°","60°","90°","120°"],answer:"90°",explanation:"All corners = right angles."},
+      {q:"Diagonals of a pentagon?",options:["4","5","6","7"],answer:"5",explanation:"Pentagon has 5 diagonals."},
     ],
-    medium:[
-      {q:"How many edges does a cuboid have?",   options:["8","10","12","14"],            answer:"12", topic:"3D Shapes", explanation:"A cuboid has 12 edges: 4 on top, 4 on bottom, 4 vertical."},
-      {q:"A shape has 5 faces, 8 edges, 5 vertices. What is it?", options:["Cube","Cylinder","Square-based pyramid","Triangular prism"], answer:"Square-based pyramid", topic:"3D Shapes", explanation:"Square base (1) + 4 triangular faces=5 faces."},
-      {q:"Which transformation preserves size and shape?", options:["Enlargement","Reflection","Distortion","Shearing"], answer:"Reflection", topic:"Transformations", explanation:"Reflection, rotation, and translation all preserve size and shape."},
-      {q:"A pattern goes: 2 dots, 4 dots, 8 dots. Next?", options:["10","12","16","20"], answer:"16",  topic:"Patterns",  explanation:"Each term doubles: 2→4→8→16. Geometric sequence."},
-      {q:"Lines of symmetry in an equilateral triangle?", options:["0","1","2","3"], answer:"3", topic:"Symmetry", explanation:"An equilateral triangle has 3 equal sides and 3 lines of symmetry."},
-      {q:"If a square is reflected in a vertical mirror line, the result is:", options:["A rectangle","The same square","A rhombus","A parallelogram"], answer:"The same square", topic:"Transformations", explanation:"A square reflected in any axis of symmetry looks identical."},
+    "Symmetry & Reflection":[
+      {q:"Circle lines of symmetry?",options:["0","1","4","Infinite"],answer:"Infinite",explanation:"Any line through centre = line of symmetry."},
+      {q:"Arrow points RIGHT, reflected vertically. Now points?",options:["Right","Left","Up","Down"],answer:"Left",explanation:"Vertical reflection flips left↔right."},
+      {q:"Rectangle lines of symmetry?",options:["1","2","4","0"],answer:"2",explanation:"Across and down — not diagonals."},
+      {q:"Point 3 squares left of mirror. Reflection?",options:["3 left","3 right","3 up","3 down"],answer:"3 right",explanation:"Equal distance, opposite side."},
+      {q:"Rotational order of equilateral triangle?",options:["1","2","3","6"],answer:"3",explanation:"Looks same 3× in 360°."},
+      {q:"Shape with rotational order 6?",options:["Square","Pentagon","Hexagon","Octagon"],answer:"Hexagon",explanation:"Regular hexagon: same every 60°."},
     ],
-    hard:[
-      {q:"Euler's formula: F + V − E = ? for any polyhedron", options:["1","2","3","4"], answer:"2",   topic:"3D Shapes",  explanation:"Euler's formula: Faces + Vertices − Edges = 2 for all convex polyhedra."},
-      {q:"Row 1: △○□  Row 2: ○□△  Row 3: □△○  Row 4: ?", options:["△○□","○□△","□△○","△□○"], answer:"△○□", topic:"Matrices", explanation:"The pattern rotates left each row. After △○□→○□△→□△○, it returns to △○□."},
-      {q:"How many faces does a dodecahedron have?", options:["10","12","20","24"],       answer:"12",  topic:"3D Shapes",  explanation:"A dodecahedron has 12 pentagonal faces. Dodeca=12."},
-      {q:"Which net CANNOT fold into a cube?", options:["A cross of 6 squares","A T-shape of 6 squares","An L-shape of 6 squares","A 2×3 grid of 6 squares"], answer:"A 2×3 grid of 6 squares", topic:"Nets", explanation:"A 2×3 grid cannot fold into a cube — opposite faces won't meet correctly."},
+    "Patterns & Matrices":[
+      {q:"2, 4, 8, 16, ?",options:["18","20","32","24"],answer:"32",explanation:"Doubles each time."},
+      {q:"R1:△○□ R2:○□△ R3:□△○ R4:?",options:["△○□","○□△","□△○","△□○"],answer:"△○□",explanation:"Rotates left each row, cycles every 3."},
+      {q:"Pattern: ●○●○●○ Next?",options:["●","○","●○","○●"],answer:"●",explanation:"Alternating: next is ●."},
+      {q:"1, 4, 9, 16, ?",options:["20","25","36","30"],answer:"25",explanation:"Square numbers: 5²=25."},
+      {q:"Triangle 1 has 3 small ▲. 3 Triangles have?",options:["6","7","8","9"],answer:"9",explanation:"3×3=9."},
+      {q:"Triangle numbers: 1,3,6,10,?",options:["13","14","15","16"],answer:"15",explanation:"Add 5 to 10 = 15."},
+    ],
+    "3D Shapes":[
+      {q:"Faces on a cube?",options:["4","5","6","8"],answer:"6",explanation:"Top,bottom,front,back,left,right=6."},
+      {q:"Edges on a cuboid?",options:["8","10","12","14"],answer:"12",explanation:"4+4+4=12."},
+      {q:"Euler: F+V-E = ?",options:["1","2","3","4"],answer:"2",explanation:"Always 2 for convex polyhedra."},
+      {q:"Faces on a dodecahedron?",options:["10","12","20","24"],answer:"12",explanation:"Dodeca=12."},
+      {q:"5 faces, 8 edges, 5 vertices. Shape?",options:["Cube","Cylinder","Square pyramid","Triangular prism"],answer:"Square pyramid",explanation:"Square base + 4 triangles = 5 faces."},
+      {q:"Vertices of a triangular prism?",options:["4","5","6","8"],answer:"6",explanation:"2 triangular ends × 3 = 6 vertices."},
+    ],
+    "BOSS":[
+      {q:"Lines of symmetry in a square?",options:["2","3","4","8"],answer:"4",explanation:"4 lines."},
+      {q:"Faces on a cube?",options:["4","5","6","8"],answer:"6",explanation:"6 faces."},
+      {q:"2,4,8,16,?",options:["18","20","32","24"],answer:"32",explanation:"×2 each time."},
+      {q:"Circle lines of symmetry?",options:["0","1","4","Infinite"],answer:"Infinite",explanation:"Infinite."},
+      {q:"Euler: F+V-E=?",options:["1","2","3","4"],answer:"2",explanation:"Always 2."},
+      {q:"R1:△○□ R4:?",options:["△○□","○□△","□△○","△□○"],answer:"△○□",explanation:"Cycles every 3 rows."},
+      {q:"Edges on a cuboid?",options:["8","10","12","14"],answer:"12",explanation:"12."},
+      {q:"5 faces, 8 edges, 5 vertices. Shape?",options:["Cube","Cylinder","Square pyramid","Triangular prism"],answer:"Square pyramid",explanation:"Square pyramid."},
     ],
   },
 };
 
-// ─── AI TUTOR TOPICS ──────────────────────────────────────────────────────────
-const AI_TUTOR_TOPICS = [
-  { id:"times-tables",  subject:"maths",   icon:"✖️",  title:"Times Tables",          intro:"Times tables are the foundation of all maths. Let's master every trick." },
-  { id:"fractions",     subject:"maths",   icon:"½",   title:"Fractions",             intro:"Fractions trip up loads of students — not for long. Step-by-step from basics." },
-  { id:"percentages",   subject:"maths",   icon:"％",  title:"Percentages",           intro:"Percentages are everywhere in the 11+ — let me teach you the shortcuts." },
-  { id:"ratio",         subject:"maths",   icon:"⚖️",  title:"Ratio & Proportion",    intro:"Ratio questions follow a simple method every time. I'll show you exactly how." },
-  { id:"algebra",       subject:"maths",   icon:"🔣",  title:"Algebra & Sequences",   intro:"Algebra is just puzzles. I'll build up from basics to full confidence." },
-  { id:"geometry",      subject:"maths",   icon:"📐",  title:"Geometry & Shapes",     intro:"Area, perimeter, angles, 3D — clear explanations and examples throughout." },
-  { id:"punctuation",   subject:"english", icon:"✏️",  title:"Punctuation",           intro:"Apostrophes, commas, colons — every rule taught clearly." },
-  { id:"grammar",       subject:"english", icon:"📝",  title:"Grammar",               intro:"Nouns, verbs, clauses, active/passive — the backbone of English." },
-  { id:"vocabulary",    subject:"english", icon:"📚",  title:"Vocabulary & Roots",    intro:"Word roots, prefixes, suffixes — work out words you've never seen." },
-  { id:"literacy",      subject:"english", icon:"🖊️",  title:"Literary Devices",      intro:"Similes, metaphors, personification — spot them and explain them." },
-  { id:"synonyms",      subject:"verbal",  icon:"🔄",  title:"Synonyms & Antonyms",   intro:"Learn words in families and never get tripped up again." },
-  { id:"analogies",     subject:"verbal",  icon:"🔗",  title:"Analogies",             intro:"The method for cracking any analogy — simpler than it looks!" },
-  { id:"codes",         subject:"verbal",  icon:"🔐",  title:"Codes & Sequences",     intro:"Every type of code that appears in the 11+ — learn to crack them fast." },
-  { id:"odd-one-out",   subject:"verbal",  icon:"🎯",  title:"Odd One Out",           intro:"Strategies to find what doesn't belong — every single time." },
-  { id:"symmetry",      subject:"nvr",     icon:"🔄",  title:"Symmetry & Reflection", intro:"Lines of symmetry, reflections, and how to spot them in any shape." },
-  { id:"patterns",      subject:"nvr",     icon:"🔲",  title:"Patterns & Matrices",   intro:"Identify rules in sequences and matrices — the core NVR skill." },
-  { id:"3d-shapes",     subject:"nvr",     icon:"🧊",  title:"3D Shapes & Nets",      intro:"Faces, edges, vertices and nets — visualise 3D on paper like an expert." },
-  { id:"transformations",subject:"nvr",   icon:"↩️",  title:"Transformations",        intro:"Rotation, reflection, translation — step-by-step for every type." },
+// ─── WORLDS ───────────────────────────────────────────────────────────────────
+const WORLDS=[
+  {id:"maths",  name:"Math Mountain",      icon:"⛰️",colour:"#4F46E5",gradient:"linear-gradient(135deg,#4F46E5,#7C3AED)",desc:"Master numbers, algebra & beyond",       unlockLevel:1,
+   missions:[
+    {id:"m_tables",name:"Times Tables",     icon:"✖️",topic:"Times Tables",       xp:60, coins:12,questions:6, trick:"t_nine"},
+    {id:"m_fracs", name:"Fraction Forest",  icon:"½", topic:"Fractions",          xp:60, coins:12,questions:6, trick:"t_fracs"},
+    {id:"m_pct",   name:"Percent Peak",     icon:"％",topic:"Percentages",        xp:80, coins:15,questions:6, trick:"t_pct"},
+    {id:"m_ratio", name:"Ratio Ridge",      icon:"⚖️",topic:"Ratio & Proportion", xp:80, coins:15,questions:6, trick:"t_ratio"},
+    {id:"m_alg",   name:"Algebra Alps",     icon:"🔣",topic:"Algebra",            xp:100,coins:18,questions:6, trick:"t_alg"},
+    {id:"m_geo",   name:"Geometry Gorge",   icon:"📐",topic:"Geometry",           xp:100,coins:18,questions:6},
+    {id:"m_stats", name:"Stats Summit",     icon:"📊",topic:"Statistics",         xp:100,coins:18,questions:6},
+    {id:"m_num",   name:"Number Nexus",     icon:"🔢",topic:"Number Properties",  xp:100,coins:18,questions:6},
+    {id:"m_boss",  name:"⚔️ Summit Boss",   icon:"👹",topic:"BOSS",               xp:250,coins:60,questions:10,isBoss:true},
+   ]},
+  {id:"english",name:"English Forest",     icon:"🌲",colour:"#059669",gradient:"linear-gradient(135deg,#059669,#047857)",desc:"Conquer grammar, vocabulary & writing",unlockLevel:3,
+   missions:[
+    {id:"e_gram",  name:"Grammar Grove",    icon:"📝",topic:"Grammar",            xp:60, coins:12,questions:6, trick:"t_gram"},
+    {id:"e_punct", name:"Punctuation Path", icon:"✏️",topic:"Punctuation",        xp:60, coins:12,questions:6, trick:"t_apos"},
+    {id:"e_vocab", name:"Vocab Valley",     icon:"📚",topic:"Vocabulary",         xp:80, coins:15,questions:6, trick:"t_roots"},
+    {id:"e_lit",   name:"Literary Lake",    icon:"🖊️",topic:"Literary Devices",   xp:80, coins:15,questions:6},
+    {id:"e_boss",  name:"⚔️ Forest Boss",   icon:"🐉",topic:"BOSS",               xp:250,coins:60,questions:8, isBoss:true},
+   ]},
+  {id:"verbal", name:"Word Wizard Tower",  icon:"🗼",colour:"#D97706",gradient:"linear-gradient(135deg,#D97706,#B45309)",desc:"Decode language and master reasoning",unlockLevel:5,
+   missions:[
+    {id:"v_syn",   name:"Synonym Spire",    icon:"🔄",topic:"Synonyms & Antonyms",xp:60, coins:12,questions:6, trick:"t_syns"},
+    {id:"v_ana",   name:"Analogy Arena",    icon:"🔗",topic:"Analogies",          xp:80, coins:15,questions:6, trick:"t_ana"},
+    {id:"v_codes", name:"Code Cavern",      icon:"🔐",topic:"Codes & Ciphers",    xp:80, coins:15,questions:5, trick:"t_codes"},
+    {id:"v_seq",   name:"Sequence Stairs",  icon:"🔢",topic:"Sequences",          xp:100,coins:18,questions:6, trick:"t_seq"},
+    {id:"v_boss",  name:"⚔️ Wizard Boss",   icon:"🧙",topic:"BOSS",               xp:250,coins:60,questions:8, isBoss:true},
+   ]},
+  {id:"nvr",    name:"Logic Lab",          icon:"🔬",colour:"#DC2626",gradient:"linear-gradient(135deg,#DC2626,#991B1B)",desc:"See patterns others can't even imagine",unlockLevel:8,
+   missions:[
+    {id:"n_2d",    name:"Shape Station",    icon:"🔷",topic:"2D Shapes",           xp:60, coins:12,questions:6},
+    {id:"n_sym",   name:"Symmetry Sanctum", icon:"🔄",topic:"Symmetry & Reflection",xp:80,coins:15,questions:6, trick:"t_sym"},
+    {id:"n_pat",   name:"Pattern Plains",   icon:"🔲",topic:"Patterns & Matrices", xp:80, coins:15,questions:6, trick:"t_pats"},
+    {id:"n_3d",    name:"3D Dimension",     icon:"🧊",topic:"3D Shapes",           xp:100,coins:18,questions:6, trick:"t_euler"},
+    {id:"n_boss",  name:"⚔️ Lab Boss",      icon:"🤖",topic:"BOSS",               xp:250,coins:60,questions:8, isBoss:true},
+   ]},
 ];
 
-// ─── TUTOR SCRIPTS ────────────────────────────────────────────────────────────
-const TUTOR_SCRIPTS = {
-  "times-tables":[
-    {role:"tutor",text:"Welcome to your Times Tables lesson! 🎓 Before we dive in — which tables do you find hardest? (Type a number like '6', '7', or '8')"},
-    {role:"tutor",text:"The trickiest for most students are 6×7, 6×8, 7×8, and 8×8. Here's the secret:\n\n🔑 **Trick 1: The 9× trick**\nHold up 10 fingers. For 9×3, fold down finger 3. You see 2 on the left and 7 on the right → 27!\n\nTry it: what does 9×6 give you?"},
-    {role:"tutor",text:"Exactly! 9×6=54 (fold finger 6: 5 on left, 4 on right).\n\n🔑 **Trick 2: Square numbers** — memorise these:\n• 6×6=36  7×7=49  8×8=64  9×9=81  12×12=144\n\nOnce you know squares, nearby facts are easy:\n• 7×8 = 7×7+7 = 49+7 = **56** ✓\n• 8×9 = 8×8+8 = 64+8 = **72** ✓\n\nCan you work out 6×7 using 6×6?"},
-    {role:"tutor",text:"6×7 = 6×6+6 = 36+6 = **42** ✓\n\n🔑 **Trick 3: The 12× table**\nBreak into 10× and 2×:\n• 12×7 = 70+14 = **84**\n• 12×9 = 90+18 = **108**\n\n💡 Quick test: What is 12×11?"},
-    {role:"tutor",text:"12×11 = 110+22 = **132** ✓\n\n📋 **Learn these 10 facts and you'll know ALL the hard tables:**\n6×6=36 · 6×7=42 · 6×8=48 · 6×9=54\n7×7=49 · 7×8=56 · 7×9=63\n8×8=64 · 8×9=72 · 9×9=81\n\n🏆 **Lesson complete!** Now go test yourself in the Quiz — Maths → Easy. Well done! 🌟"},
-  ],
-  "fractions":[
-    {role:"tutor",text:"Welcome to your Fractions lesson! 🎓\n\n**What is a fraction?**\nA fraction represents part of a whole. If you cut a pizza into 4 slices and eat 1, you've eaten **¼**.\n\n• **Numerator** (top) = how many parts you have\n• **Denominator** (bottom) = total equal parts\n\nQuick check: In the fraction **3/5**, which is the denominator?"},
-    {role:"tutor",text:"Correct! The denominator is **5** — the total parts.\n\n**Finding fractions of amounts** — most common question type:\n\n🔑 **The method:**\n1. Divide by the denominator (bottom)\n2. Multiply by the numerator (top)\n\nExample: ¾ of 40\n→ 40 ÷ 4 = 10 (find ¼)\n→ 10 × 3 = **30** (get ¾)\n\n💡 Try: What is ⅔ of 18?"},
-    {role:"tutor",text:"⅔ of 18:\n→ 18 ÷ 3 = 6 (⅓)\n→ 6 × 2 = **12** ✓\n\n**Simplifying fractions:**\nDivide both numbers by their HCF (Highest Common Factor).\n\nSimplify 8/12:\n→ HCF of 8 and 12 = 4\n→ 8÷4=2, 12÷4=3 → **2/3** ✓\n\n💡 Simplify 6/9. What do you get?"},
-    {role:"tutor",text:"HCF of 6 and 9 = **3**. So 6÷3=2, 9÷3=3 → **2/3** ✓\n\n**Adding fractions:**\nDenominators must match first!\n\n1/3 + 1/4 → make them equal:\n→ 4/12 + 3/12 = **7/12**\n\n💡 Final challenge: What is 1/2 + 1/3?"},
-    {role:"tutor",text:"1/2 + 1/3 → common denominator 6:\n→ 3/6 + 2/6 = **5/6** ✓\n\n🏆 **Lesson complete!** Summary:\n✅ Fraction of amount: divide by bottom, multiply by top\n✅ Simplify: divide by the HCF\n✅ Add/subtract: make denominators equal first\n\nHead to Quiz → Maths → Medium and try the fraction questions! 💪"},
-  ],
-  "grammar":[
-    {role:"tutor",text:"Welcome to your Grammar lesson! 🎓\n\n**Parts of Speech:**\n📌 **Noun** — naming word: teacher, London, happiness\n📌 **Verb** — action/state: run, think, is\n📌 **Adjective** — describes a noun: brilliant, quiet\n📌 **Adverb** — describes a verb: quickly, silently\n\n💡 In 'The **brave** soldier **ran** quickly' — which word is the adjective?"},
-    {role:"tutor",text:"**Brave** ✓ — it describes the noun 'soldier'. 'Quickly' is the adverb.\n\n**Clauses:**\n📌 **Main clause** — makes sense alone: 'The dog barked'\n📌 **Subordinate clause** — depends on main clause: 'because it heard a noise'\n\nSubordinate clauses start with: because, although, when, if, while, since, unless\n\n💡 Which is the subordinate clause in: 'Although she was tired, she kept studying'?"},
-    {role:"tutor",text:"'Although she was tired' ✓ — it can't stand alone.\n\n**Active vs Passive Voice:**\n📌 **Active:** Subject DOES the action → 'The cat chased the mouse'\n📌 **Passive:** Subject RECEIVES the action → 'The mouse was chased by the cat'\n\nSpot passive: look for **was/were/is/are** + past participle\n\n💡 Active or passive? 'The cake was eaten by the children'"},
-    {role:"tutor",text:"Passive ✓ — 'was eaten' is the giveaway.\n\n**Apostrophes:**\n📌 **Contraction:** it is → **it's** · do not → **don't**\n📌 **Possession:** The dog**'s** lead (one dog) · The dogs**'** leads (many dogs)\n⚠️ NEVER for plurals: ❌ Apple's for sale ✗\n\n💡 'The boys_ coats' — boys' or boy's (several boys)?"},
-    {role:"tutor",text:"**Boys'** ✓ — apostrophe AFTER the s when noun is already plural.\n\n🏆 **Grammar lesson complete!** Summary:\n✅ Nouns name things, verbs show actions, adjectives describe nouns, adverbs describe verbs\n✅ Subordinate clauses can't stand alone\n✅ Active = subject does it. Passive = subject receives it.\n✅ Apostrophes: contractions + possession — never for plurals!\n\nNow try Quiz → English → Medium! 🌟"},
-  ],
-  "synonyms":[
-    {role:"tutor",text:"Welcome to Synonyms & Antonyms! 🎓\n\n**Synonyms** = same meaning · **Antonyms** = opposite meaning\n\nExamples:\n• Synonym of HAPPY → joyful, elated, content, gleeful\n• Antonym of HAPPY → sad, miserable, melancholy\n\nThe 11+ uses unusual synonyms to catch you out!\n\nWhich is NOT a synonym of 'brave'? Courageous / Bold / Fearful / Valiant"},
-    {role:"tutor",text:"Fearful ✓ — that's an antonym! Courageous, bold, valiant all mean brave.\n\n**Learn words in families:**\n🔵 Happy: joyful, elated, content, gleeful, blissful\n🔴 Sad: melancholy, mournful, sorrowful, despondent\n🟢 Brave: courageous, valiant, bold, daring, intrepid\n🟡 Clever: astute, shrewd, perceptive, gifted\n\n💡 Which word means 'extremely clever'? astute / stupid / clumsy / cautious"},
-    {role:"tutor",text:"Astute ✓ — clever and quick to notice things.\n\n**Antonym patterns:**\n📌 Prefix antonyms: un- · in- · dis- · im-\n• happy → unhappy · correct → incorrect\n\n📌 Completely different words:\n• ancient ↔ modern · transparent ↔ opaque · benevolent ↔ malevolent\n\n💡 Antonym of 'meticulous' (meaning very careful)?"},
-    {role:"tutor",text:"'Careless' ✓\n\n**Key 11+ vocab:**\n| Word | Meaning |\n|------|---------|\n| Benevolent | Kind, generous |\n| Malevolent | Evil, wishing harm |\n| Meticulous | Extremely careful |\n| Ambiguous | More than one meaning |\n| Transparent | See-through / obvious |\n| Opaque | Not see-through |\n| Astute | Clever, perceptive |\n| Timid | Shy, lacking confidence |\n\nAntonym of 'transparent'?"},
-    {role:"tutor",text:"Opaque ✓ — now you know both!\n\n🏆 **Lesson complete!** Summary:\n✅ Synonyms = same meaning. Antonyms = opposite.\n✅ Learn words in families\n✅ Watch for prefix antonyms (un-, in-, dis-)\n✅ Memorise key 11+ vocab (benevolent, meticulous, astute, opaque...)\n\nHead to Quiz → Verbal Reasoning to test your vocabulary! 💪"},
-  ],
-  "symmetry":[
-    {role:"tutor",text:"Welcome to Symmetry & Reflection! 🎓\n\n**Lines of symmetry** — if you fold a shape and both sides match exactly, that fold line is a line of symmetry.\n\n📌 Key shapes:\n• Circle: **infinite** · Square: **4** · Rectangle: **2**\n• Equilateral triangle: **3** · Regular pentagon: **5**\n\n🔑 Rule: **regular polygon with n sides → n lines of symmetry**\n\nHow many lines of symmetry does a regular octagon have?"},
-    {role:"tutor",text:"8 ✓ — 8 sides, 8 lines!\n\n**Reflection rules:**\n• Shape stays same size and shape\n• Equal distance from mirror line on both sides\n• Vertical mirror line: left ↔ right flip\n• Horizontal mirror line: top ↔ bottom flip\n\nAlways check in NVR questions:\n1. Same size?\n2. Correctly flipped (not rotated)?\n3. Correct distance from mirror line?\n\n💡 A point is 3 squares LEFT of the mirror line. Where does it go in the reflection?"},
-    {role:"tutor",text:"3 squares to the RIGHT ✓\n\n**Rotation vs Reflection — the common trap:**\n📌 **Reflection** = mirror image (might look different)\n📌 **Rotation** = spinning (turns but doesn't flip)\n\nKey giveaway: a reflected shape is like your mirror reflection — your right hand appears on the left. A rotated shape just turns.\n\n💡 If an arrow points RIGHT and you reflect it in a vertical line, which way does it point?"},
-    {role:"tutor",text:"To the LEFT ✓ — the reflection flips it horizontally.\n\n**Rotational symmetry:**\nOrder = how many times it looks the same in one full 360° rotation.\n• Square: order **4** · Equilateral triangle: **3** · Rectangle: **2** · Regular hexagon: **6**\n\n💡 Order of rotational symmetry of a regular pentagon?"},
-    {role:"tutor",text:"Order **5** ✓ — looks the same 5 times in 360°!\n\n🏆 **Lesson complete!** Summary:\n✅ Regular n-sided polygon → n lines of symmetry\n✅ Reflection: flip over mirror line, same distance, same size\n✅ Rotation ≠ Reflection — don't confuse them!\n✅ Rotational symmetry order: how many times it looks the same in 360°\n\nTest yourself in Quiz → Non-Verbal Reasoning! 🌟"},
-  ],
+// ─── TRICKS ───────────────────────────────────────────────────────────────────
+const TRICKS={
+  t_nine: {icon:"🖐",title:"The 9× Finger Trick",      subject:"maths",  body:"Hold 10 fingers up. For 9×N, fold down finger N.\nLeft side = tens. Right side = units.\n\n9×7 → fold finger 7 → 6 left, 3 right → 63 ✓"},
+  t_fracs:{icon:"½", title:"Fractions in 2 Steps",      subject:"maths",  body:"1. DIVIDE by the bottom number\n2. MULTIPLY by the top number\n\n¾ of 40:\n→ 40÷4=10 (one quarter)\n→ 10×3=30 (three quarters) ✓"},
+  t_pct:  {icon:"％",title:"Percentage Building Blocks",subject:"maths",  body:"10%=÷10 · 5%=half of 10% · 25%=÷4 · 50%=÷2\n\nBuild any %:\n• 15% = 10% + 5%\n• 35% = 25% + 10%\n• 75% = 50% + 25%"},
+  t_ratio:{icon:"⚖️",title:"Ratio in 3 Steps",          subject:"maths",  body:"1. Add parts → total parts\n2. Total ÷ parts → 1 part value\n3. Multiply each number\n\n2:3, £30 → 5 parts → £6 each → £12 and £18"},
+  t_alg:  {icon:"⚖️",title:"Balance the Algebra Scale", subject:"maths",  body:"Do the SAME to BOTH sides.\n\nx+7=15 → subtract 7 both → x=8\n3x=21 → divide both by 3 → x=7"},
+  t_gram: {icon:"📝",title:"Subject vs Object Pronouns", subject:"english",body:"SUBJECT: I, he, she, we, they\nOBJECT: me, him, her, us, them\n\n'He and I went' ✓\n'Me and him went' ✗\n\nTip: remove the other person and test alone!"},
+  t_apos: {icon:"✏️",title:"Apostrophe Rules",           subject:"english",body:"CONTRACTION (missing letters):\nit is → it's · do not → don't\n\nPOSSESSION (belonging):\ndog's lead (1 dog) · dogs' leads (many dogs)\n\n❌ NEVER for plurals: 'Apple's' = WRONG"},
+  t_roots:{icon:"🌱",title:"Word Roots Unlock Meaning",  subject:"english",body:"port=carry · aud=hear · vis=see\nbene=good · mal=bad · scrib=write\ndic=say · rupt=break · flex=bend\n\nLearn roots = decode any unknown word!"},
+  t_syns: {icon:"🔄",title:"Word Families",              subject:"verbal", body:"😊 Happy: joyful, elated, gleeful, blissful\n😢 Sad: mournful, melancholy, sorrowful\n💪 Brave: courageous, valiant, intrepid\n😠 Angry: furious, irate, livid, incensed"},
+  t_ana:  {icon:"🔗",title:"Analogy Formula",            subject:"verbal", body:"State the relationship first:\n'A is the YOUNG OF B'\n'A is the TOOL OF B'\n'A is the OPPOSITE OF B'\n\nDog:Puppy → 'Puppy = young of Dog'\n→ Cat:? → Kitten ✓"},
+  t_codes:{icon:"🔐",title:"Code Cracking Method",       subject:"verbal", body:"Before ANY code question:\n1. Write out A B C D E...\n2. Write shifted alphabet below\n3. Map letter by letter — never in your head!\n\nMost common: +1, +2, -1, mirror (A=Z)"},
+  t_seq:  {icon:"🔢",title:"Sequence Rule Finding",      subject:"verbal", body:"1. Find gap between terms\n2. Is it +, -, ×, ÷?\n3. Letters: count positions (+2, +3, skip)\n4. May be TWO alternating rules!\n\n2,6,18,54 → ×3 each → 162"},
+  t_sym:  {icon:"🔄",title:"Reflection Rules",           subject:"nvr",    body:"• Equal distance either side of mirror\n• Same size and shape, FLIPPED not rotated\n• Vertical mirror: left↔right swap\n• Horizontal mirror: top↔bottom swap"},
+  t_pats: {icon:"🔲",title:"Matrix Pattern Method",      subject:"nvr",    body:"1. Check ROWS: what changes left→right?\n2. Check COLUMNS: what changes top→bottom?\n3. Rule is ALWAYS consistent in both\n\nCommon: rotation, add shape, change size"},
+  t_euler:{icon:"🧊",title:"Euler's Formula",            subject:"nvr",    body:"F + V - E = 2\n(Faces + Vertices - Edges = 2)\n\nCube: 6+8-12=2 ✓\nSquare pyramid: 5+5-8=2 ✓\n\nUse to find any missing value!"},
 };
 
-function getDefaultScript(topic) {
-  return [
-    {role:"tutor",text:`Welcome to your ${topic.title} lesson! 🎓\n\n${topic.intro}\n\nLet's start from the very beginning — just like a classroom. Are you ready? Type anything to begin!`},
-    {role:"tutor",text:`Great! This topic comes up regularly in the 11+ so understanding it properly is a real advantage.\n\nThe key to ${topic.title} is recognising patterns and applying a consistent method. Let me walk you through it step by step.\n\nWhat aspect of ${topic.title} do you find most confusing?`},
-    {role:"tutor",text:`You're making great progress! 🌟\n\n💡 **Top tip:** After this lesson, go straight to the Quiz and practise ${topic.title} questions immediately. That's how knowledge sticks!\n\nAny questions before we wrap up?`},
-    {role:"tutor",text:`🏆 **Lesson complete!** Well done.\n\n✅ The concepts we covered will appear in your 11+ exam\n✅ Practise regularly — even 10 minutes a day makes a huge difference\n✅ If you get a quiz question wrong, come back and we'll go through it together\n\nHead to the Quiz and put this into practice! You're doing brilliantly 💪`},
-  ];
-}
-
-// ─── SCHOOLS DATA ─────────────────────────────────────────────────────────────
-const SCHOOLS = [
-  {name:"Queen Elizabeth's School, Barnet",  area:"Barnet",  exam:"GL Assessment", score:"Highly selective – top 250 out of ~2500"},
-  {name:"Henrietta Barnett School",          area:"Barnet",  exam:"GL Assessment", score:"Most selective in London"},
-  {name:"Latymer School, Edmonton",          area:"Enfield", exam:"GL Assessment", score:"Top 120 from ~1800"},
-  {name:"Tiffin Boys' School",               area:"Kingston",exam:"GL Assessment", score:"Highly selective"},
-  {name:"Tiffin Girls' School",              area:"Kingston",exam:"GL Assessment", score:"Highly selective"},
-  {name:"Nonsuch High School for Girls",     area:"Sutton",  exam:"GL Assessment", score:"Top selective"},
-  {name:"Wallington High School for Girls",  area:"Sutton",  exam:"GL Assessment", score:"Top selective"},
-  {name:"Wilson's School",                   area:"Sutton",  exam:"GL Assessment", score:"Boys – top selective"},
-  {name:"St Olave's Grammar School",         area:"Bromley", exam:"GL Assessment", score:"Top selective"},
-  {name:"Newstead Wood School",              area:"Bromley", exam:"GL Assessment", score:"Girls – top selective"},
-  {name:"Townley Grammar School",            area:"Bexley",  exam:"GL Assessment", score:"Girls – selective"},
-  {name:"Beths Grammar School",              area:"Bexley",  exam:"GL Assessment", score:"Boys – selective"},
-  {name:"Chislehurst & Sidcup Grammar",      area:"Bexley",  exam:"GL Assessment", score:"Mixed – selective"},
-  {name:"Dartford Grammar School (Boys)",    area:"Kent",    exam:"Kent Test (GL)", score:"Selective"},
-  {name:"Dartford Grammar School (Girls)",   area:"Kent",    exam:"Kent Test (GL)", score:"Selective"},
-  {name:"Colchester Royal Grammar School",   area:"Essex",   exam:"CEM / CSSE",    score:"Boys – highly selective"},
-  {name:"Southend High School for Boys",     area:"Southend",exam:"CSSE",          score:"Selective"},
+const DAILY=[
+  {name:"Sunday Sprint",   icon:"🏃",desc:"Complete any 2 missions",       xpBonus:50, coins:20},
+  {name:"Maths Monday",    icon:"🔢",desc:"Score 80%+ on a Maths mission",  xpBonus:60, coins:25},
+  {name:"Combo Tuesday",   icon:"🌀",desc:"Complete missions in 2 worlds",  xpBonus:70, coins:30},
+  {name:"Midweek Mastery", icon:"💪",desc:"Answer 15 questions correctly",  xpBonus:80, coins:35},
+  {name:"English Edge",    icon:"📖",desc:"Score 80%+ on English mission",  xpBonus:60, coins:25},
+  {name:"Friday Fire 🔥",  icon:"🔥",desc:"Complete 3 missions today",      xpBonus:100,coins:40},
+  {name:"Weekend Warrior", icon:"⚔️",desc:"Beat any Boss Battle",          xpBonus:150,coins:60},
 ];
 
 // ─── AUTH MODAL ───────────────────────────────────────────────────────────────
-function AuthModal({ onClose, onAuth }) {
-  const [mode, setMode]       = useState("login");
-  const [email, setEmail]     = useState("");
-  const [password, setPass]   = useState("");
-  const [name, setName]       = useState("");
-  const [error, setError]     = useState("");
-  const [loading, setLoading] = useState(false);
-  const { login, signup }     = useAppContext();
+function AuthModal({onClose}){
+  const [mode,setMode]=useState("login");
+  const [email,setEmail]=useState("");
+  const [password,setPass]=useState("");
+  const [name,setName]=useState("");
+  const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
+  const {login,signup}=useAppContext();
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e){
     e.preventDefault(); setError(""); setLoading(true);
-    try {
-      if (mode==="login") await login(email, password);
-      else await signup(email, password, name);
-      onAuth();
-    } catch(err) { setError(err.message || "Something went wrong. Please try again."); }
-    finally { setLoading(false); }
+    try{
+      if(mode==="login") await login(email,password);
+      else await signup(email,password,name);
+      // Force redirect to /Home — bypasses platform's /login redirect loop
+      window.location.replace("https://11-quest-uk.base44.app/Home");
+    } catch(err){
+      setError(err.message||"Something went wrong. Please try again.");
+    } finally{setLoading(false);}
   }
 
-  return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:"white",borderRadius:20,padding:"28px 24px",width:"100%",maxWidth:380,boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+      <div style={{background:"white",borderRadius:24,padding:"28px 24px",width:"100%",maxWidth:380,boxShadow:"0 24px 80px rgba(0,0,0,0.5)",animation:"popIn 0.3s ease"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-          <h2 style={{margin:0,fontSize:20,fontWeight:900,color:"#1e1b4b"}}>{mode==="login"?"Sign In 🔐":"Create Account 🎓"}</h2>
-          <button onClick={onClose} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#9ca3af"}}>✕</button>
+          <div>
+            <h2 style={{margin:0,fontSize:20,fontWeight:900,color:"#1e1b4b"}}>{mode==="login"?"Welcome back! 🎮":"Join the Quest! 🎓"}</h2>
+            <p style={{margin:"4px 0 0",fontSize:12,color:"#6b7280"}}>{mode==="login"?"Continue your adventure":"Create your free account"}</p>
+          </div>
+          <button onClick={onClose} style={{background:"#f3f4f6",border:"none",width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
         <form onSubmit={handleSubmit}>
-          {mode==="register"&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" required style={{width:"100%",padding:"12px 14px",borderRadius:10,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>}
-          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" required style={{width:"100%",padding:"12px 14px",borderRadius:10,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>
-          <input value={password} onChange={e=>setPass(e.target.value)} placeholder="Password" type="password" required style={{width:"100%",padding:"12px 14px",borderRadius:10,border:"2px solid #e5e7eb",fontSize:14,marginBottom:14,boxSizing:"border-box",fontFamily:"inherit"}}/>
-          {error&&<p style={{color:"#DC2626",fontSize:13,margin:"0 0 10px",textAlign:"center"}}>{error}</p>}
-          <button type="submit" disabled={loading} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:15,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit"}}>
-            {loading?"Please wait...":(mode==="login"?"Sign In →":"Create Account →")}
+          {mode==="register"&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" required style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>}
+          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" required style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>
+          <input value={password} onChange={e=>setPass(e.target.value)} placeholder="Password" type="password" required style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:14,boxSizing:"border-box",fontFamily:"inherit"}}/>
+          {error&&<div style={{background:"#FEF2F2",borderRadius:10,padding:"10px 12px",marginBottom:12,color:"#DC2626",fontSize:13,fontWeight:600}}>{error}</div>}
+          <button type="submit" disabled={loading} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:15,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.7:1}}>
+            {loading?"⏳ Signing in...":(mode==="login"?"Sign In →":"Create Account →")}
           </button>
         </form>
-        <p style={{textAlign:"center",fontSize:13,color:"#6b7280",marginTop:14}}>
-          {mode==="login"?"Don't have an account? ":"Already have an account? "}
+        <p style={{textAlign:"center",fontSize:13,color:"#6b7280",marginTop:14,marginBottom:0}}>
+          {mode==="login"?"New here? ":"Have an account? "}
           <span onClick={()=>{setMode(mode==="login"?"register":"login");setError("");}} style={{color:"#4F46E5",fontWeight:700,cursor:"pointer"}}>
-            {mode==="login"?"Register free":"Sign in"}
+            {mode==="login"?"Register free 🚀":"Sign in"}
           </span>
         </p>
       </div>
@@ -297,802 +417,644 @@ function AuthModal({ onClose, onAuth }) {
   );
 }
 
-// ─── BADGE CELEBRATION POPUP ──────────────────────────────────────────────────
-function BadgeCelebration({ badges, onClose }) {
-  useEffect(() => { const t = setTimeout(onClose, 4000); return () => clearTimeout(t); }, []);
-  if (!badges || badges.length === 0) return null;
-  const badge = BADGES.find(b => b.id === badges[0]);
-  if (!badge) return null;
-  return (
-    <div style={{position:"fixed",inset:0,zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,pointerEvents:"none"}}>
-      <div style={{background:"linear-gradient(135deg,#1e1b4b,#4F46E5)",borderRadius:24,padding:"28px 32px",textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"bounceIn 0.5s ease",maxWidth:300,pointerEvents:"all"}}>
-        <div style={{fontSize:64,marginBottom:8}}>{badge.icon}</div>
-        <div style={{color:"#FDE68A",fontWeight:900,fontSize:13,textTransform:"uppercase",letterSpacing:"2px",marginBottom:4}}>Badge Unlocked!</div>
-        <div style={{color:"white",fontWeight:900,fontSize:20,marginBottom:6}}>{badge.name}</div>
-        <div style={{color:"#c7d2fe",fontSize:13,marginBottom:12}}>{badge.desc}</div>
-        {badge.xp>0&&<div style={{background:"rgba(255,255,255,0.15)",borderRadius:10,padding:"6px 16px",display:"inline-block",color:"#FDE68A",fontWeight:800,fontSize:14}}>+{badge.xp} XP</div>}
-        <button onClick={onClose} style={{display:"block",margin:"14px auto 0",background:"white",color:"#4F46E5",border:"none",borderRadius:10,padding:"8px 20px",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Awesome! 🎉</button>
+// ─── XP BAR ───────────────────────────────────────────────────────────────────
+function XPBar({xp,style={}}){
+  const {level,xpInLevel,xpNeeded}=calcLevel(xp||0);
+  const rank=getRank(level);
+  const pct=Math.round((xpInLevel/xpNeeded)*100);
+  return(
+    <div style={style}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+        <span style={{fontSize:11,fontWeight:800,color:"white"}}>{rank.icon} {rank.title} · Lv.{level}</span>
+        <span style={{fontSize:10,color:"rgba(255,255,255,0.55)"}}>{xpInLevel}/{xpNeeded} XP</span>
+      </div>
+      <div style={{height:7,background:"rgba(255,255,255,0.18)",borderRadius:4,overflow:"hidden"}}>
+        <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#FCD34D,#F59E0B)",borderRadius:4,transition:"width 0.8s ease"}}/>
       </div>
     </div>
   );
 }
 
-// ─── STREAK WIDGET ────────────────────────────────────────────────────────────
-function StreakWidget({ streak }) {
-  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  const today = new Date().getDay(); // 0=Sun
-  const todayIdx = today === 0 ? 6 : today - 1; // convert to Mon=0
-  return (
-    <div style={{background:"white",borderRadius:20,padding:"16px 18px",boxShadow:"0 4px 20px rgba(0,0,0,0.15)",marginBottom:12}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <div>
-          <div style={{fontWeight:900,fontSize:16,color:"#1e1b4b"}}>🔥 {streak || 0} Day Streak</div>
-          <div style={{fontSize:12,color:"#6b7280"}}>{streak>=1?"Keep it going! Don't break the chain":"Start your streak today!"}</div>
-        </div>
-        <div style={{fontSize:36,filter:streak>=1?"none":"grayscale(1) opacity(0.3)"}}>{streak>=7?"💎":streak>=3?"🔥":"🌱"}</div>
-      </div>
-      <div style={{display:"flex",gap:6,justifyContent:"space-between"}}>
-        {days.map((day, i) => {
-          const isPast = i < todayIdx;
-          const isToday = i === todayIdx;
-          const isActive = isPast ? i >= todayIdx - (streak - 1) : isToday && streak >= 1;
-          return (
-            <div key={day} style={{flex:1,textAlign:"center"}}>
-              <div style={{width:"100%",aspectRatio:"1",borderRadius:10,background:isActive?"linear-gradient(135deg,#F59E0B,#EF4444)":isToday?"rgba(79,70,229,0.15)":"#f3f4f6",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:4,border:isToday?`2px solid #4F46E5`:"2px solid transparent"}}>
-                <span style={{fontSize:14}}>{isActive?"🔥":"·"}</span>
-              </div>
-              <div style={{fontSize:10,fontWeight:700,color:isToday?"#4F46E5":isActive?"#D97706":"#9ca3af"}}>{day}</div>
-            </div>
-          );
-        })}
+// ─── BADGE POP ────────────────────────────────────────────────────────────────
+function BadgePop({badge,onClose}){
+  useEffect(()=>{SFX.unlock();const t=setTimeout(onClose,5000);return()=>clearTimeout(t);},[]);
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,background:"rgba(0,0,0,0.65)"}}>
+      <div style={{background:"linear-gradient(135deg,#1e1b4b,#4F46E5)",borderRadius:24,padding:"32px",textAlign:"center",maxWidth:300,animation:"popIn 0.5s ease",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
+        <div style={{fontSize:72,marginBottom:8,animation:"starBurst 0.6s ease"}}>{badge.icon}</div>
+        <div style={{color:"#FCD34D",fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"2px",marginBottom:6}}>🎉 Badge Unlocked!</div>
+        <div style={{color:"white",fontWeight:900,fontSize:22,marginBottom:6}}>{badge.name}</div>
+        <div style={{color:"rgba(255,255,255,0.7)",fontSize:13,marginBottom:16}}>{badge.desc}</div>
+        <button onClick={onClose} style={{background:"#FCD34D",color:"#1e1b4b",border:"none",borderRadius:12,padding:"12px 28px",fontWeight:800,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>Awesome! 🚀</button>
       </div>
     </div>
   );
 }
 
-// ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
-function NotificationSetup({ onDone }) {
-  const [status, setStatus] = useState("idle"); // idle | requesting | granted | denied | unsupported
-  useEffect(() => {
-    if (!("Notification" in window)) { setStatus("unsupported"); return; }
-    if (Notification.permission === "granted") setStatus("granted");
-    else if (Notification.permission === "denied") setStatus("denied");
-  }, []);
-
-  async function requestPermission() {
-    if (!("Notification" in window)) { setStatus("unsupported"); return; }
-    setStatus("requesting");
-    const perm = await Notification.requestPermission();
-    setStatus(perm);
-    if (perm === "granted") {
-      // Schedule a local "demo" notification to confirm it works
-      setTimeout(() => {
-        new Notification("🔥 11+ Quest", {
-          body: "Notifications enabled! We'll remind you to practise daily.",
-          icon: "https://11-quest-uk.base44.app/favicon.ico"
-        });
-      }, 1000);
-      localStorage.setItem("11q_notifications", "granted");
-    }
-  }
-
-  if (status === "granted") return (
-    <div style={{background:"#ECFDF5",borderRadius:14,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
-      <span style={{fontSize:20}}>✅</span>
-      <div>
-        <div style={{fontWeight:700,fontSize:13,color:"#065F46"}}>Notifications enabled!</div>
-        <div style={{fontSize:12,color:"#047857"}}>You'll get daily practice reminders</div>
-      </div>
-    </div>
-  );
-
-  if (status === "denied") return (
-    <div style={{background:"#FEF2F2",borderRadius:14,padding:"12px 16px"}}>
-      <div style={{fontWeight:700,fontSize:13,color:"#991B1B"}}>❌ Notifications blocked</div>
-      <div style={{fontSize:12,color:"#B91C1C"}}>Enable them in your browser settings to get daily reminders</div>
-    </div>
-  );
-
-  if (status === "unsupported") return (
-    <div style={{background:"#F3F4F6",borderRadius:14,padding:"12px 16px"}}>
-      <div style={{fontSize:13,color:"#6b7280"}}>Push notifications aren't supported on this device/browser. Try using Chrome on desktop.</div>
-    </div>
-  );
-
-  return (
-    <button onClick={requestPermission}
-      style={{width:"100%",padding:"14px",borderRadius:14,border:"2px dashed #4F46E5",background:"#EEF2FF",color:"#4F46E5",fontWeight:800,fontSize:14,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-      <span style={{fontSize:20}}>🔔</span>
-      Enable Daily Practice Reminders
-    </button>
-  );
-}
-
-// ─── PAGE WRAP ────────────────────────────────────────────────────────────────
-function PageWrap({children}) {
-  return <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>{children}</div>;
-}
-
-// ─── LEADERBOARD COMPONENT ────────────────────────────────────────────────────
-function LeaderboardView({ user, onSignIn }) {
-  const [board, setBoard]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab]       = useState("xp"); // xp | streak | correct
-  const { user: ctxUser }   = useAppContext();
-
-  useEffect(()=>{
-    (async()=>{
-      try {
-        const recs = await UserProgress.list();
-        // Try to get user names
-        setBoard(recs);
-      } catch {} finally { setLoading(false); }
-    })();
-  },[]);
-
-  const sorted = [...board].sort((a,b)=>{
-    if(tab==="xp") return (b.xp||0)-(a.xp||0);
-    if(tab==="streak") return (b.streak_days||0)-(a.streak_days||0);
-    if(tab==="correct") return (b.total_correct||0)-(a.total_correct||0);
-    return 0;
-  }).slice(0,20);
-
-  if(loading) return <div style={{textAlign:"center",color:"white",padding:40,fontSize:18}}>Loading...</div>;
-
-  if(board.length===0) return (
-    <div style={{textAlign:"center",padding:"40px 20px"}}>
-      <div style={{fontSize:56,marginBottom:12}}>🏆</div>
-      <p style={{color:"white",fontWeight:700,fontSize:16}}>No entries yet — be the first!</p>
-      {!user&&<button onClick={onSignIn} style={{marginTop:12,padding:"12px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In to Compete →</button>}
-    </div>
-  );
-
-  return (
-    <>
-      {/* tab switcher */}
-      <div style={{display:"flex",gap:8,marginBottom:12}}>
-        {[{id:"xp",label:"⚡ XP"},{id:"streak",label:"🔥 Streak"},{id:"correct",label:"✅ Correct"}].map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)}
-            style={{flex:1,padding:"8px 0",borderRadius:12,fontWeight:700,fontSize:12,cursor:"pointer",border:"none",background:tab===t.id?"white":"rgba(255,255,255,0.15)",color:tab===t.id?"#3730a3":"white"}}>
-            {t.label}
+// ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
+function BottomNav({screen,goTo}){
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"progress",icon:"📊",label:"Stats"}];
+  return(
+    <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
+      <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
+        {tabs.map(n=>(
+          <button key={n.id} onClick={()=>goTo(n.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:"none",border:"none",cursor:"pointer",padding:"6px 4px",borderTop:screen===n.id?"2px solid #FCD34D":"2px solid transparent"}}>
+            <span style={{fontSize:20}}>{n.icon}</span>
+            <span style={{fontSize:10,fontWeight:700,color:screen===n.id?"#FCD34D":"rgba(255,255,255,0.35)"}}>{n.label}</span>
           </button>
         ))}
       </div>
-      <div style={{background:"white",borderRadius:20,padding:"18px",boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-        {/* top 3 podium */}
-        {sorted.length>=3&&(
-          <div style={{display:"flex",justifyContent:"center",alignItems:"flex-end",gap:8,marginBottom:20,paddingTop:8}}>
-            {[sorted[1],sorted[0],sorted[2]].map((entry,i)=>{
-              const pos = i===0?2:i===1?1:3;
-              const isMe = user&&entry?.user_id===user.id;
-              const heights = ["80px","100px","65px"];
-              const medals = ["🥈","🥇","🥉"];
-              const val = tab==="xp"?`${entry?.xp||0} XP`:tab==="streak"?`🔥${entry?.streak_days||0}`:tab==="correct"?`${entry?.total_correct||0}✅`:"";
-              return (
-                <div key={pos} style={{textAlign:"center",flex:1}}>
-                  <div style={{fontSize:24,marginBottom:4}}>{medals[i]}</div>
-                  <div style={{background:isMe?"#EEF2FF":i===1?"#FEF9C3":"#f3f4f6",borderRadius:"12px 12px 0 0",height:heights[i],display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",padding:"8px 4px",border:isMe?"2px solid #4F46E5":"none"}}>
-                    <div style={{fontSize:11,fontWeight:800,color:"#1e1b4b",wordBreak:"break-all"}}>{isMe?"⭐ You":`#${pos}`}</div>
-                    <div style={{fontSize:11,fontWeight:700,color:"#4F46E5"}}>{val}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {/* full list */}
-        {sorted.map((entry,i)=>{
-          const isMe = user&&entry.user_id===user.id;
-          const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":`#${i+1}`;
-          const lvl = calcLevel(entry.xp||0).level;
-          const val = tab==="xp"?`${entry.xp||0} XP`:tab==="streak"?`🔥 ${entry.streak_days||0} days`:`${entry.total_correct||0} correct`;
-          return (
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 8px",borderRadius:10,marginBottom:4,background:isMe?"#EEF2FF":"transparent",border:isMe?"1.5px solid #c7d2fe":"1.5px solid transparent"}}>
-              <div style={{width:28,textAlign:"center",fontWeight:900,fontSize:15,color:i<3?"#F59E0B":"#9ca3af",flexShrink:0}}>{medal}</div>
-              <div style={{width:36,height:36,borderRadius:"50%",background:`linear-gradient(135deg,${SUBJECT_COLOURS.maths},${SUBJECT_COLOURS.english})`,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:900,fontSize:14,flexShrink:0}}>
-                {isMe?(user.full_name?user.full_name[0].toUpperCase():"U"):(i+1)}
-              </div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontWeight:700,fontSize:13,color:"#1e1b4b",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{isMe?`⭐ ${user.full_name||"You"}`:`Player ${i+1}`}</div>
-                <div style={{fontSize:11,color:"#6b7280"}}>Level {lvl} · 🏅{(entry.badges||[]).length} badges</div>
-              </div>
-              <div style={{fontWeight:800,fontSize:14,color:"#4F46E5",flexShrink:0}}>{val}</div>
-            </div>
-          );
-        })}
-        {!user&&(
-          <div style={{textAlign:"center",marginTop:14,paddingTop:14,borderTop:"1px solid #f3f4f6"}}>
-            <p style={{fontSize:13,color:"#6b7280",margin:"0 0 8px"}}>Sign in to appear on the leaderboard!</p>
-            <button onClick={onSignIn} style={{padding:"10px 24px",borderRadius:12,background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In to Compete →</button>
-          </div>
-        )}
-      </div>
-    </>
+    </div>
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
-export default function App() {
-  const { user, logout } = useAppContext();
+// ─── MISSION COMPLETE ─────────────────────────────────────────────────────────
+function MissionComplete({mission,score,total,xpEarned,coinsEarned,newTrick,onContinue,onRetry}){
+  const pct=Math.round((score/total)*100);
+  const passed=pct>=70;
+  const stars=pct===100?3:pct>=80?2:pct>=70?1:0;
+  useEffect(()=>{if(passed)SFX.levelup();},[]);
+  return(
+    <div style={{minHeight:"100vh",background:passed?"linear-gradient(135deg,#064E3B,#065F46)":"linear-gradient(135deg,#7F1D1D,#991B1B)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center"}}>
+      <div style={{animation:"popIn 0.5s ease",marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"center",gap:6,fontSize:38,marginBottom:8}}>
+          {[0,1,2].map(i=><span key={i} style={{filter:i<stars?"none":"grayscale(1) opacity(0.3)",animation:i<stars?`starBurst ${0.3+i*0.2}s ease`:"none"}}>⭐</span>)}
+        </div>
+        <div style={{fontSize:52,marginBottom:8}}>{pct===100?"🏆":pct>=80?"🎖️":pct>=70?"✅":"💪"}</div>
+        <h1 style={{color:"white",fontWeight:900,fontSize:28,margin:"0 0 4px"}}>{pct===100?"PERFECT!":pct>=80?"Excellent!":pct>=70?"Mission Clear!":"Keep Training!"}</h1>
+        <p style={{color:"rgba(255,255,255,0.7)",fontSize:16,margin:"0 0 20px"}}>{score}/{total} correct · {pct}%</p>
+      </div>
+      {passed&&(
+        <div style={{display:"flex",gap:12,marginBottom:20,animation:"slideUp 0.4s ease"}}>
+          <div style={{background:"rgba(255,255,255,0.15)",borderRadius:16,padding:"14px 22px"}}>
+            <div style={{color:"#FCD34D",fontWeight:900,fontSize:24}}>+{xpEarned}</div>
+            <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>XP ⚡</div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.15)",borderRadius:16,padding:"14px 22px"}}>
+            <div style={{color:"#FCD34D",fontWeight:900,fontSize:24}}>+{coinsEarned}</div>
+            <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>Coins 🪙</div>
+          </div>
+        </div>
+      )}
+      {newTrick&&passed&&(
+        <div style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(252,211,77,0.4)",borderRadius:16,padding:"14px 18px",marginBottom:20,maxWidth:320,textAlign:"left",animation:"slideUp 0.6s ease"}}>
+          <div style={{color:"#FCD34D",fontWeight:800,fontSize:11,textTransform:"uppercase",letterSpacing:"1px",marginBottom:6}}>🔑 Trick Unlocked!</div>
+          <div style={{color:"white",fontWeight:800,fontSize:15,marginBottom:4}}>{newTrick.icon} {newTrick.title}</div>
+          <div style={{color:"rgba(255,255,255,0.7)",fontSize:12}}>{newTrick.body.split("\n")[0]}</div>
+        </div>
+      )}
+      {!passed&&<p style={{color:"rgba(255,255,255,0.6)",fontSize:14,marginBottom:20}}>Need 70%+ to pass. You've got this!</p>}
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center"}}>
+        {!passed&&<button onClick={onRetry} style={{padding:"14px 28px",borderRadius:14,border:"none",background:"white",color:"#991B1B",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>Try Again 🔄</button>}
+        <button onClick={onContinue} style={{padding:"14px 28px",borderRadius:14,border:"none",background:passed?"#FCD34D":"rgba(255,255,255,0.2)",color:passed?"#1e1b4b":"white",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>
+          {passed?"Continue →":"Back to Map"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-  const [tab, setTab]           = useState("home");
-  const [showAuth, setShowAuth] = useState(false);
-  const [newBadges, setNewBadges] = useState([]);
-  const [showBadgePop, setShowBadgePop] = useState(false);
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════════════════
+export default function App(){
+  const {user,logout}=useAppContext();
+  const [screen,setScreen]=useState("home");
+  const [showAuth,setShowAuth]=useState(false);
+  const [activeWorld,setActiveWorld]=useState(null);
+  const [popBadge,setPopBadge]=useState(null);
+  const [floatMsg,setFloatMsg]=useState(null);
 
-  // Quiz state
-  const [selSubjects, setSelSubjects] = useState(["maths"]);
-  const [difficulty, setDifficulty]   = useState("medium");
-  const [qCount, setQCount]           = useState(10);
-  const [quiz, setQuiz]               = useState([]);
-  const [qIdx, setQIdx]               = useState(0);
-  const [selected, setSelected]       = useState(null);
-  const [quizActive, setQuizActive]   = useState(false);
-  const [quizDone, setQuizDone]       = useState(false);
-  const [score, setScore]             = useState(0);
-  const [answers, setAnswers]         = useState([]);
+  // Mission state
+  const [activeMission,setActiveMission]=useState(null);
+  const [missionQs,setMissionQs]=useState([]);
+  const [qIdx,setQIdx]=useState(0);
+  const [selected,setSelected]=useState(null);
+  const [missionScore,setMissionScore]=useState(0);
+  const [missionDone,setMissionDone]=useState(false);
+  const [newTrick,setNewTrick]=useState(null);
+  const [timeLeft,setTimeLeft]=useState(null);
+  const [timerActive,setTimerActive]=useState(false);
+  const [flashAnim,setFlashAnim]=useState(null);
+  const timerRef=useRef(null);
 
-  // Progress state
-  const [progress, setProgress]     = useState(null);
-  const [sessions, setSessions]     = useState([]);
-  const [visitorCount, setVisitorCount] = useState(null);
+  // Player
+  const [player,setPlayer]=useState({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});
+  const [visitorCount,setVisitorCount]=useState(null);
+  const [leaderboard,setLeaderboard]=useState([]);
 
-  // Learn / AI tutor
-  const [learnSubject, setLearnSubject] = useState("maths");
-  const [activeTopic, setActiveTopic]   = useState(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput]       = useState("");
-  const [scriptIdx, setScriptIdx]       = useState(0);
-  const chatEndRef = useRef(null);
+  const today=new Date().toISOString().split("T")[0];
+  const {level:curLevel}=calcLevel(player.xp);
+  const curRank=getRank(curLevel);
+  const dailyChallenge=DAILY[new Date().getDay()];
 
-  // ── Visitor count ─────────────────────────────────────────────────────────
   useEffect(()=>{
-    (async()=>{
-      try {
-        const records = await VisitorCount.list();
-        if(records.length===0){const r=await VisitorCount.create({count:1});setVisitorCount(r.count);}
-        else{const r=records[0];const u=await VisitorCount.update(r.id,{count:(r.count||0)+1});setVisitorCount(u.count);}
-      } catch{setVisitorCount("...");}
-    })();
+    (async()=>{try{const r=await VisitorCount.list();if(r.length===0){const v=await VisitorCount.create({count:1});setVisitorCount(v.count);}else{const v=await VisitorCount.update(r[0].id,{count:(r[0].count||0)+1});setVisitorCount(v.count);}}catch{}})();
   },[]);
 
-  // ── Load progress ─────────────────────────────────────────────────────────
   useEffect(()=>{
-    if(!user) return;
+    if(!user)return;
     (async()=>{
       try{
         const recs=await UserProgress.filter({user_id:user.id});
-        if(recs.length>0) setProgress(recs[0]);
-        const sess=await QuizSession.filter({user_id:user.id});
-        setSessions(sess.sort((a,b)=>new Date(b.date)-new Date(a.date)));
-      } catch{}
+        if(recs.length>0){const d=recs[0];setPlayer({xp:d.xp||0,coins:d.coins||0,streak:d.streak_days||0,last_practice:d.last_practice_date||"",completed_missions:d.completed_missions||[],badges:d.badges||[],daily_missions_done:d.daily_missions_done||0,daily_date:d.daily_date||""});}
+        const lb=await UserProgress.list();
+        setLeaderboard(lb.sort((a,b)=>(b.xp||0)-(a.xp||0)).slice(0,20));
+      }catch{}
     })();
   },[user]);
 
-  // ── Daily notification reminder ───────────────────────────────────────────
   useEffect(()=>{
-    if(localStorage.getItem("11q_notifications")==="granted" && "Notification" in window && Notification.permission==="granted"){
-      const lastNotif = localStorage.getItem("11q_last_notif");
-      const today = new Date().toISOString().split("T")[0];
-      if(lastNotif!==today){
-        const hour = new Date().getHours();
-        if(hour>=8 && hour<=21){
-          const msgs = [
-            "Time to practise! 📚 Your 11+ exam is getting closer.",
-            "Don't break your streak! 🔥 Quick quiz time.",
-            "5 minutes of practice = big results on exam day! 🎓",
-            "Your brain is ready for a workout! 🧠 Let's go.",
-          ];
-          new Notification("🎓 11+ Quest", {
-            body: msgs[Math.floor(Math.random()*msgs.length)],
-            icon: "/favicon.ico"
-          });
-          localStorage.setItem("11q_last_notif", today);
-        }
-      }
-    }
-  },[]);
+    if(timerActive&&timeLeft>0){timerRef.current=setTimeout(()=>setTimeLeft(t=>t-1),1000);}
+    else if(timerActive&&timeLeft===0){setTimerActive(false);setMissionDone(true);}
+    return()=>clearTimeout(timerRef.current);
+  },[timerActive,timeLeft]);
 
-  // ── Scroll chat ───────────────────────────────────────────────────────────
-  useEffect(()=>{ chatEndRef.current?.scrollIntoView({behavior:"smooth"}); },[chatMessages]);
+  function isMissionUnlocked(world,mission){
+    if(curLevel<world.unlockLevel)return false;
+    const idx=world.missions.indexOf(mission);
+    if(idx===0)return true;
+    return player.completed_missions.includes(world.missions[idx-1].id);
+  }
+  function isCompleted(id){return player.completed_missions.includes(id);}
 
-  // ── Level calc ────────────────────────────────────────────────────────────
-  const { level: curLevel, xpInLevel, xpNeeded } = calcLevel(progress?.xp||0);
-
-  // ── Start quiz ────────────────────────────────────────────────────────────
-  function startQuiz() {
-    let pool=[];
-    selSubjects.forEach(s=>{
-      const qs=QUESTIONS[s]?.[difficulty]||[];
-      pool.push(...qs);
-    });
-    pool=pool.sort(()=>Math.random()-0.5).slice(0,qCount);
-    if(pool.length===0) return;
-    setQuiz(pool);setQIdx(0);setScore(0);setAnswers([]);
-    setSelected(null);setQuizActive(true);setQuizDone(false);
+  function startMission(mission,worldId){
+    SFX.click();
+    const pool=[...(QBANK[worldId]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
+    if(!pool.length)return;
+    setActiveMission({...mission,_worldId:worldId});
+    setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setMissionDone(false);setNewTrick(null);setFlashAnim(null);
+    if(mission.isBoss){setTimeLeft(mission.questions*25);setTimerActive(true);}else{setTimeLeft(null);setTimerActive(false);}
+    setScreen("mission");
   }
 
-  // ── Answer ────────────────────────────────────────────────────────────────
-  function handleAnswer(opt) {
-    if(selected!==null) return;
+  function handleAnswer(opt){
+    if(selected!==null)return;
     setSelected(opt);
-    const correct=opt===quiz[qIdx].answer;
-    if(correct) setScore(s=>s+1);
-    setAnswers(a=>[...a,{q:quiz[qIdx].q,chosen:opt,correct,answer:quiz[qIdx].answer,explanation:quiz[qIdx].explanation}]);
+    const correct=opt===missionQs[qIdx].answer;
+    if(correct){SFX.correct();setMissionScore(s=>s+1);setFlashAnim("correct");setFloatMsg({txt:"+✅",col:"#059669"});}
+    else{SFX.wrong();setFlashAnim("wrong");setFloatMsg({txt:"❌",col:"#DC2626"});}
+    setTimeout(()=>{setFlashAnim(null);setFloatMsg(null);},1200);
   }
 
-  // ── Next ──────────────────────────────────────────────────────────────────
-  async function nextQ() {
-    if(qIdx+1>=quiz.length){
-      setQuizDone(true);setQuizActive(false);
-      if(user) await saveResults();
-    } else { setQIdx(i=>i+1);setSelected(null); }
+  async function nextQ(){
+    if(qIdx+1>=missionQs.length){setTimerActive(false);setMissionDone(true);if(user)await saveResult();}
+    else{setQIdx(i=>i+1);setSelected(null);}
   }
 
-  // ── Save results ──────────────────────────────────────────────────────────
-  async function saveResults() {
-    const pct=Math.round((score/quiz.length)*100);
-    const xpEarned=quiz.length*DIFF_XP[difficulty];
-    const today=new Date().toISOString().split("T")[0];
-    const hour=new Date().getHours();
-    try {
+  async function saveResult(){
+    const pct=Math.round((missionScore/missionQs.length)*100);
+    if(pct<70)return;
+    try{
       const existing=await UserProgress.filter({user_id:user.id});
-      const prev=existing[0]||{total_questions:0,total_correct:0,streak_days:0,last_practice_date:null,badges:[],xp:0,level:1,subject_stats:{}};
-      const newQ=(prev.total_questions||0)+quiz.length;
-      const newC=(prev.total_correct||0)+score;
-      const newXP=(prev.xp||0)+xpEarned;
-      const lvl=calcLevel(newXP).level;
-      // streak
+      const prev=existing[0]||{};
+      const newXP=(prev.xp||0)+activeMission.xp;
+      const newCoins=(prev.coins||0)+activeMission.coins;
+      const prevCompleted=prev.completed_missions||[];
+      const newCompleted=prevCompleted.includes(activeMission.id)?prevCompleted:[...prevCompleted,activeMission.id];
       let streak=prev.streak_days||0;
-      if(prev.last_practice_date===today){ /* same day, no change */ }
-      else if(prev.last_practice_date===new Date(Date.now()-86400000).toISOString().split("T")[0]) streak++;
-      else streak=1;
-      // subject stats
-      const ss={...(prev.subject_stats||{})};
-      selSubjects.forEach(s=>{
-        if(!ss[s]) ss[s]={q:0,c:0};
-        ss[s].q+=quiz.length/selSubjects.length;
-        ss[s].c+=score/selSubjects.length;
-      });
-      // badges
-      const prevBadges=[...(prev.badges||[])];
-      const badges=[...prevBadges];
-      if(!badges.includes("first_quiz")) badges.push("first_quiz");
-      if(streak>=3&&!badges.includes("streak_3")) badges.push("streak_3");
-      if(streak>=7&&!badges.includes("streak_7")) badges.push("streak_7");
-      if(streak>=14&&!badges.includes("streak_14")) badges.push("streak_14");
-      if(streak>=30&&!badges.includes("streak_30")) badges.push("streak_30");
-      if(pct===100&&quiz.length>=10&&!badges.includes("perfect_10")) badges.push("perfect_10");
-      if(pct===100&&difficulty==="hard"&&!badges.includes("perfect_hard")) badges.push("perfect_hard");
-      if(newQ>=100&&!badges.includes("century")) badges.push("century");
-      if(newQ>=500&&!badges.includes("five_hundred")) badges.push("five_hundred");
-      if(difficulty==="hard"&&!badges.includes("hard_mode")) badges.push("hard_mode");
-      if(lvl>=5&&!badges.includes("level_5")) badges.push("level_5");
-      if(lvl>=10&&!badges.includes("level_10")) badges.push("level_10");
-      if(hour<8&&!badges.includes("early_bird")) badges.push("early_bird");
-      if(hour>=21&&!badges.includes("night_owl")) badges.push("night_owl");
-      // all rounder: check if all 4 subjects have been done
-      const allSubjectsDone=["maths","english","verbal","nvr"].every(s=>(ss[s]?.q||0)>0);
-      if(allSubjectsDone&&!badges.includes("all_rounder")) badges.push("all_rounder");
-      // newly earned badges
-      const earned=badges.filter(b=>!prevBadges.includes(b));
-      if(earned.length>0){ setNewBadges(earned); setShowBadgePop(true); }
-      const data={user_id:user.id,total_questions:newQ,total_correct:newC,streak_days:streak,last_practice_date:today,badges,xp:newXP,level:lvl,subject_stats:ss};
-      if(existing[0]) await UserProgress.update(existing[0].id,data);
+      const yesterday=new Date(Date.now()-86400000).toISOString().split("T")[0];
+      if(prev.last_practice_date===today){}else if(prev.last_practice_date===yesterday)streak++;else streak=1;
+      let dd=prev.daily_missions_done||0,ddate=prev.daily_date||"";
+      if(ddate!==today){dd=0;ddate=today;}dd++;
+      if(activeMission.trick)setNewTrick(TRICKS[activeMission.trick]||null);
+      const pb=[...(prev.badges||[])],badges=[...pb];
+      const nl=calcLevel(newXP).level;
+      if(!badges.includes("first_quest"))badges.push("first_quest");
+      if(streak>=3&&!badges.includes("streak_3"))badges.push("streak_3");
+      if(streak>=7&&!badges.includes("streak_7"))badges.push("streak_7");
+      if(pct===100&&!badges.includes("perfect"))badges.push("perfect");
+      if(activeMission.isBoss&&!badges.includes("boss_slayer"))badges.push("boss_slayer");
+      if(nl>=5&&!badges.includes("level_5"))badges.push("level_5");
+      if(nl>=10&&!badges.includes("level_10"))badges.push("level_10");
+      if(newCompleted.length>=10&&!badges.includes("ten_missions"))badges.push("ten_missions");
+      const earned=badges.filter(b=>!pb.includes(b));
+      const BDEFS={first_quest:{icon:"🎯",name:"First Quest",desc:"Complete your first mission"},streak_3:{icon:"🔥",name:"On Fire",desc:"3-day streak"},streak_7:{icon:"💎",name:"Diamond",desc:"7-day streak"},perfect:{icon:"⭐",name:"Flawless",desc:"100% score"},boss_slayer:{icon:"👹",name:"Boss Slayer",desc:"Defeat a Boss"},level_5:{icon:"🚀",name:"Rising Star",desc:"Reach Level 5"},level_10:{icon:"👑",name:"Champion",desc:"Reach Level 10"},ten_missions:{icon:"💯",name:"Veteran",desc:"Complete 10 missions"}};
+      if(earned.length>0){const b=BDEFS[earned[0]];if(b)setTimeout(()=>setPopBadge(b),2800);}
+      const data={user_id:user.id,xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate};
+      if(existing[0])await UserProgress.update(existing[0].id,data);
       else await UserProgress.create(data);
-      setProgress(data);
-      const sessData={user_id:user.id,subjects:selSubjects,difficulty,score,total:quiz.length,percentage:pct,xp_earned:xpEarned,date:today};
-      await QuizSession.create(sessData);
-      setSessions(s=>[sessData,...s]);
-    } catch(e){console.error(e);}
+      setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate}));
+      if(nl>curLevel)setTimeout(()=>SFX.levelup(),600);
+    }catch(e){console.error(e);}
   }
 
-  // ── AI Tutor ──────────────────────────────────────────────────────────────
-  function openTopic(topic) {
-    setActiveTopic(topic);
-    const script=TUTOR_SCRIPTS[topic.id]||getDefaultScript(topic);
-    setChatMessages([script[0]]);setScriptIdx(1);setChatInput("");
-  }
-  function sendMessage() {
-    const text=chatInput.trim(); if(!text) return;
-    const userMsg={role:"user",text};
-    const script=TUTOR_SCRIPTS[activeTopic.id]||getDefaultScript(activeTopic);
-    const nextTutor=script[scriptIdx];
-    const newMsgs=[userMsg];
-    if(nextTutor) newMsgs.push(nextTutor);
-    else newMsgs.push({role:"tutor",text:"Great thinking! 🌟 Keep practising and come back anytime. Head to the Quiz to test what you've learned!"});
-    setChatMessages(m=>[...m,...newMsgs]);setScriptIdx(i=>i+1);setChatInput("");
-  }
+  function goTo(s){SFX.click();setScreen(s);}
 
-  function goTab(id){setTab(id);setActiveTopic(null);setQuizActive(false);setQuizDone(false);}
-
-  // ── HOME ──────────────────────────────────────────────────────────────────
-  if(tab==="home") return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4F46E5 100%)"}}>
-      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuth={()=>setShowAuth(false)}/>}
-      {showBadgePop&&<BadgeCelebration badges={newBadges} onClose={()=>setShowBadgePop(false)}/>}
-      <PageWrap>
-        <div style={{textAlign:"center",padding:"32px 0 16px"}}>
-          <div style={{fontSize:56,marginBottom:8}}>🎓</div>
-          <h1 style={{color:"white",fontWeight:900,fontSize:28,margin:"0 0 4px",letterSpacing:"-0.5px"}}>11+ Quest</h1>
-          <p style={{color:"#c7d2fe",fontSize:13,margin:"0 0 16px"}}>GL · CEM · ISEB · Independent Schools</p>
-          <div style={{background:"rgba(255,255,255,0.12)",borderRadius:16,padding:"12px 20px",display:"inline-flex",alignItems:"center",gap:10,marginBottom:16}}>
-            <span style={{fontSize:22}}>👥</span>
-            <div style={{textAlign:"left"}}>
-              <div style={{color:"white",fontWeight:900,fontSize:20}}>{visitorCount??"..."}</div>
-              <div style={{color:"#c7d2fe",fontSize:11}}>total visitors all time</div>
+  // ── MISSION SCREEN ─────────────────────────────────────────────────────────
+  if(screen==="mission"&&!missionDone&&missionQs[qIdx]){
+    const q=missionQs[qIdx];
+    const isBoss=activeMission?.isBoss;
+    const tPct=isBoss?(timeLeft/(activeMission.questions*25))*100:100;
+    return(
+      <div style={{minHeight:"100vh",background:isBoss?"linear-gradient(135deg,#3B0000,#7F1D1D)":"linear-gradient(135deg,#1e1b4b,#312e81)",animation:flashAnim==="wrong"?"shake 0.4s ease":undefined}}>
+        {floatMsg&&<div style={{position:"fixed",top:"28%",right:20,zIndex:500,animation:"floatUp 1.2s ease forwards",pointerEvents:"none",background:floatMsg.col,color:"white",fontWeight:900,fontSize:18,borderRadius:12,padding:"8px 16px"}}>{floatMsg.txt}</div>}
+        {flashAnim&&<div style={{position:"fixed",inset:0,zIndex:50,pointerEvents:"none",animation:flashAnim==="correct"?"flashGreen 0.6s ease":"flashRed 0.6s ease"}}/>}
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 80px"}}>
+          <div style={{padding:"14px 0 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <button onClick={()=>{setTimerActive(false);setScreen("map");SFX.click();}} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>✕ Quit</button>
+            <div style={{textAlign:"center"}}>
+              <div style={{color:isBoss?"#EF4444":"#FCD34D",fontWeight:800,fontSize:13}}>{isBoss?"⚔️ BOSS BATTLE":"⚡ Mission"}</div>
+              <div style={{color:"rgba(255,255,255,0.55)",fontSize:11}}>{activeMission?.name}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{color:"#FCD34D",fontWeight:800,fontSize:13}}>+{activeMission?.xp}XP</div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{missionScore}/{qIdx} ✓</div>
             </div>
           </div>
-          {user?(
-            <div style={{background:"rgba(255,255,255,0.1)",borderRadius:14,padding:"12px 16px",marginBottom:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div>
-                <p style={{color:"white",fontWeight:800,fontSize:14,margin:0}}>👋 Hey, {user.full_name?.split(" ")[0]||"there"}!</p>
-                <p style={{color:"#c7d2fe",fontSize:12,margin:"2px 0 0"}}>🔥 {progress?.streak_days||0} day streak · Level {curLevel} · {progress?.xp||0} XP</p>
+          <div style={{height:8,background:"rgba(255,255,255,0.14)",borderRadius:4,marginBottom:10,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${((qIdx+1)/missionQs.length)*100}%`,background:isBoss?"linear-gradient(90deg,#EF4444,#F97316)":"linear-gradient(90deg,#FCD34D,#A78BFA)",borderRadius:4,transition:"width 0.4s ease"}}/>
+          </div>
+          {isBoss&&(
+            <div style={{marginBottom:12}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                <span style={{color:"rgba(255,255,255,0.55)",fontSize:11}}>⏱ Time</span>
+                <span style={{color:timeLeft<30?"#EF4444":"#FCD34D",fontWeight:800,fontSize:14,animation:timeLeft<10?"pulse 0.5s infinite":undefined}}>{timeLeft}s</span>
               </div>
-              <button onClick={logout} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"white",fontSize:11,fontWeight:700,borderRadius:8,padding:"6px 10px",cursor:"pointer"}}>Sign out</button>
-            </div>
-          ):(
-            <div style={{background:"rgba(255,255,255,0.1)",borderRadius:14,padding:"14px 16px",marginBottom:4,textAlign:"center"}}>
-              <p style={{color:"white",fontWeight:800,fontSize:13,margin:"0 0 4px"}}>🔒 Sign in to save your progress</p>
-              <p style={{color:"#c7d2fe",fontSize:12,margin:"0 0 10px"}}>Track streaks · Earn badges · Climb the leaderboard</p>
-              <button onClick={()=>setShowAuth(true)} style={{padding:"10px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
+              <div style={{height:4,background:"rgba(255,255,255,0.14)",borderRadius:2,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${tPct}%`,background:timeLeft<30?"#EF4444":"#FCD34D",borderRadius:2,transition:"width 1s linear"}}/>
+              </div>
             </div>
           )}
-        </div>
-        {/* streak widget for logged in users */}
-        {user&&<StreakWidget streak={progress?.streak_days||0}/>}
-        {/* grid */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:4}}>
-          {[
-            {id:"learn",icon:"📚",title:"Learn",desc:"AI tutor — classroom style",grad:"linear-gradient(135deg,#059669,#047857)"},
-            {id:"quiz",icon:"✏️",title:"Quiz",desc:"4 subjects, 3 levels",grad:"linear-gradient(135deg,#4F46E5,#3730a3)"},
-            {id:"progress",icon:"📊",title:"My Stats",desc:"History & badges",grad:"linear-gradient(135deg,#D97706,#B45309)"},
-            {id:"leaderboard",icon:"🏆",title:"Leaderboard",desc:"Compete with friends",grad:"linear-gradient(135deg,#DC2626,#991B1B)"},
-          ].map(c=>(
-            <button key={c.id} onClick={()=>goTab(c.id)} style={{padding:"20px 16px",borderRadius:20,border:"none",background:c.grad,cursor:"pointer",textAlign:"left",boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}>
-              <div style={{fontSize:32,marginBottom:6}}>{c.icon}</div>
-              <div style={{color:"white",fontWeight:900,fontSize:16}}>{c.title}</div>
-              <div style={{color:"rgba(255,255,255,0.75)",fontSize:12}}>{c.desc}</div>
-            </button>
-          ))}
-        </div>
-        <button onClick={()=>goTab("schools")} style={{width:"100%",marginTop:12,padding:"14px",borderRadius:16,border:"2px solid rgba(255,255,255,0.3)",background:"transparent",color:"white",fontWeight:700,fontSize:14,cursor:"pointer"}}>🏫 Grammar School Info</button>
-      </PageWrap>
-    </div>
-  );
-
-  // ── SHARED WRAPPER ────────────────────────────────────────────────────────
-  return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4F46E5 100%)"}}>
-      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuth={()=>setShowAuth(false)}/>}
-      {showBadgePop&&<BadgeCelebration badges={newBadges} onClose={()=>setShowBadgePop(false)}/>}
-      {/* nav */}
-      <div style={{position:"sticky",top:0,zIndex:50,background:"rgba(30,27,75,0.95)",backdropFilter:"blur(10px)",padding:"10px 16px",display:"flex",gap:6,overflowX:"auto"}}>
-        {[{id:"home",label:"🏠"},{id:"learn",label:"📚 Learn"},{id:"quiz",label:"✏️ Quiz"},{id:"progress",label:"📊 Stats"},{id:"leaderboard",label:"🏆 Ranks"},{id:"schools",label:"🏫 Schools"}].map(n=>(
-          <button key={n.id} onClick={()=>goTab(n.id)}
-            style={{padding:"7px 12px",borderRadius:20,fontWeight:700,fontSize:12,cursor:"pointer",flexShrink:0,border:tab===n.id?"none":"2px solid rgba(255,255,255,0.3)",background:tab===n.id?"white":"transparent",color:tab===n.id?"#3730a3":"white"}}>
-            {n.label}
-          </button>
-        ))}
-        {!user&&<button onClick={()=>setShowAuth(true)} style={{marginLeft:"auto",padding:"7px 14px",borderRadius:20,fontWeight:700,fontSize:12,cursor:"pointer",flexShrink:0,border:"none",background:"#4F46E5",color:"white"}}>Sign In</button>}
-      </div>
-
-      {/* ── LEARN ── */}
-      {tab==="learn"&&!activeTopic&&(
-        <PageWrap>
-          <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"16px 0 4px"}}>📚 AI Tutor</h2>
-          <p style={{color:"#c7d2fe",fontSize:13,margin:"0 0 14px"}}>Choose a topic — your AI teacher will guide you through it like a real classroom lesson.</p>
-          <div style={{display:"flex",gap:8,marginBottom:14,overflowX:"auto"}}>
-            {Object.entries(SUBJECT_LABELS).map(([id,label])=>(
-              <button key={id} onClick={()=>setLearnSubject(id)}
-                style={{padding:"8px 14px",borderRadius:20,fontWeight:700,fontSize:12,cursor:"pointer",flexShrink:0,border:`2px solid ${learnSubject===id?SUBJECT_COLOURS[id]:"rgba(255,255,255,0.3)"}`,background:learnSubject===id?SUBJECT_COLOURS[id]:"transparent",color:"white"}}>
-                {label}
-              </button>
-            ))}
-          </div>
-          {AI_TUTOR_TOPICS.filter(t=>t.subject===learnSubject).map(topic=>(
-            <button key={topic.id} onClick={()=>openTopic(topic)}
-              style={{width:"100%",marginBottom:10,background:"white",borderRadius:16,padding:"16px",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:14,boxShadow:"0 4px 15px rgba(0,0,0,0.15)",textAlign:"left"}}>
-              <div style={{width:48,height:48,borderRadius:14,background:SUBJECT_BG[learnSubject],display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{topic.icon}</div>
-              <div>
-                <div style={{fontWeight:800,fontSize:15,color:"#1e1b4b"}}>{topic.title}</div>
-                <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>Interactive lesson with your AI tutor 🤖</div>
-              </div>
-              <div style={{marginLeft:"auto",color:SUBJECT_COLOURS[learnSubject],fontWeight:700,fontSize:18}}>→</div>
-            </button>
-          ))}
-        </PageWrap>
-      )}
-
-      {/* ── AI TUTOR CHAT ── */}
-      {tab==="learn"&&activeTopic&&(
-        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px",display:"flex",flexDirection:"column",height:"calc(100vh - 50px)"}}>
-          <div style={{padding:"12px 0",display:"flex",alignItems:"center",gap:10}}>
-            <button onClick={()=>setActiveTopic(null)} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"white",fontWeight:700,fontSize:13,borderRadius:20,padding:"7px 14px",cursor:"pointer"}}>← Back</button>
-            <div>
-              <div style={{color:"white",fontWeight:800,fontSize:16}}>{activeTopic.icon} {activeTopic.title}</div>
-              <div style={{color:"#c7d2fe",fontSize:11}}>AI Tutor · {SUBJECT_LABELS[activeTopic.subject]}</div>
+          <div style={{background:"white",borderRadius:22,padding:"22px 18px",marginBottom:12,boxShadow:isBoss?"0 8px 40px rgba(220,38,38,0.3)":"0 8px 30px rgba(0,0,0,0.25)",animation:"slideUp 0.3s ease"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+              <span style={{fontSize:11,fontWeight:700,color:"#9ca3af",textTransform:"uppercase",letterSpacing:"1px"}}>{q.topic||activeMission?.name}</span>
+              <span style={{fontSize:12,color:"#9ca3af"}}>{qIdx+1} / {missionQs.length}</span>
             </div>
-          </div>
-          <div style={{flex:1,overflowY:"auto",paddingBottom:8}}>
-            {chatMessages.map((msg,i)=>(
-              <div key={i} style={{display:"flex",justifyContent:msg.role==="user"?"flex-end":"flex-start",marginBottom:10}}>
-                {msg.role==="tutor"&&<div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,marginRight:8,flexShrink:0,alignSelf:"flex-start",marginTop:2}}>🤖</div>}
-                <div style={{maxWidth:"82%",padding:"12px 16px",borderRadius:msg.role==="user"?"20px 20px 4px 20px":"20px 20px 20px 4px",background:msg.role==="user"?"#4F46E5":"white",color:msg.role==="user"?"white":"#1e1b4b",fontSize:14,lineHeight:1.6,whiteSpace:"pre-wrap",boxShadow:"0 2px 10px rgba(0,0,0,0.1)"}}>
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            <div ref={chatEndRef}/>
-          </div>
-          <div style={{padding:"10px 0 20px",display:"flex",gap:8}}>
-            <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendMessage()}
-              placeholder="Type your answer or question..."
-              style={{flex:1,padding:"13px 16px",borderRadius:24,border:"2px solid rgba(255,255,255,0.3)",background:"rgba(255,255,255,0.15)",color:"white",fontSize:14,fontFamily:"inherit",outline:"none"}}/>
-            <button onClick={sendMessage} style={{padding:"13px 18px",borderRadius:24,border:"none",background:"white",color:"#4F46E5",fontWeight:800,fontSize:16,cursor:"pointer"}}>→</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── QUIZ SETUP ── */}
-      {tab==="quiz"&&!quizActive&&!quizDone&&(
-        <PageWrap>
-          <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"16px 0 4px"}}>✏️ Practice Quiz</h2>
-          <p style={{color:"#c7d2fe",fontSize:13,margin:"0 0 14px"}}>Choose your subjects, difficulty & number of questions.</p>
-          <div style={{background:"white",borderRadius:20,padding:"20px 18px",boxShadow:"0 8px 30px rgba(0,0,0,0.2)"}}>
-            <p style={{fontWeight:800,color:"#1e1b4b",fontSize:11,textTransform:"uppercase",letterSpacing:"1px",margin:"0 0 10px"}}>Subjects</p>
-            {Object.entries(SUBJECT_LABELS).map(([id,label])=>(
-              <button key={id} onClick={()=>setSelSubjects(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id])}
-                style={{width:"100%",marginBottom:8,padding:"13px 16px",borderRadius:12,border:`2px solid ${selSubjects.includes(id)?SUBJECT_COLOURS[id]:"#e5e7eb"}`,background:selSubjects.includes(id)?SUBJECT_BG[id]:"#fafafa",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontWeight:700,fontSize:14,color:selSubjects.includes(id)?SUBJECT_COLOURS[id]:"#374151"}}>{label}</span>
-                <div style={{width:22,height:22,borderRadius:"50%",border:`2px solid ${selSubjects.includes(id)?SUBJECT_COLOURS[id]:"#d1d5db"}`,background:selSubjects.includes(id)?SUBJECT_COLOURS[id]:"white",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  {selSubjects.includes(id)&&<span style={{color:"white",fontSize:11,fontWeight:900}}>✓</span>}
-                </div>
-              </button>
-            ))}
-            <p style={{fontWeight:800,color:"#1e1b4b",fontSize:11,textTransform:"uppercase",letterSpacing:"1px",margin:"16px 0 10px"}}>Difficulty</p>
-            <div style={{display:"flex",gap:8,marginBottom:16}}>
-              {["easy","medium","hard"].map(d=>(
-                <button key={d} onClick={()=>setDifficulty(d)}
-                  style={{flex:1,padding:"11px 0",borderRadius:10,border:`2px solid ${difficulty===d?DIFF_COLOURS[d]:"#e5e7eb"}`,background:difficulty===d?DIFF_COLOURS[d]+"15":"white",color:difficulty===d?DIFF_COLOURS[d]:"#374151",fontWeight:700,fontSize:13,cursor:"pointer"}}>
-                  {d==="easy"?"😊 Easy":d==="medium"?"🎯 Medium":"🔥 Hard"}<br/>
-                  <span style={{fontSize:10,opacity:0.7}}>+{DIFF_XP[d]} XP/q</span>
-                </button>
-              ))}
+            <p style={{fontWeight:800,fontSize:18,color:"#111827",margin:"0 0 20px",lineHeight:1.4}}>{q.q}</p>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {q.options.map(opt=>{
+                const isSel=selected===opt,isAns=opt===q.answer;
+                let bg="white",border="2px solid #E5E7EB",col="#374151",shadow="none";
+                if(selected){
+                  if(isAns){bg="#ECFDF5";border="2px solid #059669";col="#065F46";shadow="0 0 0 3px rgba(5,150,105,0.15)";}
+                  else if(isSel){bg="#FEF2F2";border="2px solid #DC2626";col="#991B1B";shadow="0 0 0 3px rgba(220,38,38,0.15)";}
+                  else{bg="#F9FAFB";col="#9CA3AF";}
+                }
+                return(
+                  <button key={opt} onClick={()=>handleAnswer(opt)}
+                    style={{padding:"14px 16px",borderRadius:14,border,background:bg,color:col,fontWeight:700,fontSize:14,cursor:selected?"default":"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",transition:"all 0.2s",boxShadow:shadow}}>
+                    <span>{opt}</span>
+                    {selected&&isAns&&<span style={{animation:"starBurst 0.4s ease"}}>✅</span>}
+                    {selected&&isSel&&!isAns&&<span>❌</span>}
+                  </button>
+                );
+              })}
             </div>
-            <p style={{fontWeight:800,color:"#1e1b4b",fontSize:11,textTransform:"uppercase",letterSpacing:"1px",margin:"0 0 10px"}}>Questions</p>
-            <div style={{display:"flex",gap:8,marginBottom:18}}>
-              {[5,10,15,20].map(n=>(
-                <button key={n} onClick={()=>setQCount(n)}
-                  style={{flex:1,padding:"11px 0",borderRadius:10,border:`2px solid ${qCount===n?"#4F46E5":"#e5e7eb"}`,background:qCount===n?"#EEF2FF":"white",color:qCount===n?"#4F46E5":"#374151",fontWeight:700,fontSize:15,cursor:"pointer"}}>{n}</button>
-              ))}
-            </div>
-            {!user&&<p style={{textAlign:"center",fontSize:12,color:"#9ca3af",marginBottom:8}}>⚠️ <span style={{cursor:"pointer",color:"#4F46E5",fontWeight:700}} onClick={()=>setShowAuth(true)}>Sign in</span> to save your score & earn XP</p>}
-            <button onClick={startQuiz} disabled={selSubjects.length===0}
-              style={{width:"100%",padding:"16px",borderRadius:14,border:"none",background:selSubjects.length===0?"#e5e7eb":"linear-gradient(135deg,#4F46E5,#7C3AED)",color:selSubjects.length===0?"#9ca3af":"white",fontWeight:800,fontSize:16,cursor:selSubjects.length===0?"not-allowed":"pointer"}}>
-              {selSubjects.length===0?"👆 Select a subject":"Start Quiz →"}
-            </button>
-          </div>
-        </PageWrap>
-      )}
-
-      {/* ── QUIZ ACTIVE ── */}
-      {tab==="quiz"&&quizActive&&!quizDone&&quiz[qIdx]&&(
-        <PageWrap>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 8px"}}>
-            <span style={{color:"#c7d2fe",fontWeight:700,fontSize:13}}>Question {qIdx+1}/{quiz.length}</span>
-            <span style={{color:"#c7d2fe",fontWeight:700,fontSize:13}}>✅ {score} correct</span>
-          </div>
-          <div style={{height:6,background:"rgba(255,255,255,0.2)",borderRadius:3,marginBottom:16}}>
-            <div style={{height:"100%",width:`${((qIdx+1)/quiz.length)*100}%`,background:"white",borderRadius:3,transition:"width 0.3s"}}/>
-          </div>
-          <div style={{background:"white",borderRadius:20,padding:"20px 18px",marginBottom:12,boxShadow:"0 8px 30px rgba(0,0,0,0.2)"}}>
-            <div style={{fontSize:11,fontWeight:700,color:"#6b7280",textTransform:"uppercase",letterSpacing:"1px",marginBottom:8}}>{quiz[qIdx].topic}</div>
-            <p style={{fontWeight:800,fontSize:17,color:"#1e1b4b",margin:"0 0 18px",lineHeight:1.4}}>{quiz[qIdx].q}</p>
-            {quiz[qIdx].options.map(opt=>{
-              let bg="#f8fafc",border="2px solid #e5e7eb",color="#374151";
-              if(selected!==null){
-                if(opt===quiz[qIdx].answer){bg="#ECFDF5";border="2px solid #059669";color="#065F46";}
-                else if(opt===selected&&opt!==quiz[qIdx].answer){bg="#FEF2F2";border="2px solid #DC2626";color="#991B1B";}
-              }
-              return (
-                <button key={opt} onClick={()=>handleAnswer(opt)}
-                  style={{width:"100%",marginBottom:10,padding:"14px 16px",borderRadius:12,border,background:bg,color,fontWeight:700,fontSize:14,cursor:selected?"default":"pointer",textAlign:"left",transition:"all 0.2s"}}>
-                  {opt}
-                  {selected!==null&&opt===quiz[qIdx].answer&&<span style={{float:"right"}}>✅</span>}
-                  {selected!==null&&opt===selected&&opt!==quiz[qIdx].answer&&<span style={{float:"right"}}>❌</span>}
-                </button>
-              );
-            })}
-            {selected!==null&&(
-              <div style={{background:"#EEF2FF",borderRadius:12,padding:"12px 14px",marginTop:4}}>
-                <p style={{fontWeight:700,fontSize:13,color:"#1e1b4b",margin:"0 0 4px"}}>💡 Explanation</p>
-                <p style={{fontSize:13,color:"#374151",margin:0}}>{quiz[qIdx].explanation}</p>
+            {selected&&(
+              <div style={{background:"#EEF2FF",borderRadius:12,padding:"12px 14px",marginTop:12,animation:"slideUp 0.3s ease"}}>
+                <p style={{fontWeight:700,fontSize:13,color:"#312e81",margin:"0 0 2px"}}>💡 Explanation</p>
+                <p style={{fontSize:13,color:"#4338ca",margin:0,lineHeight:1.5}}>{missionQs[qIdx].explanation}</p>
               </div>
             )}
           </div>
-          {selected!==null&&(
-            <button onClick={nextQ} style={{width:"100%",padding:"16px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:16,cursor:"pointer"}}>
-              {qIdx+1>=quiz.length?"See Results 🏁":"Next Question →"}
+          {selected&&(
+            <button onClick={nextQ} style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:isBoss?"linear-gradient(135deg,#DC2626,#991B1B)":"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:16,cursor:"pointer",boxShadow:"0 4px 20px rgba(0,0,0,0.3)",animation:"slideUp 0.3s ease",fontFamily:"inherit"}}>
+              {qIdx+1>=missionQs.length?"Finish Mission ⚡":"Next →"}
             </button>
           )}
-        </PageWrap>
-      )}
+        </div>
+      </div>
+    );
+  }
 
-      {/* ── QUIZ DONE ── */}
-      {tab==="quiz"&&quizDone&&(
-        <PageWrap>
-          <div style={{textAlign:"center",padding:"24px 0 12px"}}>
-            <div style={{fontSize:60}}>{score/quiz.length>=0.8?"🏆":score/quiz.length>=0.6?"⭐":"💪"}</div>
-            <h2 style={{color:"white",fontWeight:900,fontSize:26,margin:"8px 0 4px"}}>{Math.round((score/quiz.length)*100)}%</h2>
-            <p style={{color:"#c7d2fe",fontSize:15,margin:"0 0 4px"}}>{score}/{quiz.length} correct</p>
-            {user&&<p style={{color:"#FDE68A",fontWeight:700,fontSize:14,margin:"4px 0"}}>+{quiz.length*DIFF_XP[difficulty]} XP earned!</p>}
-          </div>
-          <div style={{background:"white",borderRadius:20,padding:"18px",marginBottom:12,boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-            <p style={{fontWeight:800,fontSize:14,color:"#1e1b4b",margin:"0 0 12px"}}>📋 Answer Review</p>
-            {answers.map((a,i)=>(
-              <div key={i} style={{padding:"10px 0",borderBottom:i<answers.length-1?"1px solid #f3f4f6":"none"}}>
-                <p style={{fontSize:13,fontWeight:700,color:"#374151",margin:"0 0 3px"}}>{i+1}. {a.q}</p>
-                <p style={{fontSize:12,margin:"0 0 2px",color:a.correct?"#059669":"#DC2626",fontWeight:700}}>{a.correct?"✅ Correct":"❌ "+a.chosen+" → "+a.answer}</p>
-                {!a.correct&&<p style={{fontSize:12,color:"#6b7280",margin:0}}>💡 {a.explanation}</p>}
-              </div>
-            ))}
-          </div>
-          <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>{setQuizDone(false);setQuizActive(false);}} style={{flex:1,padding:"14px",borderRadius:12,border:"2px solid rgba(255,255,255,0.4)",background:"transparent",color:"white",fontWeight:700,fontSize:14,cursor:"pointer"}}>⚙️ New Quiz</button>
-            <button onClick={startQuiz} style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:"white",color:"#4F46E5",fontWeight:800,fontSize:14,cursor:"pointer"}}>🔄 Try Again</button>
-          </div>
-        </PageWrap>
-      )}
+  if(screen==="mission"&&missionDone)return(
+    <>
+      {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
+      <MissionComplete mission={activeMission} score={missionScore} total={missionQs.length}
+        xpEarned={Math.round((missionScore/missionQs.length)*100)>=70?activeMission?.xp:0}
+        coinsEarned={Math.round((missionScore/missionQs.length)*100)>=70?activeMission?.coins:0}
+        newTrick={newTrick} onContinue={()=>setScreen("map")} onRetry={()=>startMission(activeMission,activeMission._worldId)}/>
+    </>
+  );
 
-      {/* ── PROGRESS / STATS ── */}
-      {tab==="progress"&&(
-        <PageWrap>
-          <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"16px 0 4px"}}>📊 My Stats</h2>
-          {!user?(
-            <div style={{textAlign:"center",padding:"60px 20px"}}>
-              <div style={{fontSize:56,marginBottom:16}}>🔒</div>
-              <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Sign in to see your stats</h2>
-              <p style={{color:"#c7d2fe",fontSize:14,margin:"0 0 20px"}}>Track your progress, streaks and badges!</p>
-              <button onClick={()=>setShowAuth(true)} style={{padding:"12px 28px",borderRadius:14,background:"white",color:"#3730a3",fontWeight:800,fontSize:15,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In / Register →</button>
+  // ── WORLD DETAIL ───────────────────────────────────────────────────────────
+  if(screen==="map"&&activeWorld){
+    const world=activeWorld;
+    const locked=curLevel<world.unlockLevel;
+    return(
+      <div style={{minHeight:"100vh",background:`linear-gradient(180deg,${world.colour}cc 0%,#0f0c29 100%)`}}>
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+          <div style={{padding:"14px 0",display:"flex",alignItems:"center",gap:12}}>
+            <button onClick={()=>{SFX.click();setActiveWorld(null);setScreen("home");}} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 14px",cursor:"pointer"}}>← Map</button>
+            <div>
+              <div style={{color:"white",fontWeight:900,fontSize:20}}>{world.icon} {world.name}</div>
+              <div style={{color:"rgba(255,255,255,0.55)",fontSize:12}}>{world.desc}</div>
             </div>
-          ):(
-            <>
-              <p style={{color:"#c7d2fe",fontSize:13,margin:"0 0 14px"}}>{user.full_name||user.email}</p>
-              {/* streak widget */}
-              <StreakWidget streak={progress?.streak_days||0}/>
-              {/* level */}
-              <div style={{background:"white",borderRadius:20,padding:"18px",marginBottom:12,boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <span style={{fontWeight:800,fontSize:16,color:"#1e1b4b"}}>🚀 Level {curLevel}</span>
-                  <span style={{fontSize:12,color:"#6b7280"}}>{xpInLevel}/{xpNeeded} XP to next level</span>
+          </div>
+          {locked&&<div style={{background:"rgba(0,0,0,0.4)",borderRadius:18,padding:"24px",textAlign:"center",marginBottom:16}}>
+            <div style={{fontSize:48,marginBottom:8}}>🔒</div>
+            <div style={{color:"white",fontWeight:800,fontSize:17}}>Unlocks at Level {world.unlockLevel}</div>
+            <div style={{color:"rgba(255,255,255,0.55)",fontSize:13,marginTop:4}}>You're Level {curLevel} — keep going!</div>
+          </div>}
+          {world.missions.map((mission,idx)=>{
+            const unlocked=!locked&&isMissionUnlocked(world,mission);
+            const completed=isCompleted(mission.id);
+            const trickObj=mission.trick?TRICKS[mission.trick]:null;
+            const trickUnlocked=trickObj&&player.completed_missions.includes(mission.id);
+            return(
+              <div key={mission.id} style={{display:"flex",gap:12,marginBottom:10,animation:`slideUp ${0.1+idx*0.07}s ease`}}>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:52,flexShrink:0}}>
+                  {idx>0&&<div style={{width:2,height:14,background:"rgba(255,255,255,0.18)",marginBottom:4}}/>}
+                  <button onClick={()=>unlocked&&startMission(mission,world.id)} disabled={!unlocked}
+                    style={{width:52,height:52,borderRadius:"50%",border:completed?"3px solid #FCD34D":unlocked?(mission.isBoss?"3px solid #EF4444":"3px solid rgba(255,255,255,0.4)"):"3px solid rgba(255,255,255,0.1)",background:completed?"#FCD34D":unlocked?(mission.isBoss?"rgba(220,38,38,0.35)":"rgba(255,255,255,0.12)"):"rgba(0,0,0,0.3)",cursor:unlocked?"pointer":"not-allowed",fontSize:22,display:"flex",alignItems:"center",justifyContent:"center",animation:completed?"glow 2s infinite":unlocked&&mission.isBoss?"bossGlow 2s infinite":undefined}}>
+                    {completed?"⭐":unlocked?mission.icon:"🔒"}
+                  </button>
+                  {idx<world.missions.length-1&&<div style={{width:2,height:14,background:"rgba(255,255,255,0.18)",marginTop:4}}/>}
                 </div>
-                <div style={{height:12,background:"#e5e7eb",borderRadius:6,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:`${Math.round((xpInLevel/xpNeeded)*100)}%`,background:"linear-gradient(90deg,#F59E0B,#EF4444)",borderRadius:6,transition:"width 1s"}}/>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:14}}>
-                  {[{v:progress?.total_questions||0,l:"Questions",c:"#4F46E5"},{v:(progress?.total_questions>0?Math.round(((progress?.total_correct||0)/progress.total_questions)*100):0)+"%",l:"Accuracy",c:"#059669"},{v:progress?.xp||0,l:"Total XP",c:"#F59E0B"},{v:"🔥"+(progress?.streak_days||0),l:"Streak",c:"#DC2626"}].map((s,i)=>(
-                    <div key={i} style={{textAlign:"center",background:"#f8fafc",borderRadius:12,padding:"10px 6px"}}>
-                      <div style={{fontSize:18,fontWeight:900,color:s.c}}>{s.v}</div>
-                      <div style={{fontSize:10,color:"#6b7280"}}>{s.l}</div>
+                <div onClick={()=>unlocked&&startMission(mission,world.id)}
+                  style={{flex:1,background:completed?"rgba(252,211,77,0.12)":unlocked?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.22)",borderRadius:18,padding:"14px 16px",cursor:unlocked?"pointer":"default",border:completed?"1px solid rgba(252,211,77,0.35)":mission.isBoss?"1px solid rgba(239,68,68,0.35)":"1px solid rgba(255,255,255,0.08)"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                    <div>
+                      <div style={{color:completed?"#FCD34D":unlocked?"white":"rgba(255,255,255,0.28)",fontWeight:800,fontSize:15,marginBottom:3}}>{mission.name}</div>
+                      <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{mission.isBoss?"⏱ TIMED · ":""}{mission.questions}q · +{mission.xp}XP · 🪙{mission.coins}</div>
                     </div>
-                  ))}
+                    {unlocked&&!completed&&<span style={{color:mission.isBoss?"#EF4444":"#FCD34D",fontSize:20}}>▶</span>}
+                    {completed&&<span>✅</span>}
+                    {!unlocked&&<span style={{fontSize:14}}>🔒</span>}
+                  </div>
+                  {trickObj&&<div style={{marginTop:8,background:"rgba(0,0,0,0.18)",borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{fontSize:13}}>{trickObj.icon}</span>
+                    <span style={{color:trickUnlocked?"#FCD34D":"rgba(255,255,255,0.28)",fontSize:11,fontWeight:700}}>{trickUnlocked?`🔑 ${trickObj.title}`:`🔒 Complete to unlock trick`}</span>
+                  </div>}
                 </div>
               </div>
-              {/* subject breakdown */}
-              <div style={{background:"white",borderRadius:20,padding:"18px",marginBottom:12,boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-                <p style={{fontWeight:800,fontSize:14,color:"#1e1b4b",margin:"0 0 12px"}}>📚 By Subject</p>
-                {Object.entries(SUBJECT_LABELS).map(([s,label])=>{
-                  const st=progress?.subject_stats?.[s]||{q:0,c:0};
-                  const sp=st.q>0?Math.round((st.c/st.q)*100):0;
-                  return <div key={s} style={{marginBottom:10}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                      <span style={{fontSize:13,fontWeight:700,color:"#374151"}}>{label}</span>
-                      <span style={{fontSize:13,fontWeight:700,color:SUBJECT_COLOURS[s]}}>{Math.round(st.c||0)}/{Math.round(st.q||0)} ({sp}%)</span>
+            );
+          })}
+        </div>
+        <BottomNav screen={screen} goTo={goTo}/>
+      </div>
+    );
+  }
+
+  // ── LEADERBOARD ────────────────────────────────────────────────────────────
+  if(screen==="leaderboard")return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)"}}>
+      <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+        <div style={{padding:"14px 0 8px",display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>← Back</button>
+          <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>🏆 Leaderboard</h2>
+        </div>
+        {leaderboard.length>=3&&(
+          <div style={{display:"flex",justifyContent:"center",alignItems:"flex-end",gap:6,marginBottom:16}}>
+            {[leaderboard[1],leaderboard[0],leaderboard[2]].map((e,i)=>{
+              if(!e)return null;
+              const medals=["🥈","🥇","🥉"];const hs=["70px","90px","58px"];
+              const pos=[2,1,3][i];const isMe=user&&e.user_id===user.id;
+              const rank=getRank(calcLevel(e.xp||0).level);
+              return <div key={pos} style={{textAlign:"center",flex:1}}>
+                <div style={{fontSize:22,marginBottom:4}}>{medals[i]}</div>
+                <div style={{background:isMe?"rgba(79,70,229,0.4)":"rgba(255,255,255,0.08)",borderRadius:"12px 12px 0 0",height:hs[i],display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",padding:"8px 4px",border:isMe?"2px solid #7C3AED":"none"}}>
+                  <div style={{fontSize:10,fontWeight:800,color:"white"}}>{isMe?"⭐ You":`#${pos}`}</div>
+                  <div style={{fontSize:11,color:"#FCD34D",fontWeight:700}}>{e.xp||0}XP</div>
+                  <div style={{fontSize:13}}>{rank.icon}</div>
+                </div>
+              </div>;
+            })}
+          </div>
+        )}
+        <div style={{background:"rgba(255,255,255,0.05)",borderRadius:20,overflow:"hidden"}}>
+          {leaderboard.map((e,i)=>{
+            const isMe=user&&e.user_id===user.id;
+            const rank=getRank(calcLevel(e.xp||0).level);
+            const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":`#${i+1}`;
+            return <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",background:isMe?"rgba(79,70,229,0.22)":"transparent",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+              <div style={{width:26,fontWeight:900,fontSize:14,color:i<3?"#FCD34D":"rgba(255,255,255,0.35)"}}>{medal}</div>
+              <div style={{width:34,height:34,borderRadius:"50%",background:rank.colour,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>{rank.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{color:"white",fontWeight:700,fontSize:14}}>{isMe?`⭐ ${user.full_name||"You"}`:`Player ${i+1}`}</div>
+                <div style={{color:"rgba(255,255,255,0.35)",fontSize:11}}>{rank.title} · 🔥{e.streak_days||0}</div>
+              </div>
+              <div style={{fontWeight:800,fontSize:14,color:"#FCD34D"}}>{e.xp||0} XP</div>
+            </div>;
+          })}
+          {!user&&<div style={{padding:16,textAlign:"center"}}>
+            <button onClick={()=>setShowAuth(true)} style={{padding:"12px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In to Compete →</button>
+          </div>}
+        </div>
+      </div>
+      <BottomNav screen={screen} goTo={goTo}/>
+    </div>
+  );
+
+  // ── TRICKS ─────────────────────────────────────────────────────────────────
+  if(screen==="tricks")return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)"}}>
+      <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+        <div style={{padding:"14px 0 8px",display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>← Back</button>
+          <div>
+            <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>🔑 Tricks & Hacks</h2>
+            <div style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>Earn by completing missions</div>
+          </div>
+        </div>
+        {Object.entries(TRICKS).map(([id,trick],i)=>{
+          const missionId=WORLDS.flatMap(w=>w.missions).find(m=>m.trick===id)?.id;
+          const unlocked=missionId?player.completed_missions.includes(missionId):false;
+          const world=WORLDS.find(w=>w.id===trick.subject);
+          return(
+            <div key={id} style={{background:unlocked?"rgba(255,255,255,0.07)":"rgba(0,0,0,0.28)",borderRadius:18,padding:"16px",marginBottom:10,border:unlocked?"1px solid rgba(252,211,77,0.22)":"1px solid rgba(255,255,255,0.05)",animation:`slideUp ${0.05+i*0.04}s ease`}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:unlocked?10:0}}>
+                <div style={{width:46,height:46,borderRadius:14,background:unlocked?(world?.colour||"#4F46E5"):"rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,filter:unlocked?"none":"grayscale(1) opacity(0.3)"}}>
+                  {trick.icon}
+                </div>
+                <div>
+                  <div style={{color:unlocked?"white":"rgba(255,255,255,0.28)",fontWeight:800,fontSize:15}}>{unlocked?trick.title:`🔒 ${trick.title}`}</div>
+                  <div style={{color:"rgba(255,255,255,0.3)",fontSize:11}}>{world?.name}</div>
+                </div>
+              </div>
+              {unlocked&&<div style={{background:"rgba(0,0,0,0.22)",borderRadius:12,padding:"12px 14px",whiteSpace:"pre-wrap",color:"rgba(255,255,255,0.85)",fontSize:13,lineHeight:1.65}}>{trick.body}</div>}
+            </div>
+          );
+        })}
+      </div>
+      <BottomNav screen={screen} goTo={goTo}/>
+    </div>
+  );
+
+  // ── PROGRESS ───────────────────────────────────────────────────────────────
+  if(screen==="progress")return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)"}}>
+      <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+        <div style={{padding:"14px 0 8px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>← Back</button>
+            <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>📊 Progress</h2>
+          </div>
+          {user&&<button onClick={()=>{logout();setPlayer({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});}} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"rgba(255,255,255,0.5)",fontSize:12,borderRadius:10,padding:"6px 12px",cursor:"pointer",fontFamily:"inherit"}}>Sign out</button>}
+        </div>
+        {!user?<div style={{textAlign:"center",padding:"60px 20px"}}>
+          <div style={{fontSize:56,marginBottom:12}}>🔒</div>
+          <p style={{color:"white",fontWeight:800,fontSize:18}}>Sign in to track progress</p>
+          <button onClick={()=>setShowAuth(true)} style={{marginTop:12,padding:"12px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In →</button>
+        </div>:(
+          <>
+            <div style={{background:"linear-gradient(135deg,rgba(79,70,229,0.3),rgba(124,58,237,0.2))",border:"1px solid rgba(255,255,255,0.12)",borderRadius:22,padding:"20px",marginBottom:14}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                <div>
+                  <div style={{color:"rgba(255,255,255,0.45)",fontSize:11,textTransform:"uppercase",letterSpacing:"1px"}}>Rank</div>
+                  <div style={{color:"white",fontWeight:900,fontSize:22}}>{curRank.icon} {curRank.title}</div>
+                  <div style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>Level {curLevel} · {user.full_name||user.email}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{color:"#FCD34D",fontWeight:900,fontSize:17}}>🪙 {player.coins}</div>
+                  <div style={{color:"#F97316",fontSize:13,fontWeight:700,marginTop:2}}>🔥 {player.streak} streak</div>
+                </div>
+              </div>
+              <XPBar xp={player.xp}/>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginTop:14}}>
+                {[{v:player.completed_missions.length,l:"Missions",c:"#FCD34D"},{v:player.xp,l:"Total XP",c:"#60A5FA"},{v:(player.badges||[]).length,l:"Badges",c:"#A78BFA"},{v:player.streak,l:"Streak 🔥",c:"#F97316"}].map((s,i)=>(
+                  <div key={i} style={{textAlign:"center",background:"rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 4px"}}>
+                    <div style={{fontSize:16,fontWeight:900,color:s.c}}>{s.v}</div>
+                    <div style={{fontSize:10,color:"rgba(255,255,255,0.4)"}}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{background:"rgba(255,255,255,0.04)",borderRadius:20,padding:"16px",marginBottom:14,border:"1px solid rgba(255,255,255,0.07)"}}>
+              <div style={{color:"white",fontWeight:800,fontSize:15,marginBottom:14}}>🗺 Skill Tree</div>
+              {WORLDS.map(world=>{
+                const done=world.missions.filter(m=>isCompleted(m.id)).length;
+                const total=world.missions.length;
+                const pct=Math.round((done/total)*100);
+                const locked=curLevel<world.unlockLevel;
+                return <div key={world.id} style={{marginBottom:16}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{fontSize:16}}>{world.icon}</span>
+                      <span style={{color:locked?"rgba(255,255,255,0.28)":"white",fontWeight:700,fontSize:14}}>{world.name}</span>
+                      {locked&&<span style={{color:"rgba(255,255,255,0.28)",fontSize:10}}>🔒 Lv.{world.unlockLevel}</span>}
                     </div>
-                    <div style={{height:8,background:"#e5e7eb",borderRadius:4,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${sp}%`,background:SUBJECT_COLOURS[s],borderRadius:4,transition:"width 1s"}}/>
-                    </div>
+                    <span style={{color:world.colour,fontWeight:800,fontSize:12}}>{done}/{total}</span>
+                  </div>
+                  <div style={{height:7,background:"rgba(255,255,255,0.07)",borderRadius:4,overflow:"hidden",marginBottom:6}}>
+                    <div style={{height:"100%",width:`${pct}%`,background:world.colour,borderRadius:4,transition:"width 1.2s"}}/>
+                  </div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {world.missions.map(m=>(
+                      <div key={m.id} title={m.name} style={{width:30,height:30,borderRadius:"50%",background:isCompleted(m.id)?"#FCD34D":isMissionUnlocked(world,m)?"rgba(255,255,255,0.12)":"rgba(0,0,0,0.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,border:isCompleted(m.id)?"2px solid #F59E0B":"1px solid rgba(255,255,255,0.08)"}}>
+                        {isCompleted(m.id)?"✅":m.icon}
+                      </div>
+                    ))}
+                  </div>
+                </div>;
+              })}
+            </div>
+            <div style={{background:"rgba(255,255,255,0.04)",borderRadius:20,padding:"16px",border:"1px solid rgba(255,255,255,0.07)"}}>
+              <div style={{color:"white",fontWeight:800,fontSize:15,marginBottom:12}}>🏅 Badges ({(player.badges||[]).length})</div>
+              {(player.badges||[]).length===0&&<p style={{color:"rgba(255,255,255,0.3)",fontSize:13,textAlign:"center"}}>Complete missions to earn badges!</p>}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                {(player.badges||[]).map((bid,i)=>{
+                  const defs={first_quest:{icon:"🎯",name:"First Quest"},streak_3:{icon:"🔥",name:"On Fire"},streak_7:{icon:"💎",name:"Diamond"},perfect:{icon:"⭐",name:"Flawless"},boss_slayer:{icon:"👹",name:"Boss Slayer"},level_5:{icon:"🚀",name:"Lv.5"},level_10:{icon:"👑",name:"Lv.10"},ten_missions:{icon:"💯",name:"Veteran"}};
+                  const b=defs[bid]||{icon:"🏅",name:bid};
+                  return <div key={i} style={{background:"rgba(252,211,77,0.09)",borderRadius:12,padding:"10px 4px",textAlign:"center",border:"1px solid rgba(252,211,77,0.2)"}}>
+                    <div style={{fontSize:22}}>{b.icon}</div>
+                    <div style={{fontSize:10,fontWeight:700,color:"#FCD34D",marginTop:3}}>{b.name}</div>
                   </div>;
                 })}
               </div>
-              {/* badges */}
-              {(()=>{
-                const earned=BADGES.filter(b=>(progress?.badges||[]).includes(b.id));
-                const locked=BADGES.filter(b=>!(progress?.badges||[]).includes(b.id));
-                return (
-                  <div style={{background:"white",borderRadius:20,padding:"18px",marginBottom:12,boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-                    <p style={{fontWeight:800,fontSize:14,color:"#1e1b4b",margin:"0 0 12px"}}>🏅 Badges ({earned.length}/{BADGES.length})</p>
-                    {earned.length===0&&<p style={{color:"#9ca3af",fontSize:13,textAlign:"center",marginBottom:10}}>Complete your first quiz to earn badges!</p>}
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:12}}>
-                      {earned.map(b=>(
-                        <div key={b.id} style={{background:"#FFFBEB",borderRadius:12,padding:"10px 8px",textAlign:"center",border:"1.5px solid #FDE68A"}}>
-                          <div style={{fontSize:26}}>{b.icon}</div>
-                          <div style={{fontSize:11,fontWeight:800,color:"#92400E"}}>{b.name}</div>
-                          <div style={{fontSize:10,color:"#6b7280"}}>{b.desc}</div>
-                          {b.xp>0&&<div style={{fontSize:10,color:"#D97706",fontWeight:700}}>+{b.xp} XP</div>}
-                        </div>
-                      ))}
+            </div>
+          </>
+        )}
+      </div>
+      <BottomNav screen={screen} goTo={goTo}/>
+    </div>
+  );
+
+  // ── HOME ───────────────────────────────────────────────────────────────────
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
+      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
+      {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
+
+      {/* Top bar */}
+      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(15,12,41,0.96)",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"10px 16px"}}>
+        <div style={{maxWidth:520,margin:"0 auto",display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:22}}>🎓</span>
+          <div style={{flex:1}}><XPBar xp={player.xp}/></div>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <div style={{background:"rgba(252,211,77,0.1)",border:"1px solid rgba(252,211,77,0.28)",borderRadius:10,padding:"4px 9px",fontSize:12,fontWeight:800,color:"#FCD34D"}}>🪙{player.coins}</div>
+            <div style={{background:"rgba(249,115,22,0.12)",border:"1px solid rgba(249,115,22,0.28)",borderRadius:10,padding:"4px 9px",fontSize:12,fontWeight:800,color:"#F97316"}}>🔥{player.streak}</div>
+            {user?(
+              <div onClick={()=>goTo("progress")} title="My Progress" style={{width:33,height:33,borderRadius:"50%",background:curRank.colour,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:15,border:"2px solid rgba(255,255,255,0.25)"}}>{curRank.icon}</div>
+            ):(
+              <button onClick={()=>setShowAuth(true)} style={{padding:"7px 12px",borderRadius:10,background:"#4F46E5",color:"white",fontWeight:700,fontSize:12,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In</button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:520,margin:"0 auto",padding:"14px 16px 100px"}}>
+        {/* Welcome */}
+        <div style={{textAlign:"center",marginBottom:14}}>
+          {user&&<p style={{color:"white",fontWeight:800,fontSize:17,margin:"0 0 6px"}}>👋 Hey, {user.full_name?.split(" ")[0]||"Explorer"}!</p>}
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.06)",borderRadius:20,padding:"7px 16px"}}>
+            <span style={{color:"rgba(255,255,255,0.55)",fontSize:12}}>👥 {visitorCount??"..."} explorers · {curRank.icon} {curRank.title}</span>
+          </div>
+        </div>
+
+        {/* Daily challenge */}
+        <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(239,68,68,0.14))",border:"1px solid rgba(245,158,11,0.28)",borderRadius:18,padding:"14px 16px",marginBottom:16,animation:"pulse 3s infinite"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{color:"#FCD34D",fontWeight:800,fontSize:11,textTransform:"uppercase",letterSpacing:"1px",marginBottom:3}}>⚡ Daily Challenge</div>
+              <div style={{color:"white",fontWeight:800,fontSize:15}}>{dailyChallenge.icon} {dailyChallenge.name}</div>
+              <div style={{color:"rgba(255,255,255,0.55)",fontSize:12,marginTop:2}}>{dailyChallenge.desc}</div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
+              <div style={{color:"#FCD34D",fontWeight:900,fontSize:15}}>+{dailyChallenge.xpBonus}XP</div>
+              <div style={{color:"#FCD34D",fontSize:12}}>🪙{dailyChallenge.coins}</div>
+              {player.daily_date===today&&<div style={{color:"#4ADE80",fontSize:11,fontWeight:700,marginTop:2}}>✅ Done!</div>}
+            </div>
+          </div>
+        </div>
+
+        {/* Map label */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{color:"white",fontWeight:900,fontSize:18}}>🗺 Adventure Map</div>
+          {!user&&<button onClick={()=>setShowAuth(true)} style={{padding:"5px 12px",borderRadius:16,background:"rgba(79,70,229,0.5)",border:"1px solid rgba(99,102,241,0.4)",color:"white",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Sign in to save →</button>}
+        </div>
+
+        {/* Worlds */}
+        {WORLDS.map((world,i)=>{
+          const locked=curLevel<world.unlockLevel;
+          const done=world.missions.filter(m=>isCompleted(m.id)).length;
+          const total=world.missions.length;
+          const pct=Math.round((done/total)*100);
+          const next=world.missions.find(m=>!isCompleted(m.id)&&isMissionUnlocked(world,m));
+          return(
+            <div key={world.id} onClick={()=>{SFX.click();setActiveWorld(world);setScreen("map");}}
+              style={{background:locked?"rgba(0,0,0,0.32)":world.gradient,borderRadius:22,padding:"20px",marginBottom:14,cursor:"pointer",boxShadow:locked?"none":"0 10px 40px rgba(0,0,0,0.4)",opacity:locked?0.55:1,animation:`slideUp ${0.15+i*0.08}s ease`}}>
+              <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+                <div style={{fontSize:46,lineHeight:1,flexShrink:0,animation:locked?"none":"worldFloat 4s infinite"}}>{world.icon}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                    <div>
+                      <div style={{color:"white",fontWeight:900,fontSize:18,marginBottom:2}}>{world.name}</div>
+                      <div style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:locked?0:8}}>{world.desc}</div>
                     </div>
-                    {locked.length>0&&<>
-                      <p style={{fontWeight:700,fontSize:12,color:"#9ca3af",margin:"0 0 8px"}}>🔒 Locked ({locked.length})</p>
-                      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-                        {locked.map(b=>(
-                          <div key={b.id} style={{background:"#f8fafc",borderRadius:12,padding:"10px 8px",textAlign:"center",border:"1.5px solid #e5e7eb",opacity:0.5}}>
-                            <div style={{fontSize:26,filter:"grayscale(1)"}}>{b.icon}</div>
-                            <div style={{fontSize:11,fontWeight:800,color:"#374151"}}>{b.name}</div>
-                            <div style={{fontSize:10,color:"#6b7280"}}>{b.desc}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </>}
+                    {locked&&<div style={{background:"rgba(0,0,0,0.38)",borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.45)",flexShrink:0,marginLeft:8}}>🔒 Lv.{world.unlockLevel}</div>}
+                    {!locked&&done===total&&<div style={{color:"#FCD34D",fontSize:12,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
                   </div>
-                );
-              })()}
-              {/* notifications */}
-              <div style={{background:"white",borderRadius:20,padding:"18px",marginBottom:12,boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-                <p style={{fontWeight:800,fontSize:14,color:"#1e1b4b",margin:"0 0 12px"}}>🔔 Daily Practice Reminders</p>
-                <p style={{fontSize:13,color:"#6b7280",margin:"0 0 12px"}}>Get notified each day to keep your streak alive!</p>
-                <NotificationSetup/>
-              </div>
-              {/* recent sessions */}
-              {sessions.length>0&&(
-                <div style={{background:"white",borderRadius:20,padding:"18px",boxShadow:"0 8px 25px rgba(0,0,0,0.2)"}}>
-                  <p style={{fontWeight:800,fontSize:14,color:"#1e1b4b",margin:"0 0 12px"}}>📋 Recent Quizzes</p>
-                  {sessions.slice(0,8).map((s,i)=>(
-                    <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i<Math.min(sessions.length,8)-1?"1px solid #f3f4f6":"none"}}>
-                      <div>
-                        <div style={{fontWeight:700,fontSize:13,color:"#1e1b4b"}}>{s.subjects?.map(x=>SUBJECT_LABELS[x]?.split(" ")[0]).join(", ")}</div>
-                        <div style={{fontSize:11,color:"#6b7280"}}>{s.date} · {s.difficulty} · {s.total}q</div>
+                  {!locked&&(
+                    <>
+                      <div style={{height:6,background:"rgba(255,255,255,0.2)",borderRadius:3,overflow:"hidden",marginBottom:5}}>
+                        <div style={{height:"100%",width:`${pct}%`,background:"rgba(255,255,255,0.85)",borderRadius:3,transition:"width 1.2s"}}/>
                       </div>
-                      <div style={{textAlign:"right"}}>
-                        <div style={{fontWeight:800,fontSize:14,color:s.percentage>=80?"#059669":s.percentage>=60?"#D97706":"#DC2626"}}>{s.percentage}%</div>
-                        <div style={{fontSize:11,color:"#F59E0B",fontWeight:700}}>+{s.xp_earned} XP</div>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        <span style={{color:"rgba(255,255,255,0.6)",fontSize:11}}>{done}/{total} missions</span>
+                        {next&&<span style={{background:"rgba(0,0,0,0.2)",color:"white",fontWeight:700,fontSize:11,borderRadius:8,padding:"3px 8px"}}>▶ {next.name}</span>}
+                        {done===total&&!locked&&<span style={{color:"#FCD34D",fontSize:12,fontWeight:800}}>Boss slain ⚔️</span>}
                       </div>
-                    </div>
-                  ))}
+                    </>
+                  )}
                 </div>
-              )}
-            </>
-          )}
-        </PageWrap>
-      )}
-
-      {/* ── LEADERBOARD ── */}
-      {tab==="leaderboard"&&(
-        <PageWrap>
-          <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"16px 0 4px"}}>🏆 Leaderboard</h2>
-          <p style={{color:"#c7d2fe",fontSize:13,margin:"0 0 14px"}}>Compete with friends & siblings — who's top of the class?</p>
-          {user&&progress&&(
-            <div style={{background:"rgba(255,255,255,0.1)",borderRadius:14,padding:"12px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:12}}>
-              <div style={{fontSize:28}}>⭐</div>
-              <div>
-                <div style={{color:"white",fontWeight:800,fontSize:14}}>Your standing</div>
-                <div style={{color:"#c7d2fe",fontSize:12}}>{progress.xp||0} XP · 🔥{progress.streak_days||0} streak · {(progress.badges||[]).length} badges</div>
               </div>
             </div>
-          )}
-          <LeaderboardView user={user} onSignIn={()=>setShowAuth(true)}/>
-        </PageWrap>
-      )}
-
-      {/* ── SCHOOLS ── */}
-      {tab==="schools"&&(
-        <PageWrap>
-          <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"16px 0 4px"}}>🏫 Grammar Schools</h2>
-          <p style={{color:"#c7d2fe",fontSize:13,margin:"0 0 14px"}}>London & surrounding area — entry info & tips</p>
-          {SCHOOLS.map((s,i)=>(
-            <div key={i} style={{background:"white",borderRadius:16,padding:"14px 16px",marginBottom:10,boxShadow:"0 4px 15px rgba(0,0,0,0.15)"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
-                <div style={{fontWeight:800,fontSize:14,color:"#1e1b4b",flex:1}}>{s.name}</div>
-                <span style={{background:"#EEF2FF",color:"#4F46E5",fontWeight:700,fontSize:10,borderRadius:8,padding:"3px 8px",flexShrink:0,marginLeft:8}}>{s.area}</span>
-              </div>
-              <div style={{fontSize:12,color:"#6b7280",marginBottom:2}}>📝 {s.exam}</div>
-              <div style={{fontSize:12,color:"#374151",fontWeight:600}}>🎯 {s.score}</div>
-            </div>
-          ))}
-        </PageWrap>
-      )}
+          );
+        })}
+      </div>
+      <BottomNav screen={screen} goTo={goTo}/>
     </div>
   );
 }
