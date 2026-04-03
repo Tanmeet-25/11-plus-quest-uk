@@ -457,26 +457,34 @@ function BadgePop({badge,onClose}){
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_5kQ7sK1Kn2BU9FE5jV77O00";
 const PRICE_MONTHLY = "£4.99/month";
 
-// Which worlds/missions are free vs premium
-// Free: first 2 missions of Math Mountain only
-// Premium: everything else
+// No free missions — everything requires a plan
 function isMissionFree(worldId, missionId) {
-  const freeMissions = ["m_tables", "m_fracs"];
-  return worldId === "maths" && freeMissions.includes(missionId);
+  return false; // All content requires subscription
 }
 
 // ─── PREMIUM MODAL ────────────────────────────────────────────────────────────
 function PremiumModal({onClose, user, onSignIn}){
   const [loading, setLoading] = useState(false);
 
-  function startTrial(){
+  async function startTrial(){
     if(!user){ onSignIn(); return; }
     setLoading(true);
-    // Build URL with prefilled email
+    try {
+      // Try backend function first
+      const res = await fetch("/api/functions/startSubscription", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: user.id, email: user.email || "" })
+      });
+      if(res.ok){
+        const data = await res.json();
+        if(data.url){ window.location.href = data.url; return; }
+      }
+    } catch(e){}
+    // Fallback: direct payment link with prefilled email
     const email = user?.email || "";
     const url = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
-    window.open(url, "_blank");
-    setTimeout(()=>setLoading(false), 2000);
+    window.location.href = url;
   }
 
   return(
@@ -716,15 +724,49 @@ const UK_GRAMMAR_SCHOOLS = [
 const REGIONS = [...new Set(UK_GRAMMAR_SCHOOLS.map(s => s.area.split(",").slice(-1)[0].trim()))].sort();
 
 // ─── SUBSCRIPTION MODAL ──────────────────────────────────────────────────────
-function SubscriptionModal({user, onClose}) {
+function SubscriptionModal({user, onClose, inline=false}) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  function handleSubscribe() {
+  async function handleSubscribe() {
     setLoading(true);
-    // Direct Stripe Payment Link - 30-day free trial, then £4.99/month
-    window.location.href = "https://buy.stripe.com/test_aFa6oGbkX2BUbNMaEf77O01";
+    setErr("");
+    try {
+      const res = await fetch("/api/functions/startSubscription", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: user?.id || "", email: user?.email || "" })
+      });
+      if(res.ok){
+        const data = await res.json();
+        if(data.url){ window.location.href = data.url; return; }
+        if(data.error) throw new Error(data.error);
+      }
+    } catch(e){
+      // Fallback to direct payment link
+    }
+    const email = user?.email || "";
+    window.location.href = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
   }
+
+  const content = (
+    <>
+      {!inline && <><div style={{fontSize:56,marginBottom:8}}>👑</div>
+      <div style={{color:"#FCD34D",fontWeight:900,fontSize:12,textTransform:"uppercase",letterSpacing:"2px",marginBottom:6}}>11+ Quest Premium</div>
+      <h2 style={{color:"white",fontWeight:900,fontSize:24,margin:"0 0 6px",lineHeight:1.2}}>1 Month Free,<br/>Then £4.99/mo</h2>
+      <p style={{color:"rgba(255,255,255,0.6)",fontSize:13,margin:"0 0 24px",lineHeight:1.5}}>Start your free trial today. No charge for 30 days.<br/>Cancel anytime — no commitment.</p>
+      </>}
+      {err && <div style={{background:"rgba(220,38,38,0.2)",border:"1px solid rgba(220,38,38,0.4)",borderRadius:10,padding:"10px",marginBottom:14,color:"#FCA5A5",fontSize:13}}>{err}</div>}
+      <button onClick={handleSubscribe} disabled={loading}
+        style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",marginBottom:8,opacity:loading?0.7:1,boxShadow:"0 4px 20px rgba(252,211,77,0.35)"}}>
+        {loading ? "⏳ Connecting to Stripe..." : "🚀 Start Free Trial →"}
+      </button>
+      <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:"0 0 10px"}}>1 month free · Then £4.99/mo · Cancel anytime</p>
+      {!inline && <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Maybe later</button>}
+    </>
+  );
+
+  if(inline) return <div style={{textAlign:"center"}}>{content}</div>;
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:2500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
@@ -733,28 +775,7 @@ function SubscriptionModal({user, onClose}) {
         <div style={{color:"#FCD34D",fontWeight:900,fontSize:12,textTransform:"uppercase",letterSpacing:"2px",marginBottom:6}}>11+ Quest Premium</div>
         <h2 style={{color:"white",fontWeight:900,fontSize:24,margin:"0 0 6px",lineHeight:1.2}}>1 Month Free,<br/>Then £4.99/mo</h2>
         <p style={{color:"rgba(255,255,255,0.6)",fontSize:13,margin:"0 0 24px",lineHeight:1.5}}>Start your free trial today. No charge for 30 days.<br/>Cancel anytime — no commitment.</p>
-        <div style={{background:"rgba(255,255,255,0.07)",borderRadius:16,padding:"16px",marginBottom:20,textAlign:"left"}}>
-          {[
-            ["🗺","All 4 worlds & 30+ missions"],
-            ["⚔️","Boss battles & timed challenges"],
-            ["🔑","All secret tricks & hacks unlocked"],
-            ["🏆","Leaderboard & streak tracking"],
-            ["🎓","All UK grammar school info"],
-            ["🆓","First month completely free"],
-          ].map(([icon,text],i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<5?10:0}}>
-              <span style={{fontSize:18,flexShrink:0}}>{icon}</span>
-              <span style={{color:"white",fontSize:13,fontWeight:600}}>{text}</span>
-            </div>
-          ))}
-        </div>
-        {err && <div style={{background:"rgba(220,38,38,0.2)",border:"1px solid rgba(220,38,38,0.4)",borderRadius:10,padding:"10px",marginBottom:14,color:"#FCA5A5",fontSize:13}}>{err}</div>}
-        <button onClick={handleSubscribe} disabled={loading}
-          style={{width:"100%",padding:"16px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",marginBottom:10,opacity:loading?0.7:1}}>
-          {loading ? "⏳ Loading..." : "Start Free Trial →"}
-        </button>
-        <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:"0 0 14px"}}>Powered by Stripe · Secure payment · Cancel anytime</p>
-        <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Maybe later</button>
+        {content}
       </div>
     </div>
   );
@@ -1316,6 +1337,117 @@ export default function App(){
 
   // ── SCHOOLS ────────────────────────────────────────────────────────────────
   if(screen==="schools")return <SchoolsScreen goTo={goTo}/>;
+
+  // ── PLAN GATE helpers ─────────────────────────────────────────────────────
+  function GateSubscribeButton({user}){
+    const [loading,setLoading]=useState(false);
+    const [gErr,setGErr]=useState("");
+    async function doSub(){
+      setLoading(true); setGErr("");
+      try{
+        const res=await fetch("/api/functions/startSubscription",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:user?.id||"",email:user?.email||""})});
+        if(res.ok){const d=await res.json();if(d.url){window.location.href=d.url;return;}if(d.error)throw new Error(d.error);}
+        throw new Error("No URL");
+      }catch(e){
+        const email=user?.email||"";
+        window.location.href=STRIPE_PAYMENT_LINK+(email?`?prefilled_email=${encodeURIComponent(email)}`:"");
+      }
+    }
+    return(
+      <>
+        {gErr&&<div style={{color:"#FCA5A5",fontSize:12,marginBottom:8}}>{gErr}</div>}
+        <button onClick={doSub} disabled={loading}
+          style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.7:1,boxShadow:"0 4px 20px rgba(252,211,77,0.35)"}}>
+          {loading?"⏳ Loading Stripe...":"🚀 Start My Free Month →"}
+        </button>
+        <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:"4px 0 0",textAlign:"center"}}>Secure checkout · Cancel anytime · No charge for 30 days</p>
+      </>
+    );
+  }
+
+  // ── PLAN GATE: Must be logged in & have active subscription ────────────────
+  if(!user || !isPremium){
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0a0820 0%,#150d3e 50%,#0a0820 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"0 16px 40px"}}>
+        {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
+
+        {/* Stars background */}
+        <div style={{position:"fixed",inset:0,overflow:"hidden",pointerEvents:"none"}}>
+          {[...Array(30)].map((_,i)=>(
+            <div key={i} style={{position:"absolute",width:i%5===0?3:2,height:i%5===0?3:2,background:"white",borderRadius:"50%",opacity:0.3+Math.random()*0.5,left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,animation:`pulse ${2+Math.random()*3}s ease-in-out infinite`}}/>
+          ))}
+        </div>
+
+        <div style={{width:"100%",maxWidth:440,marginTop:48,position:"relative",zIndex:1}}>
+          {/* Logo */}
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <div style={{fontSize:64,marginBottom:8,animation:"worldFloat 3s ease-in-out infinite"}}>🎓</div>
+            <div style={{color:"#FCD34D",fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"3px",marginBottom:6}}>11+ Quest UK</div>
+            <h1 style={{color:"white",fontWeight:900,fontSize:30,margin:"0 0 8px",lineHeight:1.2}}>The #1 Exam Prep<br/>Adventure</h1>
+            <p style={{color:"rgba(255,255,255,0.5)",fontSize:14,margin:0,lineHeight:1.5}}>Practice maths, english, verbal & non-verbal reasoning<br/>with 100+ missions and boss battles</p>
+          </div>
+
+          {/* Feature highlights */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:28}}>
+            {[
+              ["⛰️","Math Mountain","Algebra, fractions, percentages"],
+              ["🌲","English Forest","Grammar, vocabulary, writing"],
+              ["🗼","Word Wizard","Verbal reasoning & codes"],
+              ["🔬","Logic Lab","Non-verbal patterns & shapes"],
+              ["⚔️","Boss Battles","Timed challenges & rewards"],
+              ["🏆","Leaderboard","Compete with other students"],
+            ].map(([icon,title,desc],i)=>(
+              <div key={i} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"14px 12px",textAlign:"center"}}>
+                <div style={{fontSize:24,marginBottom:4}}>{icon}</div>
+                <div style={{color:"white",fontWeight:800,fontSize:12,marginBottom:2}}>{title}</div>
+                <div style={{color:"rgba(255,255,255,0.35)",fontSize:10,lineHeight:1.3}}>{desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pricing card */}
+          <div style={{background:"linear-gradient(135deg,rgba(79,70,229,0.3),rgba(124,58,237,0.3))",border:"1px solid rgba(124,58,237,0.5)",borderRadius:24,padding:"24px 20px",marginBottom:16,textAlign:"center",boxShadow:"0 0 40px rgba(124,58,237,0.2)"}}>
+            <div style={{display:"inline-block",background:"rgba(252,211,77,0.15)",border:"1px solid rgba(252,211,77,0.4)",borderRadius:20,padding:"4px 14px",marginBottom:12}}>
+              <span style={{color:"#FCD34D",fontSize:11,fontWeight:900,letterSpacing:"1px"}}>⭐ MOST POPULAR</span>
+            </div>
+            <div style={{color:"white",fontWeight:900,fontSize:26,marginBottom:2}}>1 Month Free</div>
+            <div style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:16}}>Then just £4.99/month • Cancel anytime</div>
+            
+            {!user ? (
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <button onClick={()=>setShowAuth(true)}
+                  style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 20px rgba(252,211,77,0.35)"}}>
+                  🚀 Sign Up & Start Free →
+                </button>
+                <button onClick={()=>setShowAuth(true)}
+                  style={{width:"100%",padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:"rgba(255,255,255,0.7)",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>
+                  Already have an account? Sign In
+                </button>
+              </div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <GateSubscribeButton user={user}/>
+              </div>
+            )}
+          </div>
+
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:16,marginBottom:20}}>
+            {["🔒 Secure payment","✅ No commitment","🆓 1 month free"].map((t,i)=>(
+              <span key={i} style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{t}</span>
+            ))}
+          </div>
+
+          {/* Visitor counter */}
+          {visitorCount && (
+            <div style={{textAlign:"center"}}>
+              <span style={{color:"rgba(255,255,255,0.25)",fontSize:11}}>👥 {visitorCount.toLocaleString()} adventurers have visited</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // ── HOME ───────────────────────────────────────────────────────────────────
   return(
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
