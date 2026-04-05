@@ -343,11 +343,171 @@ const QBANK={
       {q:"5 faces, 8 edges, 5 vertices. Shape?",options:["Cube","Cylinder","Square pyramid","Triangular prism"],answer:"Square pyramid",explanation:"Square pyramid."},
     ],
   },
+,
+  j_numbers:{
+    "Addition":[
+      {q:"23 + 45 = ?",options:["58","67","68","78"],answer:"68",explanation:"20+40=60, 3+5=8. Total=68."},
+      {q:"56 + 37 = ?",options:["83","93","84","73"],answer:"93",explanation:"50+30=80, 6+7=13. 80+13=93."},
+      {q:"100 - 37 = ?",options:["53","63","73","67"],answer:"63",explanation:"100-37: 100-40=60, +3=63."},
+      {q:"48 + 52 = ?",options:["90","100","110","95"],answer:"100",explanation:"48+52=100. Number bond!"},
+      {q:"67 + 28 = ?",options:["85","95","94","96"],answer:"95",explanation:"67+30=97, -2=95."},
+      {q:"144 + 36 = ?",options:["170","180","174","190"],answer:"180",explanation:"144+36: 4+6=10, 140+40=180."},
+    ],
+    "Subtraction":[
+      {q:"75 - 28 = ?",options:["43","47","53","57"],answer:"47",explanation:"75-30=45, +2=47."},
+      {q:"100 - 64 = ?",options:["26","34","36","46"],answer:"36",explanation:"100-64=36. Add on: 64+6=70, 70+30=100. Total=36."},
+      {q:"83 - 47 = ?",options:["26","34","36","46"],answer:"36",explanation:"83-47: 83-50=33, +3=36."},
+      {q:"200 - 156 = ?",options:["34","44","54","64"],answer:"44",explanation:"156+44=200. Count on!"},
+      {q:"91 - 38 = ?",options:["43","53","47","63"],answer:"53",explanation:"91-40=51, +2=53."},
+      {q:"130 - 75 = ?",options:["45","55","65","75"],answer:"55",explanation:"130-75: 130-80=50, +5=55."},
+    ],
+    "Multiplication":[
+      {q:"3 × 4 = ?",options:["10","12","14","16"],answer:"12",explanation:"3+3+3+3=12."},
+      {q:"5 × 6 = ?",options:["25","30","35","36"],answer:"30",explanation:"Count in 5s: 5,10,15,20,25,30."},
+      {q:"4 × 7 = ?",options:["24","28","32","36"],answer:"28",explanation:"4×7=28. Double 4×7: 2×7=14, ×2=28."},
+      {q:"6 × 6 = ?",options:["30","32","36","42"],answer:"36",explanation:"6²=36."},
+      {q:"8 × 3 = ?",options:["21","22","24","26"],answer:"24",explanation:"8+8+8=24."},
+      {q:"9 × 4 = ?",options:["32","36","38","40"],answer:"36",explanation:"10×4=40, -4=36."},
+    ],
+    "Division":[
+      {q:"24 ÷ 6 = ?",options:["3","4","5","6"],answer:"4",explanation:"6×4=24."},
+      {q:"35 ÷ 5 = ?",options:["5","6","7","8"],answer:"7",explanation:"5×7=35."},
+      {q:"48 ÷ 8 = ?",options:["4","5","6","7"],answer:"6",explanation:"8×6=48."},
+      {q:"36 ÷ 4 = ?",options:["7","8","9","10"],answer:"9",explanation:"4×9=36."},
+      {q:"63 ÷ 9 = ?",options:["6","7","8","9"],answer:"7",explanation:"9×7=63."},
+      {q:"56 ÷ 7 = ?",options:["6","7","8","9"],answer:"8",explanation:"7×8=56."},
+    ],
+    "BOSS":[
+      {q:"45 + 37 = ?",options:["72","82","83","92"],answer:"82",explanation:"45+37=82."},
+      {q:"100 - 47 = ?",options:["43","53","63","73"],answer:"53",explanation:"100-47=53."},
+      {q:"6 × 7 = ?",options:["36","42","48","54"],answer:"42",explanation:"6×7=42."},
+      {q:"48 ÷ 6 = ?",options:["6","7","8","9"],answer:"8",explanation:"6×8=48."},
+      {q:"25 + 76 = ?",options:["91","101","100","111"],answer:"101",explanation:"25+76=101."},
+      {q:"90 - 34 = ?",options:["46","56","66","54"],answer:"56",explanation:"90-34=56."},
+      {q:"9 × 7 = ?",options:["54","56","63","72"],answer:"63",explanation:"9×7=63."},
+      {q:"72 ÷ 8 = ?",options:["7","8","9","10"],answer:"9",explanation:"8×9=72."},
+    ],
+  },
+  j_shapes:{
+    "2D Shapes":[
+      {q:"How many sides does a hexagon have?",options:["5","6","7","8"],answer:"6",explanation:"Hexa = 6. Hexagon has 6 sides."},
+      {q:"What shape has 4 equal sides and 4 right angles?",options:["Rectangle","Rhombus","Square","Kite"],answer:"Square",explanation:"A square has 4 equal sides and all angles are 90°."},
+      {q:"A triangle with all sides equal is called?",options:["Scalene","Isosceles","Equilateral","Right-angled"],answer:"Equilateral",explanation:"Equilateral = all three sides equal, all angles 60°."},
+      {q:"How many sides does a pentagon have?",options:["4","5","6","7"],answer:"5",explanation:"Penta = 5. Pentagon has 5 sides."},
+      {q:"Angles in a triangle sum to?",options:["90°","180°","270°","360°"],answer:"180°",explanation:"Always 180° in any triangle."},
+      {q:"What is the name of a 4-sided shape?",options:["Triangle","Quadrilateral","Pentagon","Hexagon"],answer:"Quadrilateral",explanation:"Quad = 4. Any 4-sided shape is a quadrilateral."},
+    ],
+    "Symmetry & Reflection":[
+      {q:"How many lines of symmetry does a square have?",options:["1","2","3","4"],answer:"4",explanation:"Square has 4: 2 through corners, 2 through midpoints."},
+      {q:"How many lines of symmetry does a rectangle have?",options:["1","2","3","4"],answer:"2",explanation:"Rectangle: one horizontal, one vertical line."},
+      {q:"An equilateral triangle has how many lines of symmetry?",options:["1","2","3","4"],answer:"3",explanation:"One from each vertex to midpoint of opposite side."},
+      {q:"Which shape has NO lines of symmetry?",options:["Square","Circle","Scalene triangle","Equilateral triangle"],answer:"Scalene triangle",explanation:"Scalene triangle has no equal sides, so no lines of symmetry."},
+      {q:"A regular hexagon has how many lines of symmetry?",options:["3","4","6","8"],answer:"6",explanation:"Regular hexagon: 3 through vertices, 3 through edge midpoints."},
+      {q:"What does a line of symmetry do to a shape?",options:["Rotates it","Enlarges it","Divides it into two identical halves","Translates it"],answer:"Divides it into two identical halves",explanation:"A line of symmetry (mirror line) splits a shape into two equal mirror images."},
+    ],
+    "Measurement":[
+      {q:"How many cm in 1 metre?",options:["10","100","1000","50"],answer:"100",explanation:"1 metre = 100 centimetres."},
+      {q:"How many mm in 1 cm?",options:["5","10","100","1000"],answer:"10",explanation:"1 cm = 10 mm."},
+      {q:"How many minutes in an hour?",options:["30","50","60","100"],answer:"60",explanation:"1 hour = 60 minutes."},
+      {q:"How many seconds in a minute?",options:["30","60","100","120"],answer:"60",explanation:"1 minute = 60 seconds."},
+      {q:"1 km = ? metres",options:["10","100","500","1000"],answer:"1000",explanation:"1 kilometre = 1000 metres."},
+      {q:"A rectangle is 5cm wide and 3cm tall. Perimeter?",options:["8cm","15cm","16cm","30cm"],answer:"16cm",explanation:"Perimeter = 2×(5+3) = 2×8 = 16cm."},
+    ],
+    "BOSS":[
+      {q:"How many sides does a hexagon have?",options:["5","6","7","8"],answer:"6",explanation:"Hexa = 6."},
+      {q:"Angles in a triangle = ?",options:["90°","180°","270°","360°"],answer:"180°",explanation:"All triangles = 180°."},
+      {q:"Lines of symmetry in a square?",options:["2","3","4","6"],answer:"4",explanation:"4 lines of symmetry."},
+      {q:"1 metre = ? cm",options:["10","100","1000","10000"],answer:"100",explanation:"100 cm in 1 metre."},
+      {q:"Perimeter of 4×4 square?",options:["8","12","16","20"],answer:"16",explanation:"4×4=16."},
+      {q:"Which has NO lines of symmetry?",options:["Square","Equilateral triangle","Scalene triangle","Circle"],answer:"Scalene triangle",explanation:"No equal sides = no symmetry."},
+      {q:"Pentagon has how many sides?",options:["4","5","6","7"],answer:"5",explanation:"Penta=5."},
+      {q:"1 km = ? metres",options:["100","500","1000","10000"],answer:"1000",explanation:"1 km = 1000 m."},
+    ],
+  },
+  j_english:{
+    "Spelling":[
+      {q:"Which is spelled correctly?",options:["Freind","Frend","Friend","Fiend"],answer:"Friend",explanation:"Friend — remember: 'fri END'."},
+      {q:"Which is spelled correctly?",options:["Beleive","Believe","Belive","Believ"],answer:"Believe",explanation:"Believe — 'I before E except after C'."},
+      {q:"Opposite of 'ancient' is?",options:["Old","Modern","Ancient","Past"],answer:"Modern",explanation:"Ancient = very old. Opposite = modern."},
+      {q:"Which word means 'very happy'?",options:["Sad","Gloomy","Elated","Weary"],answer:"Elated",explanation:"Elated = extremely happy."},
+      {q:"Which is spelled correctly?",options:["Recieve","Recive","Receive","Receve"],answer:"Receive",explanation:"Receive — E before I after C."},
+      {q:"'Necessary' has how many Cs?",options:["0","1","2","3"],answer:"1",explanation:"Necessary = 1 C, 2 Ss. Remember: 1 Collar, 2 Socks!"},
+    ],
+    "Grammar":[
+      {q:"'The dog runs fast.' 'Dog' is a?",options:["Verb","Adjective","Noun","Adverb"],answer:"Noun",explanation:"Dog is a naming word — a noun."},
+      {q:"'She ran quickly.' 'Quickly' is a?",options:["Noun","Verb","Adjective","Adverb"],answer:"Adverb",explanation:"Quickly describes HOW she ran — it's an adverb."},
+      {q:"Which sentence is correct?",options:["Me and Jake went","Jake and I went","Jake and me went","I and Jake went"],answer:"Jake and I went",explanation:"Use subject pronoun 'I' (not me) when YOU are doing the action."},
+      {q:"'Beautiful' is a?",options:["Noun","Verb","Adjective","Adverb"],answer:"Adjective",explanation:"Beautiful describes a noun — it's an adjective."},
+      {q:"What does a verb do?",options:["Names a person","Describes a noun","Shows an action or state","Joins words"],answer:"Shows an action or state",explanation:"Verbs are doing/being words: run, jump, is, think."},
+      {q:"Which word is a conjunction?",options:["Apple","Quickly","Because","Running"],answer:"Because",explanation:"Conjunctions join clauses: because, and, but, although."},
+    ],
+    "Literary Devices":[
+      {q:"'The stars danced in the sky.' This is?",options:["Simile","Metaphor","Personification","Alliteration"],answer:"Personification",explanation:"Stars can't dance — giving human qualities to non-human things = personification."},
+      {q:"'As brave as a lion.' This is?",options:["Metaphor","Simile","Personification","Hyperbole"],answer:"Simile",explanation:"Similes compare using 'as' or 'like'."},
+      {q:"'She is a shining star.' This is?",options:["Simile","Metaphor","Onomatopoeia","Alliteration"],answer:"Metaphor",explanation:"Saying she IS a star (not like one) = metaphor."},
+      {q:"'The bee buzzed by.' This is?",options:["Simile","Metaphor","Alliteration","Onomatopoeia"],answer:"Onomatopoeia",explanation:"'Buzzed' sounds like the thing it describes = onomatopoeia."},
+      {q:"'Peter Piper picked a peck.' This is?",options:["Simile","Metaphor","Alliteration","Personification"],answer:"Alliteration",explanation:"Repeated P sound at the start of words = alliteration."},
+      {q:"'I've told you a million times!' This is?",options:["Simile","Metaphor","Personification","Hyperbole"],answer:"Hyperbole",explanation:"Deliberate exaggeration = hyperbole."},
+    ],
+    "BOSS":[
+      {q:"'Dog' in 'The dog runs fast' is a?",options:["Verb","Noun","Adjective","Adverb"],answer:"Noun",explanation:"Naming word = noun."},
+      {q:"'Quickly' in 'She ran quickly' is a?",options:["Noun","Verb","Adjective","Adverb"],answer:"Adverb",explanation:"Describes the verb = adverb."},
+      {q:"'As brave as a lion' is a?",options:["Metaphor","Simile","Personification","Hyperbole"],answer:"Simile",explanation:"Comparing with 'as' = simile."},
+      {q:"Which is correct?",options:["Me and Tom went","Tom and I went","Tom and me went","I and Tom went"],answer:"Tom and I went",explanation:"Subject pronoun = I."},
+      {q:"Onomatopoeia example?",options:["A shining star","Buzz","Peter Piper","Run fast"],answer:"Buzz",explanation:"Buzz sounds like what it means."},
+      {q:"Which is spelled correctly?",options:["Recieve","Believe","Freind","Necesary"],answer:"Believe",explanation:"Believe = correct spelling."},
+      {q:"'Beautiful' is a?",options:["Noun","Verb","Adjective","Adverb"],answer:"Adjective",explanation:"Describes = adjective."},
+      {q:"Repeated start sounds in a sentence is?",options:["Simile","Alliteration","Metaphor","Hyperbole"],answer:"Alliteration",explanation:"Same start sounds = alliteration."},
+    ],
+  }
 };
 
-// ─── WORLDS ───────────────────────────────────────────────────────────────────
+// ─── WORLDS — age-categorised, all subjects ──────────────────────────────────
+// Each world: { id, name, icon, colour, gradient, desc, ageGroup, free?, missions[] }
+// ageGroup: "junior" (7–9) | "core" (9–11) | "advanced" (11–13)
+// free: true → all missions playable without account; false → need account (still no paywall)
+
+const AGE_GROUPS = [
+  {id:"junior",   label:"Ages 7–9",   icon:"🌱", desc:"Foundation skills — build confidence"},
+  {id:"core",     label:"Ages 9–11",  icon:"⭐", desc:"11+ core content — exam ready"},
+  {id:"advanced", label:"Ages 11–13", icon:"🚀", desc:"Beyond 11+ — challenge yourself"},
+];
+
 const WORLDS=[
-  {id:"maths",  name:"Math Mountain",      icon:"⛰️",colour:"#4F46E5",gradient:"linear-gradient(135deg,#4F46E5,#7C3AED)",desc:"Master numbers, algebra & beyond",       unlockLevel:1,
+  // ───────────────── JUNIOR (7–9) ─────────────────
+  {id:"j_numbers",  ageGroup:"junior", free:true,
+   name:"Number Island",      icon:"🏝️",colour:"#0EA5E9",gradient:"linear-gradient(135deg,#0EA5E9,#0284C7)",
+   desc:"Counting, addition, subtraction & place value",
+   missions:[
+    {id:"jn_add",  name:"Addition Cove",    icon:"➕",topic:"Addition",         xp:40,coins:8, questions:6},
+    {id:"jn_sub",  name:"Subtract Stream",  icon:"➖",topic:"Subtraction",      xp:40,coins:8, questions:6},
+    {id:"jn_mult", name:"Multiply Marsh",   icon:"✖️",topic:"Multiplication",   xp:50,coins:10,questions:6},
+    {id:"jn_div",  name:"Division Dell",    icon:"➗",topic:"Division",         xp:50,coins:10,questions:6},
+    {id:"jn_boss", name:"⚔️ Island Boss",   icon:"🦁",topic:"BOSS",             xp:150,coins:40,questions:8,isBoss:true},
+   ]},
+  {id:"j_shapes",   ageGroup:"junior",
+   name:"Shape Kingdom",      icon:"🔷",colour:"#8B5CF6",gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)",
+   desc:"2D shapes, symmetry and measurement",
+   missions:[
+    {id:"js_2d",   name:"Shape Safari",     icon:"🔺",topic:"2D Shapes",        xp:40,coins:8, questions:6},
+    {id:"js_sym",  name:"Mirror Meadow",    icon:"🔄",topic:"Symmetry & Reflection",xp:50,coins:10,questions:6},
+    {id:"js_meas", name:"Measure Mountains",icon:"📏",topic:"Measurement",      xp:50,coins:10,questions:6},
+    {id:"js_boss", name:"⚔️ Kingdom Boss",  icon:"🐲",topic:"BOSS",             xp:150,coins:40,questions:8,isBoss:true},
+   ]},
+  {id:"j_english",  ageGroup:"junior",
+   name:"Story Forest",       icon:"📖",colour:"#10B981",gradient:"linear-gradient(135deg,#10B981,#047857)",
+   desc:"Spelling, basic grammar and reading",
+   missions:[
+    {id:"je_spell", name:"Spell Springs",   icon:"✍️",topic:"Spelling",         xp:40,coins:8, questions:6},
+    {id:"je_gram",  name:"Grammar Glade",   icon:"📝",topic:"Grammar",          xp:50,coins:10,questions:6,trick:"t_gram"},
+    {id:"je_read",  name:"Reading Ravine",  icon:"👁️",topic:"Literary Devices", xp:50,coins:10,questions:6},
+    {id:"je_boss",  name:"⚔️ Forest Boss",  icon:"🐉",topic:"BOSS",             xp:150,coins:40,questions:8,isBoss:true},
+   ]},
+
+  // ───────────────── CORE 11+ (9–11) ──────────────
+  {id:"maths",      ageGroup:"core",
+   name:"Math Mountain",      icon:"⛰️",colour:"#4F46E5",gradient:"linear-gradient(135deg,#4F46E5,#7C3AED)",
+   desc:"Fractions, percentages, algebra & more",
    missions:[
     {id:"m_tables",name:"Times Tables",     icon:"✖️",topic:"Times Tables",       xp:60, coins:12,questions:6, trick:"t_nine"},
     {id:"m_fracs", name:"Fraction Forest",  icon:"½", topic:"Fractions",          xp:60, coins:12,questions:6, trick:"t_fracs"},
@@ -359,7 +519,9 @@ const WORLDS=[
     {id:"m_num",   name:"Number Nexus",     icon:"🔢",topic:"Number Properties",  xp:100,coins:18,questions:6},
     {id:"m_boss",  name:"⚔️ Summit Boss",   icon:"👹",topic:"BOSS",               xp:250,coins:60,questions:10,isBoss:true},
    ]},
-  {id:"english",name:"English Forest",     icon:"🌲",colour:"#059669",gradient:"linear-gradient(135deg,#059669,#047857)",desc:"Conquer grammar, vocabulary & writing",unlockLevel:3,
+  {id:"english",    ageGroup:"core",
+   name:"English Forest",     icon:"🌲",colour:"#059669",gradient:"linear-gradient(135deg,#059669,#047857)",
+   desc:"Grammar, punctuation, vocabulary & comprehension",
    missions:[
     {id:"e_gram",  name:"Grammar Grove",    icon:"📝",topic:"Grammar",            xp:60, coins:12,questions:6, trick:"t_gram"},
     {id:"e_punct", name:"Punctuation Path", icon:"✏️",topic:"Punctuation",        xp:60, coins:12,questions:6, trick:"t_apos"},
@@ -367,7 +529,9 @@ const WORLDS=[
     {id:"e_lit",   name:"Literary Lake",    icon:"🖊️",topic:"Literary Devices",   xp:80, coins:15,questions:6},
     {id:"e_boss",  name:"⚔️ Forest Boss",   icon:"🐉",topic:"BOSS",               xp:250,coins:60,questions:8, isBoss:true},
    ]},
-  {id:"verbal", name:"Word Wizard Tower",  icon:"🗼",colour:"#D97706",gradient:"linear-gradient(135deg,#D97706,#B45309)",desc:"Decode language and master reasoning",unlockLevel:5,
+  {id:"verbal",     ageGroup:"core",
+   name:"Word Wizard Tower",  icon:"🗼",colour:"#D97706",gradient:"linear-gradient(135deg,#D97706,#B45309)",
+   desc:"Synonyms, analogies, codes & sequences",
    missions:[
     {id:"v_syn",   name:"Synonym Spire",    icon:"🔄",topic:"Synonyms & Antonyms",xp:60, coins:12,questions:6, trick:"t_syns"},
     {id:"v_ana",   name:"Analogy Arena",    icon:"🔗",topic:"Analogies",          xp:80, coins:15,questions:6, trick:"t_ana"},
@@ -375,7 +539,9 @@ const WORLDS=[
     {id:"v_seq",   name:"Sequence Stairs",  icon:"🔢",topic:"Sequences",          xp:100,coins:18,questions:6, trick:"t_seq"},
     {id:"v_boss",  name:"⚔️ Wizard Boss",   icon:"🧙",topic:"BOSS",               xp:250,coins:60,questions:8, isBoss:true},
    ]},
-  {id:"nvr",    name:"Logic Lab",          icon:"🔬",colour:"#DC2626",gradient:"linear-gradient(135deg,#DC2626,#991B1B)",desc:"See patterns others can't even imagine",unlockLevel:8,
+  {id:"nvr",        ageGroup:"core",
+   name:"Logic Lab",          icon:"🔬",colour:"#DC2626",gradient:"linear-gradient(135deg,#DC2626,#991B1B)",
+   desc:"Patterns, matrices, 3D shapes & reflection",
    missions:[
     {id:"n_2d",    name:"Shape Station",    icon:"🔷",topic:"2D Shapes",           xp:60, coins:12,questions:6},
     {id:"n_sym",   name:"Symmetry Sanctum", icon:"🔄",topic:"Symmetry & Reflection",xp:80,coins:15,questions:6, trick:"t_sym"},
@@ -383,8 +549,44 @@ const WORLDS=[
     {id:"n_3d",    name:"3D Dimension",     icon:"🧊",topic:"3D Shapes",           xp:100,coins:18,questions:6, trick:"t_euler"},
     {id:"n_boss",  name:"⚔️ Lab Boss",      icon:"🤖",topic:"BOSS",               xp:250,coins:60,questions:8, isBoss:true},
    ]},
-];
 
+  // ───────────────── ADVANCED (11–13) ─────────────
+  {id:"adv_maths",  ageGroup:"advanced",
+   name:"Advanced Algebra Citadel",icon:"🏰",colour:"#1D4ED8",gradient:"linear-gradient(135deg,#1D4ED8,#1E40AF)",
+   desc:"Simultaneous equations, quadratics & harder algebra",
+   missions:[
+    {id:"am_sim",  name:"Simultaneous Stronghold",icon:"🔀",topic:"Algebra",      xp:120,coins:22,questions:6},
+    {id:"am_quad", name:"Quadratic Quest",        icon:"📈",topic:"Algebra",      xp:140,coins:26,questions:6},
+    {id:"am_seq",  name:"Advanced Sequences",     icon:"🔢",topic:"Algebra",      xp:140,coins:26,questions:6},
+    {id:"am_boss", name:"⚔️ Citadel Boss",        icon:"🦅",topic:"BOSS",         xp:350,coins:80,questions:10,isBoss:true},
+   ]},
+  {id:"adv_stats",  ageGroup:"advanced",
+   name:"Data Observatory",   icon:"🔭",colour:"#0F766E",gradient:"linear-gradient(135deg,#0F766E,#134E4A)",
+   desc:"Advanced statistics, probability & data analysis",
+   missions:[
+    {id:"as_prob", name:"Probability Plains",     icon:"🎲",topic:"Statistics",   xp:120,coins:22,questions:6},
+    {id:"as_data", name:"Data Dunes",             icon:"📊",topic:"Statistics",   xp:140,coins:26,questions:6},
+    {id:"as_boss", name:"⚔️ Observatory Boss",    icon:"🌌",topic:"BOSS",         xp:350,coins:80,questions:8, isBoss:true},
+   ]},
+  {id:"adv_geo",    ageGroup:"advanced",
+   name:"Geometry Fortress",  icon:"🏯",colour:"#92400E",gradient:"linear-gradient(135deg,#92400E,#78350F)",
+   desc:"Pythagoras, circles, transformations & vectors",
+   missions:[
+    {id:"ag_pyth", name:"Pythagoras Peak",        icon:"📐",topic:"Geometry",     xp:120,coins:22,questions:6},
+    {id:"ag_circ", name:"Circle City",            icon:"⭕",topic:"Geometry",     xp:140,coins:26,questions:6},
+    {id:"ag_trans",name:"Transformation Tower",   icon:"🔄",topic:"Geometry",     xp:140,coins:26,questions:6},
+    {id:"ag_boss", name:"⚔️ Fortress Boss",       icon:"🛡️",topic:"BOSS",         xp:350,coins:80,questions:10,isBoss:true},
+   ]},
+  {id:"adv_verbal", ageGroup:"advanced",
+   name:"Reasoning Realm",    icon:"🧠",colour:"#7C3AED",gradient:"linear-gradient(135deg,#7C3AED,#6D28D9)",
+   desc:"Advanced verbal reasoning, logic & critical thinking",
+   missions:[
+    {id:"av_log",  name:"Logic Labyrinth",        icon:"🔍",topic:"Analogies",   xp:120,coins:22,questions:6},
+    {id:"av_crit", name:"Critical Catacombs",     icon:"💭",topic:"Synonyms & Antonyms",xp:140,coins:26,questions:6},
+    {id:"av_code", name:"Cipher Sanctum",         icon:"🔐",topic:"Codes & Ciphers",xp:140,coins:26,questions:6},
+    {id:"av_boss", name:"⚔️ Realm Boss",          icon:"🧿",topic:"BOSS",         xp:350,coins:80,questions:8, isBoss:true},
+   ]},
+];
 // ─── TRICKS ───────────────────────────────────────────────────────────────────
 const TRICKS={
   t_nine: {icon:"🖐",title:"The 9× Finger Trick",      subject:"maths",  body:"Hold 10 fingers up. For 9×N, fold down finger N.\nLeft side = tens. Right side = units.\n\n9×7 → fold finger 7 → 6 left, 3 right → 63 ✓"},
@@ -502,297 +704,6 @@ function BadgePop({badge,onClose}){
 
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 
-// ─── STRIPE PAYMENT LINK ──────────────────────────────────────────────────────
-const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_5kQ7sK1Kn2BU9FE5jV77O00";
-const PRICE_MONTHLY = "£4.99/month";
-
-// ─── PREMIUM MODAL ────────────────────────────────────────────────────────────
-function PremiumModal({onClose, user, onSignIn}){
-  const [loading, setLoading] = useState(false);
-
-  function startTrial(){
-    if(!user){ onSignIn(); return; }
-    const email = user?.email || "";
-    window.location.href = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
-  }
-
-  return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:2500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:"linear-gradient(135deg,#1e1b4b,#312e81)",borderRadius:28,padding:"32px 24px",width:"100%",maxWidth:380,textAlign:"center",animation:"popIn 0.35s ease",boxShadow:"0 24px 80px rgba(0,0,0,0.7)",border:"1px solid rgba(124,58,237,0.4)"}}>
-        <button onClick={onClose} style={{position:"absolute",top:16,right:20,background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:20,cursor:"pointer"}}>✕</button>
-        <div style={{fontSize:52,marginBottom:8}}>👑</div>
-        <div style={{color:"#FCD34D",fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"2px",marginBottom:8}}>11+ Quest Premium</div>
-        <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 6px",lineHeight:1.3}}>Start Your Free Month</h2>
-        <p style={{color:"rgba(255,255,255,0.6)",fontSize:14,margin:"0 0 20px",lineHeight:1.5}}>Then just {PRICE_MONTHLY} — cancel anytime. No charge during your trial.</p>
-
-        <div style={{background:"rgba(255,255,255,0.07)",borderRadius:16,padding:"16px",marginBottom:20,textAlign:"left"}}>
-          {[
-            ["🗺","All 4 worlds & 28+ missions"],
-            ["⚔️","Boss Battles & timed challenges"],
-            ["🔑","All 15 Tricks & Hacks"],
-            ["🏆","Leaderboard & rank system"],
-            ["📊","Full progress tracking"],
-            ["🆓","1 month completely free"],
-          ].map(([icon,text],i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:i<5?10:0}}>
-              <span style={{fontSize:18,width:24,textAlign:"center"}}>{icon}</span>
-              <span style={{color:"white",fontSize:14,fontWeight:600}}>{text}</span>
-              <span style={{marginLeft:"auto",color:"#4ADE80",fontSize:14}}>✓</span>
-            </div>
-          ))}
-        </div>
-
-        <button onClick={startTrial} disabled={loading}
-          style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",marginBottom:10,opacity:loading?0.7:1,boxShadow:"0 4px 20px rgba(252,211,77,0.4)"}}>
-          {loading?"Opening Stripe...":"🚀 Start Free Trial →"}
-        </button>
-        <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:0}}>
-          Test card: 4242 4242 4242 4242 · Any future date · Any CVC
-        </p>
-      </div>
-    </div>
-  );
-}
-
-
-// ─── UK GRAMMAR SCHOOLS ──────────────────────────────────────────────────────
-const UK_GRAMMAR_SCHOOLS = [
-  // KENT (largest grammar school area)
-  { name:"Tonbridge Grammar School", area:"Tonbridge, Kent", type:"GL", url:"https://www.tonbridgegrammar.org.uk", gender:"Girls" },
-  { name:"Judd School", area:"Tonbridge, Kent", type:"GL", url:"https://www.judd.kent.sch.uk", gender:"Boys" },
-  { name:"Skinners' School", area:"Tunbridge Wells, Kent", type:"GL", url:"https://www.skinners.kent.sch.uk", gender:"Boys" },
-  { name:"Tunbridge Wells Grammar School for Boys", area:"Tunbridge Wells, Kent", type:"GL", url:"https://twgsb.org.uk", gender:"Boys" },
-  { name:"Tunbridge Wells Girls' Grammar School", area:"Tunbridge Wells, Kent", type:"GL", url:"https://www.twggs.kent.sch.uk", gender:"Girls" },
-  { name:"Dartford Grammar School", area:"Dartford, Kent", type:"GL", url:"https://www.dartfordgrammarschool.org.uk", gender:"Boys" },
-  { name:"Dartford Grammar School for Girls", area:"Dartford, Kent", type:"GL", url:"https://www.dgsg.kent.sch.uk", gender:"Girls" },
-  { name:"Simon Langton Grammar School for Boys", area:"Canterbury, Kent", type:"GL", url:"https://www.langtonboys.kent.sch.uk", gender:"Boys" },
-  { name:"Simon Langton Girls' Grammar School", area:"Canterbury, Kent", type:"GL", url:"https://www.langton.kent.sch.uk", gender:"Girls" },
-  { name:"Folkestone School for Girls", area:"Folkestone, Kent", type:"GL", url:"https://www.folkestoneschool.org", gender:"Girls" },
-  { name:"Harvey Grammar School", area:"Folkestone, Kent", type:"GL", url:"https://harveygrammar.co.uk", gender:"Boys" },
-  { name:"Gravesend Grammar School", area:"Gravesend, Kent", type:"GL", url:"https://www.gravesendgrammar.org.uk", gender:"Boys" },
-  { name:"Weald of Kent Grammar School", area:"Tonbridge, Kent", type:"GL", url:"https://www.wealdofkent.kent.sch.uk", gender:"Girls" },
-  { name:"The Maidstone Grammar School", area:"Maidstone, Kent", type:"GL", url:"https://www.maidstonegrammar.com", gender:"Boys" },
-  { name:"Maidstone Grammar School for Girls", area:"Maidstone, Kent", type:"GL", url:"https://mgsg.org.uk", gender:"Girls" },
-  { name:"Invicta Grammar School", area:"Maidstone, Kent", type:"GL", url:"https://www.invicta.kent.sch.uk", gender:"Girls" },
-  { name:"Barton Court Grammar School", area:"Canterbury, Kent", type:"GL", url:"https://www.bartoncourt.org", gender:"Mixed" },
-  { name:"Chatham & Clarendon Grammar School", area:"Ramsgate, Kent", type:"GL", url:"https://www.chathamandclarendon.co.uk", gender:"Mixed" },
-  { name:"Sir Roger Manwood's School", area:"Sandwich, Kent", type:"GL", url:"https://www.srmanwoods.co.uk", gender:"Mixed" },
-  { name:"Cranbrook School", area:"Cranbrook, Kent", type:"GL", url:"https://www.cranbrook.kent.sch.uk", gender:"Mixed" },
-  { name:"The Norton Knatchbull School", area:"Ashford, Kent", type:"GL", url:"https://www.nortonknatchbull.org", gender:"Boys" },
-  { name:"Highworth Grammar School", area:"Ashford, Kent", type:"GL", url:"https://www.highworth.kent.sch.uk", gender:"Girls" },
-  { name:"Borden Grammar School", area:"Sittingbourne, Kent", type:"GL", url:"https://www.bordengrammar.kent.sch.uk", gender:"Boys" },
-  { name:"Homewood School (Sixth Form Centre)", area:"Tenterden, Kent", type:"GL", gender:"Mixed" },
-  { name:"Swadelands School", area:"Lenham, Kent", type:"GL", gender:"Mixed" },
-
-  // MEDWAY
-  { name:"Rochester Grammar School", area:"Rochester, Medway", type:"GL", url:"https://www.rochestergrammar.org.uk", gender:"Girls" },
-  { name:"Strood Academy", area:"Strood, Medway", type:"GL", gender:"Mixed" },
-  { name:"Rainham Mark Grammar School", area:"Gillingham, Medway", type:"GL", url:"https://www.rmgs.org.uk", gender:"Boys" },
-  { name:"Fort Pitt Grammar School", area:"Chatham, Medway", type:"GL", url:"https://www.fortpitt.medway.sch.uk", gender:"Girls" },
-  { name:"Holcombe Grammar School", area:"Chatham, Medway", type:"GL", gender:"Boys" },
-  { name:"The Hundred of Hoo Academy", area:"Rochester, Medway", type:"GL", gender:"Mixed" },
-
-  // BIRMINGHAM / WALSALL (MIDLANDS)
-  { name:"King Edward VI Camp Hill School for Boys", area:"Birmingham", type:"CEM", url:"https://www.camphillboys.bham.sch.uk", gender:"Boys" },
-  { name:"King Edward VI Camp Hill School for Girls", area:"Birmingham", type:"CEM", url:"https://www.camphillgirls.bham.sch.uk", gender:"Girls" },
-  { name:"King Edward VI Handsworth Grammar School", area:"Birmingham", type:"CEM", url:"https://www.handsworth.bham.sch.uk", gender:"Boys" },
-  { name:"King Edward VI Five Ways School", area:"Birmingham", type:"CEM", url:"https://www.fiveways.bham.sch.uk", gender:"Mixed" },
-  { name:"King Edward VI Aston School", area:"Birmingham", type:"CEM", url:"https://www.aston.bham.sch.uk", gender:"Boys" },
-  { name:"King Edward VI Handsworth School for Girls", area:"Birmingham", type:"CEM", gender:"Girls" },
-  { name:"Sutton Coldfield Grammar School for Girls", area:"Sutton Coldfield, Birmingham", type:"CEM", url:"https://www.scggs.co.uk", gender:"Girls" },
-  { name:"Bishop Vesey's Grammar School", area:"Sutton Coldfield, Birmingham", type:"CEM", url:"https://www.bishopveseys.co.uk", gender:"Boys" },
-  { name:"Walsall Girls' High School", area:"Walsall, West Midlands", type:"CEM", gender:"Girls" },
-  { name:"Queen Mary's Grammar School", area:"Walsall, West Midlands", type:"CEM", url:"https://www.qmgs.walsall.sch.uk", gender:"Boys" },
-  { name:"Queen Mary's High School", area:"Walsall, West Midlands", type:"CEM", url:"https://www.qmhs.walsall.sch.uk", gender:"Girls" },
-
-  // ESSEX
-  { name:"Chelmsford County High School for Girls", area:"Chelmsford, Essex", type:"CEM", url:"https://www.cchs.co.uk", gender:"Girls" },
-  { name:"King Edward VI Grammar School", area:"Chelmsford, Essex", type:"CEM", url:"https://www.kegs.org.uk", gender:"Boys" },
-  { name:"Colchester Royal Grammar School", area:"Colchester, Essex", type:"GL", url:"https://www.crgs.co.uk", gender:"Boys" },
-  { name:"Colchester County High School for Girls", area:"Colchester, Essex", type:"GL", url:"https://www.cchs4g.co.uk", gender:"Girls" },
-  { name:"Westcliff High School for Boys", area:"Westcliff-on-Sea, Essex", type:"CEM", url:"https://www.whsb.essex.sch.uk", gender:"Boys" },
-  { name:"Westcliff High School for Girls", area:"Westcliff-on-Sea, Essex", type:"CEM", url:"https://www.whsg.info", gender:"Girls" },
-  { name:"Southend High School for Boys", area:"Southend-on-Sea, Essex", type:"CEM", url:"https://www.shsb.org.uk", gender:"Boys" },
-  { name:"Southend High School for Girls", area:"Southend-on-Sea, Essex", type:"CEM", url:"https://www.shsg.org", gender:"Girls" },
-  { name:"Brentwood County High School", area:"Brentwood, Essex", type:"CEM", gender:"Mixed" },
-  { name:"Shenfield High School", area:"Brentwood, Essex", type:"CEM", gender:"Mixed" },
-
-  // HERTFORDSHIRE
-  { name:"Watford Grammar School for Boys", area:"Watford, Hertfordshire", type:"GL", url:"https://www.wgsb.co.uk", gender:"Boys" },
-  { name:"Watford Grammar School for Girls", area:"Watford, Hertfordshire", type:"GL", url:"https://www.wgsb.co.uk", gender:"Girls" },
-  { name:"Rickmansworth School", area:"Rickmansworth, Hertfordshire", type:"GL", gender:"Mixed" },
-  { name:"Dame Alice Owen's School", area:"Potters Bar, Hertfordshire", type:"GL", url:"https://www.damealiceowen.herts.sch.uk", gender:"Mixed" },
-  { name:"The Parmiter's School", area:"Watford, Hertfordshire", type:"GL", gender:"Mixed" },
-  { name:"St Clement Danes School", area:"Chorleywood, Hertfordshire", type:"GL", gender:"Mixed" },
-
-  // BUCKINGHAMSHIRE
-  { name:"Aylesbury Grammar School", area:"Aylesbury, Buckinghamshire", type:"GL", url:"https://www.ags.bucks.sch.uk", gender:"Boys" },
-  { name:"Aylesbury High School", area:"Aylesbury, Buckinghamshire", type:"GL", url:"https://www.ahs.bucks.sch.uk", gender:"Girls" },
-  { name:"Royal Grammar School, High Wycombe", area:"High Wycombe, Buckinghamshire", type:"GL", url:"https://www.rgshw.com", gender:"Boys" },
-  { name:"Wycombe High School", area:"High Wycombe, Buckinghamshire", type:"GL", url:"https://www.wycombeigh.bucks.sch.uk", gender:"Girls" },
-  { name:"Dr Challoner's Grammar School", area:"Amersham, Buckinghamshire", type:"GL", url:"https://www.challoners.com", gender:"Boys" },
-  { name:"Dr Challoner's High School", area:"Little Chalfont, Buckinghamshire", type:"GL", url:"https://www.challonershigh.com", gender:"Girls" },
-  { name:"Chesham Grammar School", area:"Chesham, Buckinghamshire", type:"GL", url:"https://www.cheshamgrammar.co.uk", gender:"Mixed" },
-  { name:"Burnham Grammar School", area:"Burnham, Buckinghamshire", type:"GL", gender:"Mixed" },
-  { name:"Sir Henry Floyd Grammar School", area:"Aylesbury, Buckinghamshire", type:"GL", gender:"Mixed" },
-  { name:"John Hampden Grammar School", area:"High Wycombe, Buckinghamshire", type:"GL", gender:"Boys" },
-  { name:"Beaconsfield High School", area:"Beaconsfield, Buckinghamshire", type:"GL", gender:"Girls" },
-  { name:"The Misbourne School", area:"Great Missenden, Buckinghamshire", type:"GL", gender:"Mixed" },
-  { name:"Cottesloe School", area:"Wing, Buckinghamshire", type:"GL", gender:"Mixed" },
-  { name:"The Mandeville School", area:"Aylesbury, Buckinghamshire", type:"GL", gender:"Mixed" },
-
-  // LINCOLNSHIRE
-  { name:"Lincoln Christ's Hospital School", area:"Lincoln, Lincolnshire", type:"GL", url:"https://www.lincolnchrists.org.uk", gender:"Mixed" },
-  { name:"The Priory Academy LSST", area:"Lincoln, Lincolnshire", type:"GL", gender:"Mixed" },
-  { name:"Caistor Grammar School", area:"Caistor, Lincolnshire", type:"GL", url:"https://www.caistor-grammar.co.uk", gender:"Mixed" },
-  { name:"King Edward VI Grammar School (Louth)", area:"Louth, Lincolnshire", type:"GL", gender:"Mixed" },
-  { name:"Queen Elizabeth's Grammar School", area:"Alford, Lincolnshire", type:"GL", gender:"Mixed" },
-  { name:"Market Rasen Queen Elizabeth's Grammar", area:"Market Rasen, Lincolnshire", type:"GL", gender:"Mixed" },
-  { name:"Spalding Grammar School", area:"Spalding, Lincolnshire", type:"GL", url:"https://www.spaldinggrammar.lincs.sch.uk", gender:"Boys" },
-  { name:"Bourne Grammar School", area:"Bourne, Lincolnshire", type:"GL", url:"https://www.bournegrammar.com", gender:"Mixed" },
-  { name:"Kesteven and Grantham Girls' School", area:"Grantham, Lincolnshire", type:"GL", gender:"Girls" },
-  { name:"The King's School", area:"Grantham, Lincolnshire", type:"GL", gender:"Boys" },
-  { name:"Boston Grammar School", area:"Boston, Lincolnshire", type:"GL", gender:"Boys" },
-  { name:"Haven High Academy", area:"Boston, Lincolnshire", type:"GL", gender:"Mixed" },
-  { name:"Sleaford Joint Sixth Form", area:"Sleaford, Lincolnshire", type:"GL", gender:"Mixed" },
-
-  // DEVON / TORQUAY
-  { name:"Torquay Boys' Grammar School", area:"Torquay, Devon", type:"GL", url:"https://www.tbgs.co.uk", gender:"Boys" },
-  { name:"Torquay Girls' Grammar School", area:"Torquay, Devon", type:"GL", url:"https://www.tggs.co.uk", gender:"Girls" },
-  { name:"Colyton Grammar School", area:"Colyton, Devon", type:"GL", url:"https://www.colytongrammar.com", gender:"Mixed" },
-
-  // GLOUCESTERSHIRE / CHELTENHAM
-  { name:"Pate's Grammar School", area:"Cheltenham, Gloucestershire", type:"GL", url:"https://www.pates.gloucs.sch.uk", gender:"Mixed" },
-  { name:"The Crypt School", area:"Gloucester, Gloucestershire", type:"GL", url:"https://www.cryptschool.co.uk", gender:"Boys" },
-  { name:"Denmark Road High School", area:"Gloucester, Gloucestershire", type:"GL", gender:"Girls" },
-  { name:"Sir Thomas Rich's School", area:"Gloucester, Gloucestershire", type:"GL", url:"https://www.str.gloucs.sch.uk", gender:"Boys" },
-  { name:"Ribston Hall High School", area:"Gloucester, Gloucestershire", type:"GL", gender:"Girls" },
-
-  // SUPER-SELECTIVE / LONDON AREA
-  { name:"Henrietta Barnett School", area:"Hampstead Garden Suburb, London", type:"GL", url:"https://www.hbschool.org.uk", gender:"Girls" },
-  { name:"Queen Elizabeth's School, Barnet", area:"Barnet, London", type:"GL", url:"https://www.qebarnet.co.uk", gender:"Boys" },
-  { name:"St Olave's Grammar School", area:"Orpington, London (Bromley)", type:"GL", url:"https://www.saintolaves.net", gender:"Boys" },
-  { name:"Newstead Wood School", area:"Orpington, London (Bromley)", type:"GL", url:"https://www.newsteadwood.co.uk", gender:"Girls" },
-  { name:"Wilson's School", area:"Sutton, London", type:"GL", url:"https://www.wilsons.school", gender:"Boys" },
-  { name:"Wallington County Grammar School", area:"Wallington, London", type:"GL", url:"https://www.wcgs.org.uk", gender:"Boys" },
-  { name:"Wallington High School for Girls", area:"Wallington, London", type:"GL", url:"https://www.wallingtonhigh.org.uk", gender:"Girls" },
-  { name:"Nonsuch High School for Girls", area:"Cheam, London (Sutton)", type:"GL", url:"https://www.nonsuch.school", gender:"Girls" },
-  { name:"Sutton Grammar School", area:"Sutton, London", type:"GL", url:"https://www.suttongrammar.sutton.sch.uk", gender:"Boys" },
-  { name:"Greenshaw High School", area:"Sutton, London", type:"GL", gender:"Mixed" },
-  { name:"The Tiffin School", area:"Kingston upon Thames, London", type:"GL", url:"https://www.tiffin.kingston.sch.uk", gender:"Boys" },
-  { name:"Tiffin Girls' School", area:"Kingston upon Thames, London", type:"GL", url:"https://www.tiffingirls.org", gender:"Girls" },
-  { name:"Latymer School", area:"Edmonton, London (Enfield)", type:"GL", url:"https://www.latymer-ed.org", gender:"Mixed" },
-  { name:"Enfield Grammar School", area:"Enfield, London", type:"GL", url:"https://www.enfieldgrammar.net", gender:"Boys" },
-  { name:"Chace Community School", area:"Enfield, London", type:"GL", gender:"Mixed" },
-
-  // TRAFFORD (MANCHESTER)
-  { name:"Altrincham Grammar School for Boys", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.agsb.co.uk", gender:"Boys" },
-  { name:"Altrincham Grammar School for Girls", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.aggs.trafford.sch.uk", gender:"Girls" },
-  { name:"Sale Grammar School", area:"Sale, Greater Manchester", type:"CEM", url:"https://www.salegrammar.co.uk", gender:"Mixed" },
-  { name:"Stretford Grammar School", area:"Stretford, Greater Manchester", type:"CEM", url:"https://www.stretfordgrammar.com", gender:"Mixed" },
-  { name:"Urmston Grammar School", area:"Urmston, Greater Manchester", type:"CEM", url:"https://www.urmstongrammar.co.uk", gender:"Mixed" },
-  { name:"Loreto Grammar School", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.loreto.trafford.sch.uk", gender:"Girls" },
-  { name:"St Ambrose College", area:"Altrincham, Greater Manchester", type:"CEM", url:"https://www.stambroseCollege.co.uk", gender:"Boys" },
-
-  // WIRRAL / MERSEYSIDE
-  { name:"Birkenhead School", area:"Birkenhead, Merseyside", type:"GL", gender:"Boys" },
-  { name:"Wirral Grammar School for Boys", area:"Bebington, Merseyside", type:"GL", url:"https://www.wirralgrammar.co.uk", gender:"Boys" },
-  { name:"Wirral Grammar School for Girls", area:"Bebington, Merseyside", type:"GL", url:"https://www.wirralgrammarforgirlss.co.uk", gender:"Girls" },
-  { name:"Calday Grange Grammar School", area:"West Kirby, Merseyside", type:"GL", url:"https://www.caldaygrammar.co.uk", gender:"Boys" },
-  { name:"West Kirby Grammar School", area:"West Kirby, Merseyside", type:"GL", url:"https://www.westkirbygrammar.co.uk", gender:"Girls" },
-
-  // SLOUGH / BERKSHIRE
-  { name:"Upton Court Grammar School", area:"Slough, Berkshire", type:"GL", url:"https://www.uptoncourtgrammar.co.uk", gender:"Mixed" },
-  { name:"Langley Grammar School", area:"Langley, Berkshire", type:"GL", url:"https://www.langleygrammar.com", gender:"Mixed" },
-  { name:"Herschel Grammar School", area:"Slough, Berkshire", type:"GL", url:"https://www.herschel.slough.sch.uk", gender:"Mixed" },
-  { name:"St Bernard's Catholic Grammar School", area:"Slough, Berkshire", type:"GL", url:"https://www.st-bernards.org", gender:"Mixed" },
-
-  // READING / BERKSHIRE
-  { name:"Reading School", area:"Reading, Berkshire", type:"GL", url:"https://www.reading-school.co.uk", gender:"Boys" },
-  { name:"Abbey School", area:"Reading, Berkshire", type:"GL", gender:"Girls" },
-  { name:"Kendrick School", area:"Reading, Berkshire", type:"GL", url:"https://www.kendrick.reading.sch.uk", gender:"Girls" },
-
-  // SHROPSHIRE
-  { name:"Haberdashers' Abraham Darby", area:"Telford, Shropshire", type:"GL", gender:"Mixed" },
-  { name:"Newport Girls' High School", area:"Newport, Shropshire", type:"GL", url:"https://www.newportgirlshigh.co.uk", gender:"Girls" },
-  { name:"Adams' Grammar School", area:"Newport, Shropshire", type:"GL", url:"https://www.adamsgrammar.org.uk", gender:"Boys" },
-
-  // STAFFORDSHIRE
-  { name:"Chase Grammar School", area:"Cannock, Staffordshire", type:"GL", gender:"Mixed" },
-  { name:"King Edward VI Grammar School", area:"Lichfield, Staffordshire", type:"GL", gender:"Mixed" },
-
-  // NORTHAMPTONSHIRE
-  { name:"Northampton School for Boys", area:"Northampton", type:"ISEB", url:"https://www.nsb.northants.sch.uk", gender:"Boys" },
-  { name:"Northampton High School", area:"Northampton", type:"ISEB", gender:"Girls" },
-
-  // RIPON / NORTH YORKSHIRE
-  { name:"Ripon Grammar School", area:"Ripon, North Yorkshire", type:"GL", url:"https://www.ripongrammar.co.uk", gender:"Mixed" },
-  { name:"Skipton Girls' High School", area:"Skipton, North Yorkshire", type:"GL", url:"https://www.skiptongirlshigh.com", gender:"Girls" },
-  { name:"Ermysted's Grammar School", area:"Skipton, North Yorkshire", type:"GL", url:"https://www.ermysteds.eu", gender:"Boys" },
-
-  // CUMBRIA
-  { name:"Queen Katherine School", area:"Kendal, Cumbria", type:"GL", gender:"Mixed" },
-  { name:"Kirkbie Kendal School", area:"Kendal, Cumbria", type:"GL", gender:"Mixed" },
-
-  // KENDAL
-  { name:"Stramongate School", area:"Kendal, Cumbria", type:"GL", gender:"Mixed" },
-
-  // WARWICKSHIRE
-  { name:"Lawrence Sheriff School", area:"Rugby, Warwickshire", type:"CEM", url:"https://www.lawrencesheriff.org.uk", gender:"Boys" },
-  { name:"Rugby High School", area:"Rugby, Warwickshire", type:"CEM", url:"https://www.rugbyhighschool.co.uk", gender:"Girls" },
-  { name:"Stratford-upon-Avon Grammar School", area:"Stratford-upon-Avon, Warwickshire", type:"CEM", url:"https://www.sags.org.uk", gender:"Boys" },
-  { name:"King Edward VI School", area:"Stratford-upon-Avon, Warwickshire", type:"CEM", gender:"Mixed" },
-
-  // DORSET
-  { name:"Bournemouth School", area:"Bournemouth, Dorset", type:"GL", url:"https://www.bournemouth-school.org", gender:"Boys" },
-  { name:"Bournemouth School for Girls", area:"Bournemouth, Dorset", type:"GL", url:"https://www.bsg.dorset.sch.uk", gender:"Girls" },
-  { name:"Poole Grammar School", area:"Poole, Dorset", type:"GL", url:"https://www.poolegrammar.com", gender:"Boys" },
-  { name:"Parkstone Grammar School", area:"Poole, Dorset", type:"GL", url:"https://www.parkstone.poole.sch.uk", gender:"Girls" },
-];
-
-const REGIONS = [...new Set(UK_GRAMMAR_SCHOOLS.map(s => s.area.split(",").slice(-1)[0].trim()))].sort();
-
-// ─── SUBSCRIPTION MODAL ──────────────────────────────────────────────────────
-function SubscriptionModal({user, onClose, inline=false}) {
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
-
-  function handleSubscribe() {
-    const email = user?.email || "";
-    window.location.href = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
-  }
-
-  const content = (
-    <>
-      {!inline && <><div style={{fontSize:56,marginBottom:8}}>👑</div>
-      <div style={{color:"#FCD34D",fontWeight:900,fontSize:12,textTransform:"uppercase",letterSpacing:"2px",marginBottom:6}}>11+ Quest Premium</div>
-      <h2 style={{color:"white",fontWeight:900,fontSize:24,margin:"0 0 6px",lineHeight:1.2}}>1 Month Free,<br/>Then £4.99/mo</h2>
-      <p style={{color:"rgba(255,255,255,0.6)",fontSize:13,margin:"0 0 24px",lineHeight:1.5}}>Start your free trial today. No charge for 30 days.<br/>Cancel anytime — no commitment.</p>
-      </>}
-      {err && <div style={{background:"rgba(220,38,38,0.2)",border:"1px solid rgba(220,38,38,0.4)",borderRadius:10,padding:"10px",marginBottom:14,color:"#FCA5A5",fontSize:13}}>{err}</div>}
-      <button onClick={handleSubscribe} disabled={loading}
-        style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",marginBottom:8,opacity:loading?0.7:1,boxShadow:"0 4px 20px rgba(252,211,77,0.35)"}}>
-        {loading ? "⏳ Connecting to Stripe..." : "🚀 Start Free Trial →"}
-      </button>
-      <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:"0 0 10px"}}>1 month free · Then £4.99/mo · Cancel anytime</p>
-      {!inline && <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Maybe later</button>}
-    </>
-  );
-
-  if(inline) return <div style={{textAlign:"center"}}>{content}</div>;
-
-  return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",zIndex:2500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-      <div style={{background:"linear-gradient(135deg,#1e1b4b,#312e81)",borderRadius:28,padding:"32px 24px",width:"100%",maxWidth:380,boxShadow:"0 30px 80px rgba(0,0,0,0.7)",animation:"popIn 0.3s ease",textAlign:"center"}}>
-        <div style={{fontSize:56,marginBottom:8}}>👑</div>
-        <div style={{color:"#FCD34D",fontWeight:900,fontSize:12,textTransform:"uppercase",letterSpacing:"2px",marginBottom:6}}>11+ Quest Premium</div>
-        <h2 style={{color:"white",fontWeight:900,fontSize:24,margin:"0 0 6px",lineHeight:1.2}}>1 Month Free,<br/>Then £4.99/mo</h2>
-        <p style={{color:"rgba(255,255,255,0.6)",fontSize:13,margin:"0 0 24px",lineHeight:1.5}}>Start your free trial today. No charge for 30 days.<br/>Cancel anytime — no commitment.</p>
-        {content}
-      </div>
-    </div>
-  );
-}
 
 // ─── SCHOOLS SCREEN ──────────────────────────────────────────────────────────
 function SchoolsScreen({goTo}) {
@@ -1561,7 +1472,6 @@ export default function App(){
 
   const [screen,setScreen]=useState("home");
   const [showAuth,setShowAuth]=useState(false);
-  const [showSub,setShowSub]=useState(false);
   const [activeWorld,setActiveWorld]=useState(null);
   const [popBadge,setPopBadge]=useState(null);
   const [floatMsg,setFloatMsg]=useState(null);
@@ -1585,9 +1495,6 @@ export default function App(){
   const [leaderboard,setLeaderboard]=useState([]);
 
   const today=new Date().toISOString().split("T")[0];
-  // Premium: check URL param (post-checkout redirect) or stored subscription
-  const urlParams = new URLSearchParams(window.location.search);
-  const justSubscribed = urlParams.get("subscribed") === "true";
   const {level:curLevel}=calcLevel(player.xp);
   const curRank=getRank(curLevel);
   const dailyChallenge=DAILY[new Date().getDay()];
@@ -1596,17 +1503,6 @@ export default function App(){
     const c = trackVisitorCount();
     if(c) setVisitorCount(c);
   },[]);
-
-  // Mark subscription on return from Stripe
-  useEffect(()=>{
-    if(justSubscribed && user){
-      const prog = Progress.get(user.id);
-      const updated = {...prog, subscription:"trial"};
-      Progress.save(user.id, updated);
-      setPlayer(p=>({...p, subscription:"trial"}));
-      window.history.replaceState({},"","/Home");
-    }
-  },[user,justSubscribed]);
 
   useEffect(()=>{
     if(!user)return;
@@ -1929,7 +1825,7 @@ export default function App(){
   return(
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
       {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuthSuccess={handleAuthSuccess}/>}
-      {showSub&&<SubscriptionModal user={user} onClose={()=>setShowSub(false)}/>}
+      
       {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
 
       {/* Top bar */}
@@ -1969,18 +1865,6 @@ export default function App(){
           </div>
         </div>
 
-        {/* Premium CTA banner */}
-        <div onClick={()=>setShowSub(true)} style={{background:"linear-gradient(135deg,rgba(124,58,237,0.35),rgba(79,70,229,0.25))",border:"1px solid rgba(124,58,237,0.4)",borderRadius:18,padding:"14px 16px",marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-          <div>
-            <div style={{color:"#A78BFA",fontWeight:800,fontSize:11,textTransform:"uppercase",letterSpacing:"1px",marginBottom:3}}>👑 Premium</div>
-            <div style={{color:"white",fontWeight:800,fontSize:14}}>1 Month Free Trial</div>
-            <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>Then £4.99/month · Cancel anytime</div>
-          </div>
-          <div style={{background:"linear-gradient(135deg,#FCD34D,#F59E0B)",borderRadius:12,padding:"10px 16px",flexShrink:0}}>
-            <div style={{color:"#1e1b4b",fontWeight:900,fontSize:13}}>Try Free →</div>
-          </div>
-        </div>
-
         {/* Daily challenge */}
         <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(239,68,68,0.14))",border:"1px solid rgba(245,158,11,0.28)",borderRadius:18,padding:"14px 16px",marginBottom:16,animation:"pulse 3s infinite"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1997,45 +1881,58 @@ export default function App(){
           </div>
         </div>
 
-        {/* Map label */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        {/* Age-grouped Adventure Map */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div style={{color:"white",fontWeight:900,fontSize:18}}>🗺 Adventure Map</div>
           {!user&&<button onClick={()=>setShowAuth(true)} style={{padding:"5px 12px",borderRadius:16,background:"rgba(79,70,229,0.5)",border:"1px solid rgba(99,102,241,0.4)",color:"white",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Sign in to save →</button>}
         </div>
 
-        {/* Worlds */}
-        {WORLDS.map((world,i)=>{
-          const done=world.missions.filter(m=>isCompleted(m.id)).length;
-          const total=world.missions.length;
-          const pct=Math.round((done/total)*100);
-          const next=world.missions.find(m=>!isCompleted(m.id)&&isMissionUnlocked(world,m));
+        {AGE_GROUPS.map(ag=>{
+          const groupWorlds = WORLDS.filter(w=>w.ageGroup===ag.id);
           return(
-            <div key={world.id} onClick={()=>{SFX.click();setActiveWorld(world);setScreen("map");}}
-              style={{background:world.gradient,borderRadius:22,padding:"20px",marginBottom:14,cursor:"pointer",boxShadow:"0 10px 40px rgba(0,0,0,0.4)",animation:`slideUp ${0.15+i*0.08}s ease`}}>
-              <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
-                <div style={{fontSize:46,lineHeight:1,flexShrink:0,animation:"worldFloat 4s infinite"}}>{world.icon}</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                    <div>
-                      <div style={{color:"white",fontWeight:900,fontSize:18,marginBottom:2}}>{world.name}</div>
-                      <div style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:8}}>{world.desc}</div>
-                    </div>
-                    {done===total&&<div style={{color:"#FCD34D",fontSize:12,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
-                  </div>
-                  <>
-                    <>
-                      <div style={{height:6,background:"rgba(255,255,255,0.2)",borderRadius:3,overflow:"hidden",marginBottom:5}}>
-                        <div style={{height:"100%",width:`${pct}%`,background:"rgba(255,255,255,0.85)",borderRadius:3,transition:"width 1.2s"}}/>
-                      </div>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                        <span style={{color:"rgba(255,255,255,0.6)",fontSize:11}}>{done}/{total} missions</span>
-                        {next&&<span style={{background:"rgba(0,0,0,0.2)",color:"white",fontWeight:700,fontSize:11,borderRadius:8,padding:"3px 8px"}}>▶ {next.name}</span>}
-                        {done===total&&<span style={{color:"#FCD34D",fontSize:12,fontWeight:800}}>Boss slain ⚔️</span>}
-                      </div>
-                    </>
-                  </>
+            <div key={ag.id} style={{marginBottom:24}}>
+              {/* Age group header */}
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,paddingBottom:8,borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+                <span style={{fontSize:20}}>{ag.icon}</span>
+                <div>
+                  <div style={{color:"white",fontWeight:900,fontSize:15}}>{ag.label}</div>
+                  <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{ag.desc}</div>
+                </div>
+                <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"3px 10px"}}>
+                  <span style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{groupWorlds.length} worlds</span>
                 </div>
               </div>
+              {/* World cards for this age group */}
+              {groupWorlds.map((world,i)=>{
+                const done=world.missions.filter(m=>isCompleted(m.id)).length;
+                const total=world.missions.length;
+                const pct=Math.round((done/total)*100);
+                const next=world.missions.find(m=>!isCompleted(m.id)&&isMissionUnlocked(world,m));
+                return(
+                  <div key={world.id} onClick={()=>{SFX.click();setActiveWorld(world);setScreen("map");}}
+                    style={{background:world.gradient,borderRadius:20,padding:"16px 18px",marginBottom:10,cursor:"pointer",boxShadow:"0 6px 24px rgba(0,0,0,0.35)",animation:`slideUp ${0.1+i*0.06}s ease`,position:"relative"}}>
+                    {world.free&&<div style={{position:"absolute",top:10,right:12,background:"rgba(74,222,128,0.25)",border:"1px solid rgba(74,222,128,0.5)",borderRadius:8,padding:"2px 8px",fontSize:10,fontWeight:800,color:"#4ADE80"}}>✅ FREE</div>}
+                    <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+                      <div style={{fontSize:38,lineHeight:1,flexShrink:0,animation:"worldFloat 4s infinite"}}>{world.icon}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2}}>
+                          <div style={{color:"white",fontWeight:900,fontSize:16}}>{world.name}</div>
+                          {done===total&&<div style={{color:"#FCD34D",fontSize:11,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
+                        </div>
+                        <div style={{color:"rgba(255,255,255,0.65)",fontSize:12,marginBottom:8}}>{world.desc}</div>
+                        <div style={{height:5,background:"rgba(255,255,255,0.2)",borderRadius:3,overflow:"hidden",marginBottom:4}}>
+                          <div style={{height:"100%",width:`${pct}%`,background:"rgba(255,255,255,0.85)",borderRadius:3,transition:"width 1.2s"}}/>
+                        </div>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                          <span style={{color:"rgba(255,255,255,0.55)",fontSize:11}}>{done}/{total} missions</span>
+                          {next&&<span style={{background:"rgba(0,0,0,0.2)",color:"white",fontWeight:700,fontSize:10,borderRadius:8,padding:"2px 7px"}}>▶ {next.name}</span>}
+                          {done===total&&<span style={{color:"#FCD34D",fontSize:11,fontWeight:800}}>Boss slain ⚔️</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
