@@ -506,11 +506,6 @@ function BadgePop({badge,onClose}){
 const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_5kQ7sK1Kn2BU9FE5jV77O00";
 const PRICE_MONTHLY = "£4.99/month";
 
-// No free missions — everything requires a plan
-function isMissionFree(worldId, missionId) {
-  return false; // All content requires subscription
-}
-
 // ─── PREMIUM MODAL ────────────────────────────────────────────────────────────
 function PremiumModal({onClose, user, onSignIn}){
   const [loading, setLoading] = useState(false);
@@ -905,7 +900,7 @@ function SchoolsScreen({goTo}) {
 }
 
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"schools",icon:"🏫",label:"Schools"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"progress",icon:"📊",label:"Stats"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"schools",icon:"🏫",label:"Schools"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
@@ -969,6 +964,578 @@ function MissionComplete({mission,score,total,xpEarned,coinsEarned,newTrick,onCo
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN APP
 // ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── LEARN DATA (lessons + AI tutor) ──────────────────────────────────────────
+const LESSONS = {
+  maths: {
+    icon:"⛰️", colour:"#4F46E5",
+    topics:[
+      {id:"fractions", title:"Fractions", icon:"½", content:`WHAT IS A FRACTION?
+A fraction shows part of a whole. The bottom number (denominator) is how many equal parts the whole is split into. The top number (numerator) is how many parts you have.
+
+🔑 KEY RULE: To find a fraction of a number:
+  DIVIDE by the bottom → MULTIPLY by the top
+
+EXAMPLES:
+• ¾ of 40  → 40÷4=10 → 10×3=30 ✓
+• ⅔ of 18  → 18÷3=6  → 6×2=12  ✓
+• ⅖ of 25  → 25÷5=5  → 5×2=10  ✓
+
+SIMPLIFYING: Divide top AND bottom by their HCF.
+  8/12 → HCF=4 → 2/3 ✓
+
+ADDING: Make denominators the same first.
+  ½ + ¼ → 2/4 + 1/4 = 3/4 ✓`},
+      {id:"percentages", title:"Percentages", icon:"％", content:`PERCENTAGES = PARTS PER 100
+
+🔑 BUILDING BLOCKS (memorise these!):
+  10% = ÷10
+  5%  = half of 10%
+  25% = ÷4
+  50% = ÷2
+  1%  = ÷100
+
+BUILD ANY %:
+  15% = 10% + 5%
+  35% = 25% + 10%
+  75% = 50% + 25%
+
+EXAMPLE: 35% of £80
+  10% = £8 → 25% = £20 → 35% = £28
+  Or: 35% off → £80 − £28 = £52 ✓
+
+% CHANGE: (Change ÷ Original) × 100
+  £40 → £50: change=10, 10÷40×100 = 25% increase ✓`},
+      {id:"algebra", title:"Algebra", icon:"🔣", content:`ALGEBRA — think of the letter as a mystery box.
+
+🔑 GOLDEN RULE: Do the SAME thing to BOTH sides.
+
+SOLVING EQUATIONS:
+  x + 7 = 15  → subtract 7 both sides → x = 8
+  3x = 21     → divide both by 3      → x = 7
+  2x − 3 = 7  → +3 both → 2x=10 → ÷2 → x = 5
+
+NTH TERM (sequences):
+  5, 8, 11, 14... gap = +3 → rule is 3n + ?
+  When n=1: 3×1=3, but answer is 5 → +2
+  nth term = 3n + 2 ✓
+
+EXPAND: 3(x+4) = 3x + 12
+FACTORISE: 2x+6 = 2(x+3)  (take out the HCF)`},
+      {id:"ratio", title:"Ratio", icon:"⚖️", content:`RATIO — sharing in given parts.
+
+🔑 3-STEP METHOD:
+  1. Add the parts to get TOTAL PARTS
+  2. Divide the total value by total parts → 1 PART
+  3. Multiply each ratio number by 1 part
+
+EXAMPLE: Share £30 in ratio 2:3
+  Total parts = 2+3 = 5
+  1 part = £30÷5 = £6
+  2 parts = £12, 3 parts = £18 ✓
+
+SCALING UP:
+  Recipe for 4 uses 200g flour. For 6?
+  Per person: 200÷4 = 50g
+  For 6: 50×6 = 300g ✓`},
+      {id:"geometry", title:"Geometry", icon:"📐", content:`KEY FORMULAS:
+
+📏 PERIMETER = add all sides
+   Rectangle: 2×(length + width)
+
+📦 AREA:
+   Rectangle = length × width
+   Triangle = ½ × base × height
+   Circle = π × r²  (π ≈ 3.14)
+
+📦 VOLUME:
+   Cuboid = length × width × height
+
+⭕ CIRCLES:
+   Circumference = 2 × π × r
+
+📐 ANGLES:
+   Triangle = 180°
+   Quadrilateral = 360°
+   Regular hexagon interior = 120°
+
+🔺 PYTHAGORAS (right-angled triangles):
+   a² + b² = c²  →  3²+4²=5² ✓`},
+    ]
+  },
+  english: {
+    icon:"🌲", colour:"#059669",
+    topics:[
+      {id:"grammar", title:"Grammar", icon:"📝", content:`PARTS OF SPEECH — know them cold!
+
+NOUNS: naming words (happiness, London, dog)
+VERBS: doing/being words (run, is, think)
+ADJECTIVES: describe nouns (tall, beautiful)
+ADVERBS: describe verbs, often end in -ly (quickly, very)
+PRONOUNS: replace nouns (he, she, it, they)
+
+🔑 SUBJECT vs OBJECT PRONOUNS:
+  Subject: I, he, she, we, they  (doing the action)
+  Object:  me, him, her, us, them (receiving it)
+
+  ✓ "He and I went"   ✗ "Me and him went"
+  TIP: remove the other person and test alone!
+
+ACTIVE vs PASSIVE:
+  Active:  "The cat ate the fish." (subject does it)
+  Passive: "The fish was eaten."  (subject receives it)`},
+      {id:"punctuation", title:"Punctuation", icon:"✏️", content:`APOSTROPHES — two uses only:
+
+1. CONTRACTION (missing letters):
+   it is → it's    do not → don't
+   they are → they're    I am → I'm
+
+2. POSSESSION (belonging):
+   the dog's lead  (one dog)
+   the dogs' leads (many dogs)
+   NOTE: "its" as possession = NO apostrophe!
+
+❌ NEVER use apostrophe for plurals:
+   "apple's" = WRONG.  "apples" = correct ✓
+
+COMMAS:
+• Before a joining word (FANBOYS): but, and, or, so
+• After an introductory phrase: "However, ..."
+• Around extra information: "Jay, my friend, ..."
+
+COLONS: introduce lists or explanations.
+SEMICOLONS: join two related sentences.`},
+      {id:"vocabulary", title:"Vocabulary", icon:"📚", content:`WORD ROOTS — crack any unknown word!
+
+port = carry   (transport, portable, import)
+aud  = hear    (audio, auditorium, audience)
+vis  = see     (vision, visible, television)
+bene = good    (benefit, benevolent, beneficial)
+mal  = bad     (malicious, malfunction, malice)
+scrib= write   (scribble, describe, script)
+dict = say     (dictate, predict, dictionary)
+rupt = break   (interrupt, erupt, corrupt)
+flex = bend    (flexible, reflect, inflexible)
+bio  = life    (biology, biography, antibiotic)
+graph= write   (photograph, autograph)
+tele = far     (telephone, television, telescope)
+
+PREFIXES:
+  un/dis/mis = not/opposite
+  re = again    pre = before    over = too much`},
+    ]
+  },
+  verbal: {
+    icon:"🗼", colour:"#D97706",
+    topics:[
+      {id:"synonyms", title:"Synonyms & Antonyms", icon:"🔄", content:`SYNONYMS = same meaning
+ANTONYMS = opposite meaning
+
+WORD FAMILIES to know:
+
+😊 Happy: joyful, elated, gleeful, blissful, content
+😢 Sad: mournful, melancholy, sorrowful, dejected
+💪 Brave: courageous, valiant, intrepid, bold, daring
+😠 Angry: furious, irate, livid, incensed, wrathful
+🌟 Excellent: superb, outstanding, exceptional, magnificent
+
+ANTONYMS — common pairs:
+  ancient ↔ modern    reveal ↔ conceal
+  generous ↔ mean     genuine ↔ fake
+  cautious ↔ reckless  tranquil ↔ turbulent
+
+TIP: When in doubt, break the word into prefix/root.
+  "benevolent" → bene(good) = kind/generous`},
+      {id:"analogies", title:"Analogies", icon:"🔗", content:`ANALOGIES — find the relationship, then apply it.
+
+🔑 FORMULA: State the relationship first!
+  "A is the YOUNG OF B"
+  "A is the TOOL FOR B"
+  "A is the OPPOSITE OF B"
+  "A is WHERE B lives"
+
+EXAMPLES:
+  Puppy:Dog → young of → Kitten:Cat ✓
+  Brush:Paint → tool for → Pen:Write ✓
+  Hot:Cold → opposite → Light:Dark ✓
+  Den:Fox → home of → Burrow:Rabbit ✓
+  Surgeon:Hospital → works in → Teacher:School ✓
+
+COMMON RELATIONSHIPS:
+  animal/young · tool/action · part/whole
+  worker/workplace · degree (warm/hot/boiling)`},
+      {id:"codes", title:"Codes & Ciphers", icon:"🔐", content:`CODE CRACKING — always write it out!
+
+🔑 STEP-BY-STEP:
+  1. Write out: A B C D E F G H...
+  2. Find the shift rule (+1, +2, -1, mirror etc.)
+  3. Map EVERY letter (never guess in your head!)
+
+COMMON CODES:
+  +1: A→B, B→C, C→D...
+  -1: B→A, C→B, D→C...
+  Mirror (A=Z): A↔Z, B↔Y, C↔X...
+
+EXAMPLE: If CAT = DBU, what is DOG?
+  Rule: each letter +1
+  D→E, O→P, G→H → answer: EPH ✓
+
+LETTER POSITIONS:
+  A=1, B=2, C=3... Z=26
+  (Write this out on your paper every time!)`},
+      {id:"sequences", title:"Sequences", icon:"🔢", content:`SEQUENCES — find the rule between terms.
+
+🔑 STEP BY STEP:
+  1. Find the gap between each pair of numbers
+  2. Is it +, -, ×, ÷?
+  3. Check if it's TWO alternating rules
+
+NUMBER EXAMPLES:
+  2, 5, 8, 11... → gap = +3 → next = 14
+  2, 6, 18, 54... → rule = ×3 → next = 162
+  20, 17, 14, 11... → rule = −3 → next = 8
+
+LETTER SEQUENCES:
+  A, C, E, G... → +2 positions → next = I
+  Z, X, V, T... → −2 positions → next = R
+
+TWO RULE sequences:
+  2, 3, 5, 6, 8, 9... → +1, +2, +1, +2...`},
+    ]
+  },
+  nvr: {
+    icon:"🔬", colour:"#DC2626",
+    topics:[
+      {id:"shapes2d", title:"2D Shapes", icon:"🔷", content:`POLYGONS — shapes with straight sides.
+
+TRIANGLES (3 sides):
+  Equilateral: 3 equal sides, all angles 60°
+  Isosceles: 2 equal sides, 2 equal angles
+  Scalene: no equal sides
+  Right-angled: one 90° angle
+
+QUADRILATERALS (4 sides):
+  Square: 4 equal sides, all 90°
+  Rectangle: opposite sides equal, all 90°
+  Parallelogram: opposite sides parallel & equal
+  Rhombus: 4 equal sides, opposite angles equal
+  Trapezium: ONE pair of parallel sides
+
+ANGLE RULES:
+  All triangles → 180°
+  All quadrilaterals → 360°
+  Regular n-gon interior angle = (n−2)×180 ÷ n`},
+      {id:"patterns", title:"Patterns & Matrices", icon:"🔲", content:`MATRIX PATTERNS — look for rules in rows AND columns.
+
+🔑 METHOD:
+  1. Check ROWS: what changes left → right?
+  2. Check COLUMNS: what changes top → bottom?
+  3. The rule must be consistent in BOTH directions
+
+COMMON CHANGES TO SPOT:
+  • Shape rotates (90°, 180°, 270°)
+  • Shape gets larger/smaller
+  • One shape added/removed each step
+  • Shading changes (add/remove/alternate)
+  • Number of sides increases by 1 each time
+
+STRATEGY: If stuck, find what the top-left and top-right have in common — then apply it to the bottom row.`},
+      {id:"symmetry", title:"Symmetry & Reflection", icon:"🔄", content:`LINES OF SYMMETRY: a fold line where both halves match exactly.
+
+Regular shapes:
+  Square: 4 lines · Rectangle: 2 lines
+  Equilateral triangle: 3 lines · Circle: infinite
+
+🔑 REFLECTION RULES:
+  • Each point stays the SAME DISTANCE from the mirror
+  • Shape is FLIPPED, not rotated
+  • Vertical mirror: left ↔ right swap
+  • Horizontal mirror: top ↔ bottom swap
+
+ROTATION:
+  90° clockwise: (x,y) → (y,−x)
+  180°: shape is upside down
+  270° clockwise = 90° anticlockwise
+
+TIP: Count squares from the mirror line carefully — this is where most mistakes happen!`},
+      {id:"3dshapes", title:"3D Shapes", icon:"🧊", content:`3D SHAPE VOCABULARY:
+  Face = flat surface
+  Edge = line where 2 faces meet
+  Vertex (pl. Vertices) = corner point
+
+COMMON SHAPES:
+  Cube:           6F, 12E, 8V
+  Cuboid:         6F, 12E, 8V
+  Square pyramid: 5F, 8E, 5V
+  Triangular prism: 5F, 9E, 6V
+  Cylinder:       3F, 2E, 0V
+  Cone:           2F, 1E, 1V
+  Sphere:         1F, 0E, 0V
+
+🔑 EULER'S FORMULA (always works for polyhedra):
+  F + V − E = 2
+  Cube: 6 + 8 − 12 = 2 ✓
+  Use it to find any missing value in an exam!`},
+    ]
+  },
+};
+
+// ─── LEARN SCREEN ─────────────────────────────────────────────────────────────
+function LearnScreen({goTo, player}){
+  const [subject, setSubject] = useState(null);
+  const [topic, setTopic] = useState(null);
+  const [chatMode, setChatMode] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatHistory, setChatHistory] = useState([
+    {role:"tutor", text:"Hi! I'm your 11+ AI Tutor 🤖 Ask me anything about Maths, English, Verbal or Non-Verbal Reasoning — or pick a subject below!"}
+  ]);
+  const chatEndRef = useRef(null);
+
+  useEffect(()=>{ if(chatEndRef.current) chatEndRef.current.scrollIntoView({behavior:"smooth"}); },[chatHistory]);
+
+  // Simple rule-based AI tutor responses
+  function getTutorResponse(q){
+    const lower = q.toLowerCase();
+    // Fractions
+    if(lower.includes("fraction")||lower.includes("numerator")||lower.includes("denominator")){
+      return "Great question! For fractions: DIVIDE by the bottom number, then MULTIPLY by the top. So ¾ of 40 → 40÷4=10, 10×3=30. To simplify, divide both top and bottom by their HCF. Want a practice question? 😊";
+    }
+    if(lower.includes("percentage")||lower.includes("percent")){
+      return "Percentages are easy once you know your building blocks! 10%=÷10, 25%=÷4, 50%=÷2. Build any %: 35% = 25%+10%. Example: 35% of £80 → 25%=£20, 10%=£8 → 35%=£28. Got it? 💡";
+    }
+    if(lower.includes("ratio")){
+      return "Ratio in 3 steps: ①Add all parts to get total parts. ②Divide total value by total parts to get 1 part. ③Multiply each ratio number by 1 part. Example: 2:3 sharing £30 → 5 parts → £6 each → £12 and £18. 👍";
+    }
+    if(lower.includes("algebra")||lower.includes("equation")){
+      return "Algebra tip: whatever you do to one side, do to the other! To solve 2x+3=11 → subtract 3 both sides → 2x=8 → divide by 2 → x=4. For nth terms: find the gap (common difference), then work out the adjustment. Example: 5,8,11,14 → gap=3 → 3n, check: 3(1)=3 but need 5, so add 2 → 3n+2 ✓";
+    }
+    if(lower.includes("geometry")||lower.includes("area")||lower.includes("perimeter")){
+      return "Key formulas: Perimeter = add all sides. Area of rectangle = l×w. Area of triangle = ½×base×height. Area of circle = πr². Pythagoras: a²+b²=c². Interior angles: triangle=180°, quadrilateral=360°. Need me to explain any of these? 📐";
+    }
+    if(lower.includes("grammar")||lower.includes("adjective")||lower.includes("adverb")||lower.includes("noun")||lower.includes("verb")){
+      return "Grammar quick guide: Nouns=naming words, Verbs=doing words, Adjectives=describe nouns, Adverbs=describe verbs (often -ly). Remember: subject pronouns (I, he, she) vs object pronouns (me, him, her). Test: 'He and I went' ✓ vs 'Me and him went' ✗";
+    }
+    if(lower.includes("apostrophe")||lower.includes("punctuation")){
+      return "Apostrophes have TWO uses: 1) Contractions — missing letters (it's = it is, don't = do not). 2) Possession — belonging (dog's collar = one dog, dogs' collars = many dogs). NEVER use apostrophes for plain plurals! 'Apple's' is ALWAYS wrong. ✏️";
+    }
+    if(lower.includes("synonym")||lower.includes("antonym")||lower.includes("vocabulary")){
+      return "Synonyms = same meaning, Antonyms = opposite. Learn word families: Happy→joyful/elated/gleeful. Brave→courageous/valiant/intrepid. Use word roots too: bene=good, mal=bad, port=carry, vis=see. These help you crack unknown words! 📚";
+    }
+    if(lower.includes("analogy")){
+      return "For analogies, ALWAYS state the relationship first! 'A is the young of B', 'A is the tool for B', 'A is the opposite of B'. Example: Puppy:Dog → young of → Kitten:Cat. Surgeon:Hospital → works in → Teacher:School. State it, then apply it! 🔗";
+    }
+    if(lower.includes("code")||lower.includes("cipher")){
+      return "For code questions: ALWAYS write out the full alphabet first, then find the shift rule (+1, +2, -1, mirror/A=Z). Map EVERY letter on paper — never try to do it in your head! Most common shifts are +1 and -1. 🔐";
+    }
+    if(lower.includes("sequence")){
+      return "For sequences: find the gap between each pair of terms. Is it +, -, ×, ÷? Watch for two alternating rules (2,3,5,6,8,9 → +1,+2,+1,+2). For letter sequences, count alphabet positions. Always check your rule on at least 3 terms! 🔢";
+    }
+    if(lower.includes("symmetry")||lower.includes("reflection")){
+      return "Reflection: each point stays the SAME distance from the mirror line, but flipped. Vertical mirror: left↔right. Horizontal mirror: top↔bottom. Count squares carefully — this is where most marks are lost! 🔄";
+    }
+    if(lower.includes("pattern")||lower.includes("matrix")){
+      return "For pattern/matrix questions: check ROWS left→right first (what changes?), then COLUMNS top→bottom. The rule must work consistently in BOTH directions. Common changes: rotation, size, shading, adding/removing shapes. 🔲";
+    }
+    if(lower.includes("3d")||lower.includes("cube")||lower.includes("euler")||lower.includes("face")||lower.includes("edge")||lower.includes("vertice")){
+      return "Euler's Formula: Faces + Vertices − Edges = 2. Works for all polyhedra! Cube: 6+8−12=2 ✓. Use it to find any missing value. Know your shapes: Cube(6F,12E,8V), Square pyramid(5F,8E,5V), Triangular prism(5F,9E,6V). 🧊";
+    }
+    if(lower.includes("help")||lower.includes("how do i")||lower.includes("explain")||lower.includes("what is")||lower.includes("what are")){
+      return "I'm here to help! I can explain any 11+ topic: fractions, percentages, algebra, geometry, grammar, punctuation, vocabulary, analogies, codes, sequences, symmetry, and more. What topic would you like me to explain? 🤖";
+    }
+    if(lower.includes("test")||lower.includes("practice")||lower.includes("question")){
+      return "Great idea! Head to the 🗺 Map tab to practice with real exam questions. Each world has missions for Maths, English, Verbal and Non-Verbal Reasoning. Boss battles are timed for extra challenge! 🎮";
+    }
+    if(lower.includes("level")||lower.includes("xp")||lower.includes("badge")){
+      return "You earn XP by completing missions with 70%+ score. Level up to unlock new ranks: Explorer → Apprentice → Scholar → Logic Warrior → Champion → 11+ Master → Legend! Badges are special achievements — check your stats in the progress tab. 🏆";
+    }
+    if(lower.includes("streak")){
+      return "A streak means you practice every day! Your streak goes up when you complete a mission on consecutive days. 3-day streak = 🔥 badge, 7-day = 💎 badge. Try to practice a little every day — it really helps with exam prep! 📅";
+    }
+    // Greetings
+    if(lower.includes("hello")||lower.includes("hi ")||lower.match(/^hi$/)||lower.includes("hey")){
+      return "Hey there! 👋 I'm your 11+ AI Tutor. I can help you understand any topic — maths, english, verbal reasoning, or non-verbal reasoning. What would you like to learn today?";
+    }
+    if(lower.includes("thank")){
+      return "You're welcome! 😊 Keep up the great work. Remember: a little practice every day is way better than cramming. Good luck with your 11+! 🌟";
+    }
+    // Generic fallback
+    return `That's a great question about "${q.slice(0,40)}${q.length>40?"...":""}". I'm best at explaining 11+ topics like fractions, percentages, algebra, grammar, analogies, codes, and sequences. Try asking me something like "How do fractions work?" or "Explain codes!" 🤖`;
+  }
+
+  function sendMessage(){
+    if(!chatInput.trim()) return;
+    const userMsg = chatInput.trim();
+    setChatInput("");
+    setChatHistory(h=>[...h,{role:"user",text:userMsg}]);
+    setTimeout(()=>{
+      const resp = getTutorResponse(userMsg);
+      setChatHistory(h=>[...h,{role:"tutor",text:resp}]);
+    }, 600);
+  }
+
+  // Subject list view
+  if(!subject && !chatMode){
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29,#1a1042)"}}>
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+          <div style={{padding:"18px 0 12px",textAlign:"center"}}>
+            <div style={{fontSize:48,marginBottom:6}}>🤖</div>
+            <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 4px"}}>AI Tutor & Learn</h2>
+            <p style={{color:"rgba(255,255,255,0.45)",fontSize:13,margin:0}}>Study lessons or chat with your personal tutor</p>
+          </div>
+
+          {/* Chat with AI button */}
+          <div onClick={()=>setChatMode(true)} style={{background:"linear-gradient(135deg,#4F46E5,#7C3AED)",borderRadius:20,padding:"18px 20px",marginBottom:16,cursor:"pointer",boxShadow:"0 8px 32px rgba(79,70,229,0.4)",display:"flex",alignItems:"center",gap:14}}>
+            <div style={{fontSize:40,flexShrink:0}}>💬</div>
+            <div>
+              <div style={{color:"white",fontWeight:900,fontSize:16,marginBottom:2}}>Chat with AI Tutor</div>
+              <div style={{color:"rgba(255,255,255,0.65)",fontSize:13}}>Ask anything — get instant explanations</div>
+            </div>
+            <div style={{marginLeft:"auto",color:"rgba(255,255,255,0.5)",fontSize:20}}>›</div>
+          </div>
+
+          {/* Subject lessons */}
+          <div style={{color:"rgba(255,255,255,0.5)",fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>📚 Study Lessons</div>
+          {Object.entries(LESSONS).map(([id,subj])=>{
+            const worldObj = WORLDS.find(w=>w.id===id);
+            return(
+              <div key={id} onClick={()=>setSubject(id)} style={{background:worldObj?.gradient||"rgba(255,255,255,0.08)",borderRadius:18,padding:"16px 18px",marginBottom:10,cursor:"pointer",boxShadow:"0 4px 20px rgba(0,0,0,0.3)",display:"flex",alignItems:"center",gap:14}}>
+                <div style={{fontSize:36,flexShrink:0}}>{subj.icon}</div>
+                <div>
+                  <div style={{color:"white",fontWeight:800,fontSize:16}}>{worldObj?.name||id}</div>
+                  <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>{LESSONS[id].topics.length} lessons available</div>
+                </div>
+                <div style={{marginLeft:"auto",color:"rgba(255,255,255,0.4)",fontSize:20}}>›</div>
+              </div>
+            );
+          })}
+        </div>
+        <BottomNav screen="learn" goTo={goTo}/>
+      </div>
+    );
+  }
+
+  // Chat mode
+  if(chatMode){
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29,#1a1042)",display:"flex",flexDirection:"column"}}>
+        <div style={{maxWidth:520,margin:"0 auto",width:"100%",display:"flex",flexDirection:"column",height:"100vh"}}>
+          {/* Header */}
+          <div style={{padding:"14px 16px 10px",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+            <button onClick={()=>setChatMode(false)} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer",fontFamily:"inherit"}}>← Back</button>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{fontSize:28}}>🤖</div>
+              <div>
+                <div style={{color:"white",fontWeight:800,fontSize:15}}>11+ AI Tutor</div>
+                <div style={{color:"#4ADE80",fontSize:11,fontWeight:700}}>● Online</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div style={{flex:1,overflowY:"auto",padding:"0 16px 16px"}}>
+            {chatHistory.map((msg,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:msg.role==="user"?"flex-end":"flex-start",marginBottom:10}}>
+                {msg.role==="tutor"&&<div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,marginRight:8,flexShrink:0,marginTop:2}}>🤖</div>}
+                <div style={{maxWidth:"80%",background:msg.role==="user"?"linear-gradient(135deg,#4F46E5,#7C3AED)":"rgba(255,255,255,0.1)",borderRadius:msg.role==="user"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"10px 14px",color:"white",fontSize:13,lineHeight:1.55,whiteSpace:"pre-wrap"}}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            <div ref={chatEndRef}/>
+          </div>
+
+          {/* Input */}
+          <div style={{padding:"12px 16px",background:"rgba(15,12,41,0.98)",borderTop:"1px solid rgba(255,255,255,0.08)",flexShrink:0}}>
+            <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
+              <input
+                value={chatInput}
+                onChange={e=>setChatInput(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&(e.preventDefault(),sendMessage())}
+                placeholder="Ask me anything about 11+ topics..."
+                style={{flex:1,background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:16,padding:"12px 14px",color:"white",fontSize:13,fontFamily:"inherit",outline:"none",resize:"none"}}
+              />
+              <button onClick={sendMessage} style={{width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",border:"none",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>→</button>
+            </div>
+            <div style={{display:"flex",gap:6,marginTop:8,flexWrap:"wrap"}}>
+              {["How do fractions work?","Explain percentages","Help with algebra","What are analogies?","Crack codes tips"].map(q=>(
+                <button key={q} onClick={()=>{setChatInput(q);}} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"4px 10px",color:"rgba(255,255,255,0.6)",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>{q}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Topic list for a subject
+  if(subject && !topic){
+    const subj = LESSONS[subject];
+    const world = WORLDS.find(w=>w.id===subject);
+    return(
+      <div style={{minHeight:"100vh",background:`linear-gradient(180deg,${world?.colour||"#4F46E5"}cc,#0f0c29)`}}>
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+          <div style={{padding:"14px 0 12px",display:"flex",alignItems:"center",gap:12}}>
+            <button onClick={()=>setSubject(null)} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer",fontFamily:"inherit"}}>← Back</button>
+            <div>
+              <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>{subj.icon} {world?.name||subject} Lessons</h2>
+              <p style={{color:"rgba(255,255,255,0.5)",fontSize:12,margin:0}}>Tap a topic to study</p>
+            </div>
+          </div>
+          {subj.topics.map((t,i)=>(
+            <div key={t.id} onClick={()=>setTopic(t)} style={{background:"rgba(255,255,255,0.08)",borderRadius:18,padding:"16px 18px",marginBottom:10,cursor:"pointer",border:"1px solid rgba(255,255,255,0.1)",animation:`slideUp ${0.1+i*0.06}s ease`,display:"flex",alignItems:"center",gap:14}}>
+              <div style={{fontSize:32}}>{t.icon}</div>
+              <div>
+                <div style={{color:"white",fontWeight:800,fontSize:15}}>{t.title}</div>
+                <div style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>Tap to read lesson</div>
+              </div>
+              <div style={{marginLeft:"auto",color:"rgba(255,255,255,0.4)",fontSize:20}}>›</div>
+            </div>
+          ))}
+          <div onClick={()=>setChatMode(true)} style={{background:"linear-gradient(135deg,rgba(79,70,229,0.4),rgba(124,58,237,0.4))",borderRadius:18,padding:"14px 18px",marginTop:8,cursor:"pointer",border:"1px solid rgba(124,58,237,0.3)",display:"flex",alignItems:"center",gap:12}}>
+            <div style={{fontSize:28}}>💬</div>
+            <div style={{color:"white",fontWeight:700,fontSize:14}}>Still confused? Ask the AI Tutor →</div>
+          </div>
+        </div>
+        <BottomNav screen="learn" goTo={goTo}/>
+      </div>
+    );
+  }
+
+  // Lesson content view
+  if(topic){
+    const world = WORLDS.find(w=>w.id===subject);
+    return(
+      <div style={{minHeight:"100vh",background:`linear-gradient(180deg,${world?.colour||"#4F46E5"}cc,#0f0c29)`}}>
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+          <div style={{padding:"14px 0 12px",display:"flex",alignItems:"center",gap:12}}>
+            <button onClick={()=>setTopic(null)} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer",fontFamily:"inherit"}}>← Back</button>
+            <div>
+              <h2 style={{color:"white",fontWeight:900,fontSize:18,margin:0}}>{topic.icon} {topic.title}</h2>
+            </div>
+          </div>
+          <div style={{background:"rgba(0,0,0,0.35)",borderRadius:20,padding:"20px",marginBottom:14,border:"1px solid rgba(255,255,255,0.1)"}}>
+            <pre style={{color:"rgba(255,255,255,0.9)",fontSize:13,lineHeight:1.75,whiteSpace:"pre-wrap",fontFamily:"inherit",margin:0}}>{topic.content}</pre>
+          </div>
+          <div onClick={()=>{setTopic(null);setChatMode(true);}} style={{background:"linear-gradient(135deg,rgba(79,70,229,0.4),rgba(124,58,237,0.4))",borderRadius:18,padding:"14px 18px",cursor:"pointer",border:"1px solid rgba(124,58,237,0.3)",display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+            <div style={{fontSize:28}}>💬</div>
+            <div>
+              <div style={{color:"white",fontWeight:700,fontSize:14}}>Ask the AI Tutor about this</div>
+              <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>Get more examples and explanations</div>
+            </div>
+          </div>
+          <button onClick={()=>goTo("home")} style={{width:"100%",padding:"14px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>
+            🎮 Practice this in a Mission →
+          </button>
+        </div>
+        <BottomNav screen="learn" goTo={goTo}/>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export default function App(){
   // ── Custom auth (no Base44 SDK) ──────────────────────────────────────────
   const [user, setUser] = useState(() => Auth.getSession());
@@ -995,7 +1562,6 @@ export default function App(){
   const [screen,setScreen]=useState("home");
   const [showAuth,setShowAuth]=useState(false);
   const [showSub,setShowSub]=useState(false);
-  const [showPremium,setShowPremium]=useState(false);
   const [activeWorld,setActiveWorld]=useState(null);
   const [popBadge,setPopBadge]=useState(null);
   const [floatMsg,setFloatMsg]=useState(null);
@@ -1022,8 +1588,6 @@ export default function App(){
   // Premium: check URL param (post-checkout redirect) or stored subscription
   const urlParams = new URLSearchParams(window.location.search);
   const justSubscribed = urlParams.get("subscribed") === "true";
-  const isPremium = justSubscribed || (player.subscription === "active") || (player.subscription === "trial");
-
   const {level:curLevel}=calcLevel(player.xp);
   const curRank=getRank(curLevel);
   const dailyChallenge=DAILY[new Date().getDay()];
@@ -1068,11 +1632,6 @@ export default function App(){
 
   function startMission(mission,worldId){
     SFX.click();
-    // Paywall: non-premium users can only play free missions
-    if(!isPremium && !isMissionFree(worldId, mission.id)){
-      setShowPremium(true);
-      return;
-    }
     const pool=[...(QBANK[worldId]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
     if(!pool.length)return;
     setActiveMission({...mission,_worldId:worldId});
@@ -1357,111 +1916,14 @@ export default function App(){
     </div>
   );
 
+
+  // ── LEARN / AI TUTOR ────────────────────────────────────────────────────────
+  if(screen==="learn")return <LearnScreen goTo={goTo} player={player}/>;
+
   // ── SCHOOLS ────────────────────────────────────────────────────────────────
   if(screen==="schools")return <SchoolsScreen goTo={goTo}/>;
 
-  // ── PLAN GATE helpers ─────────────────────────────────────────────────────
-  function GateSubscribeButton({user}){
-    const [loading,setLoading]=useState(false);
-    const [gErr,setGErr]=useState("");
-    function doSub(){
-      const email=user?.email||"";
-      window.location.href=STRIPE_PAYMENT_LINK+(email?`?prefilled_email=${encodeURIComponent(email)}`:"");
-    }
-    return(
-      <>
-        {gErr&&<div style={{color:"#FCA5A5",fontSize:12,marginBottom:8}}>{gErr}</div>}
-        <button onClick={doSub} disabled={loading}
-          style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.7:1,boxShadow:"0 4px 20px rgba(252,211,77,0.35)"}}>
-          {loading?"⏳ Loading Stripe...":"🚀 Start My Free Month →"}
-        </button>
-        <p style={{color:"rgba(255,255,255,0.35)",fontSize:11,margin:"4px 0 0",textAlign:"center"}}>Secure checkout · Cancel anytime · No charge for 30 days</p>
-      </>
-    );
-  }
 
-  // ── PLAN GATE: Must be logged in & have active subscription ────────────────
-  if(!user || !isPremium){
-    return(
-      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0a0820 0%,#150d3e 50%,#0a0820 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"0 16px 40px"}}>
-        {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuthSuccess={handleAuthSuccess}/>}
-
-        {/* Stars background */}
-        <div style={{position:"fixed",inset:0,overflow:"hidden",pointerEvents:"none"}}>
-          {[...Array(30)].map((_,i)=>(
-            <div key={i} style={{position:"absolute",width:i%5===0?3:2,height:i%5===0?3:2,background:"white",borderRadius:"50%",opacity:0.3+Math.random()*0.5,left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,animation:`pulse ${2+Math.random()*3}s ease-in-out infinite`}}/>
-          ))}
-        </div>
-
-        <div style={{width:"100%",maxWidth:440,marginTop:48,position:"relative",zIndex:1}}>
-          {/* Logo */}
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <div style={{fontSize:64,marginBottom:8,animation:"worldFloat 3s ease-in-out infinite"}}>🎓</div>
-            <div style={{color:"#FCD34D",fontWeight:900,fontSize:11,textTransform:"uppercase",letterSpacing:"3px",marginBottom:6}}>11+ Quest UK</div>
-            <h1 style={{color:"white",fontWeight:900,fontSize:30,margin:"0 0 8px",lineHeight:1.2}}>The #1 Exam Prep<br/>Adventure</h1>
-            <p style={{color:"rgba(255,255,255,0.5)",fontSize:14,margin:0,lineHeight:1.5}}>Practice maths, english, verbal & non-verbal reasoning<br/>with 100+ missions and boss battles</p>
-          </div>
-
-          {/* Feature highlights */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:28}}>
-            {[
-              ["⛰️","Math Mountain","Algebra, fractions, percentages"],
-              ["🌲","English Forest","Grammar, vocabulary, writing"],
-              ["🗼","Word Wizard","Verbal reasoning & codes"],
-              ["🔬","Logic Lab","Non-verbal patterns & shapes"],
-              ["⚔️","Boss Battles","Timed challenges & rewards"],
-              ["🏆","Leaderboard","Compete with other students"],
-            ].map(([icon,title,desc],i)=>(
-              <div key={i} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"14px 12px",textAlign:"center"}}>
-                <div style={{fontSize:24,marginBottom:4}}>{icon}</div>
-                <div style={{color:"white",fontWeight:800,fontSize:12,marginBottom:2}}>{title}</div>
-                <div style={{color:"rgba(255,255,255,0.35)",fontSize:10,lineHeight:1.3}}>{desc}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pricing card */}
-          <div style={{background:"linear-gradient(135deg,rgba(79,70,229,0.3),rgba(124,58,237,0.3))",border:"1px solid rgba(124,58,237,0.5)",borderRadius:24,padding:"24px 20px",marginBottom:16,textAlign:"center",boxShadow:"0 0 40px rgba(124,58,237,0.2)"}}>
-            <div style={{display:"inline-block",background:"rgba(252,211,77,0.15)",border:"1px solid rgba(252,211,77,0.4)",borderRadius:20,padding:"4px 14px",marginBottom:12}}>
-              <span style={{color:"#FCD34D",fontSize:11,fontWeight:900,letterSpacing:"1px"}}>⭐ MOST POPULAR</span>
-            </div>
-            <div style={{color:"white",fontWeight:900,fontSize:26,marginBottom:2}}>1 Month Free</div>
-            <div style={{color:"rgba(255,255,255,0.45)",fontSize:13,marginBottom:16}}>Then just £4.99/month • Cancel anytime</div>
-            
-            {!user ? (
-              <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                <button onClick={()=>setShowAuth(true)}
-                  style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 20px rgba(252,211,77,0.35)"}}>
-                  🚀 Sign Up & Start Free →
-                </button>
-                <button onClick={()=>setShowAuth(true)}
-                  style={{width:"100%",padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:"rgba(255,255,255,0.7)",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>
-                  Already have an account? Sign In
-                </button>
-              </div>
-            ) : (
-              <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                <GateSubscribeButton user={user}/>
-              </div>
-            )}
-          </div>
-
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:16,marginBottom:20}}>
-            {["🔒 Secure payment","✅ No commitment","🆓 1 month free"].map((t,i)=>(
-              <span key={i} style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{t}</span>
-            ))}
-          </div>
-
-          {/* Visitor counter */}
-          {visitorCount && (
-            <div style={{textAlign:"center"}}>
-              <span style={{color:"rgba(255,255,255,0.25)",fontSize:11}}>👥 {visitorCount.toLocaleString()} adventurers have visited</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   // ── HOME ───────────────────────────────────────────────────────────────────
   return(
