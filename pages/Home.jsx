@@ -1,7 +1,61 @@
-// v4.1 - GAMIFIED 11+ QUEST | FIXED AUTH | EXPANDED | ANIMATIONS | SOUND
-import { useState, useEffect, useRef } from "react";
-import { UserProgress, QuizSession, VisitorCount } from "../api/entities";
-import { useAppContext } from "../api/app-context";
+// v5.0 - GAMIFIED 11+ QUEST | STANDALONE | NO SDK | CUSTOM AUTH
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ─── LOCAL STORAGE HELPERS ────────────────────────────────────────────────────
+const LS = {
+  get: (k, def=null) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del: (k) => { try { localStorage.removeItem(k); } catch {} },
+};
+
+// ─── AUTH HELPERS (custom, no Base44 SDK) ────────────────────────────────────
+// Users stored as: auth_users = [{id, email, password (hashed naive), name, created}]
+// Current session: auth_session = {id, email, name}
+// IMPORTANT: This is a client-side auth for demo/MVP purposes.
+// For production, replace with a real auth backend.
+function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;} return h.toString(16); }
+const Auth = {
+  getUsers: () => LS.get("q11_users", []),
+  getSession: () => LS.get("q11_session", null),
+  login: (email, password) => {
+    const users = Auth.getUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === hashStr(password));
+    if(!user) throw new Error("Incorrect email or password.");
+    const session = {id: user.id, email: user.email, name: user.name};
+    LS.set("q11_session", session);
+    return session;
+  },
+  signup: (email, password, name) => {
+    const users = Auth.getUsers();
+    if(users.find(u => u.email.toLowerCase() === email.toLowerCase())) throw new Error("Email already registered.");
+    const id = "u_" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    const newUser = {id, email, password: hashStr(password), name: name || email.split("@")[0], created: new Date().toISOString()};
+    LS.set("q11_users", [...users, newUser]);
+    const session = {id, email, name: newUser.name};
+    LS.set("q11_session", session);
+    return session;
+  },
+  logout: () => { LS.del("q11_session"); },
+};
+
+// ─── PROGRESS HELPERS (localStorage, keyed by user id) ───────────────────────
+const Progress = {
+  key: (uid) => `q11_progress_${uid}`,
+  get: (uid) => LS.get(Progress.key(uid), {xp:0,coins:0,streak_days:0,last_practice_date:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:"",subscription:""}),
+  save: (uid, data) => LS.set(Progress.key(uid), data),
+};
+
+// ─── VISITOR COUNTER (calls trackVisitor backend function) ────────────────────
+async function trackVisitorCount() {
+  try {
+    const res = await fetch("/api/functions/trackVisitor", { method: "POST" });
+    if(res.ok){ const d = await res.json(); return d.count || null; }
+  } catch {}
+  // Fallback: local counter
+  const c = (LS.get("q11_visitors", 0) || 0) + 1;
+  LS.set("q11_visitors", c);
+  return c;
+}
 
 // ─── INJECT ANIMATIONS ────────────────────────────────────────────────────────
 const CSS=`
@@ -366,22 +420,22 @@ const DAILY=[
 ];
 
 // ─── AUTH MODAL ───────────────────────────────────────────────────────────────
-function AuthModal({onClose}){
+function AuthModal({onClose, onAuthSuccess}){
   const [mode,setMode]=useState("login");
   const [email,setEmail]=useState("");
   const [password,setPass]=useState("");
   const [name,setName]=useState("");
   const [error,setError]=useState("");
   const [loading,setLoading]=useState(false);
-  const {login,signup}=useAppContext();
 
-  async function handleSubmit(e){
+  function handleSubmit(e){
     e.preventDefault(); setError(""); setLoading(true);
     try{
-      if(mode==="login") await login(email,password);
-      else await signup(email,password,name);
-      // Force redirect to /Home — bypasses platform's /login redirect loop
-      window.location.replace("https://11-quest-uk.base44.app/Home");
+      let session;
+      if(mode==="login") session = Auth.login(email, password);
+      else session = Auth.signup(email, password, name);
+      onAuthSuccess(session);
+      onClose();
     } catch(err){
       setError(err.message||"Something went wrong. Please try again.");
     } finally{setLoading(false);}
@@ -952,7 +1006,28 @@ function MissionComplete({mission,score,total,xpEarned,coinsEarned,newTrick,onCo
 // MAIN APP
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function App(){
-  const {user,logout}=useAppContext();
+  // ── Custom auth (no Base44 SDK) ──────────────────────────────────────────
+  const [user, setUser] = useState(() => Auth.getSession());
+
+  function handleAuthSuccess(session){
+    setUser(session);
+    // Load progress for newly logged-in user
+    const prog = Progress.get(session.id);
+    setPlayer({
+      xp: prog.xp||0, coins: prog.coins||0, streak: prog.streak_days||0,
+      last_practice: prog.last_practice_date||"",
+      completed_missions: prog.completed_missions||[],
+      badges: prog.badges||[], daily_missions_done: prog.daily_missions_done||0,
+      daily_date: prog.daily_date||"", subscription: prog.subscription||""
+    });
+  }
+
+  function logout(){
+    Auth.logout();
+    setUser(null);
+    setPlayer({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:"",subscription:""});
+  }
+
   const [screen,setScreen]=useState("home");
   const [showAuth,setShowAuth]=useState(false);
   const [showSub,setShowSub]=useState(false);
@@ -990,36 +1065,27 @@ export default function App(){
   const dailyChallenge=DAILY[new Date().getDay()];
 
   useEffect(()=>{
-    (async()=>{try{const r=await VisitorCount.list();if(r.length===0){const v=await VisitorCount.create({count:1});setVisitorCount(v.count);}else{const v=await VisitorCount.update(r[0].id,{count:(r[0].count||0)+1});setVisitorCount(v.count);}}catch{}})();
+    (async()=>{ const c = await trackVisitorCount(); if(c) setVisitorCount(c); })();
   },[]);
 
   // Mark subscription on return from Stripe
   useEffect(()=>{
     if(justSubscribed && user){
-      (async()=>{
-        try{
-          const existing=await UserProgress.filter({user_id:user.id});
-          const data={user_id:user.id,subscription:"trial"};
-          if(existing[0])await UserProgress.update(existing[0].id,{...existing[0],...data});
-          else await UserProgress.create(data);
-          setPlayer(p=>({...p,subscription:"trial"}));
-          // clean URL
-          window.history.replaceState({},"","/Home");
-        }catch{}
-      })();
+      const prog = Progress.get(user.id);
+      const updated = {...prog, subscription:"trial"};
+      Progress.save(user.id, updated);
+      setPlayer(p=>({...p, subscription:"trial"}));
+      window.history.replaceState({},"","/Home");
     }
   },[user,justSubscribed]);
 
   useEffect(()=>{
     if(!user)return;
-    (async()=>{
-      try{
-        const recs=await UserProgress.filter({user_id:user.id});
-        if(recs.length>0){const d=recs[0];setPlayer({xp:d.xp||0,coins:d.coins||0,streak:d.streak_days||0,last_practice:d.last_practice_date||"",completed_missions:d.completed_missions||[],badges:d.badges||[],daily_missions_done:d.daily_missions_done||0,daily_date:d.daily_date||""});}
-        const lb=await UserProgress.list();
-        setLeaderboard(lb.sort((a,b)=>(b.xp||0)-(a.xp||0)).slice(0,20));
-      }catch{}
-    })();
+    const d = Progress.get(user.id);
+    setPlayer({xp:d.xp||0, coins:d.coins||0, streak:d.streak_days||0, last_practice:d.last_practice_date||"",
+      completed_missions:d.completed_missions||[], badges:d.badges||[],
+      daily_missions_done:d.daily_missions_done||0, daily_date:d.daily_date||"",
+      subscription:d.subscription||""});
   },[user]);
 
   useEffect(()=>{
@@ -1060,17 +1126,16 @@ export default function App(){
     setTimeout(()=>{setFlashAnim(null);setFloatMsg(null);},1200);
   }
 
-  async function nextQ(){
-    if(qIdx+1>=missionQs.length){setTimerActive(false);setMissionDone(true);if(user)await saveResult();}
+  function nextQ(){
+    if(qIdx+1>=missionQs.length){setTimerActive(false);setMissionDone(true);if(user)saveResult();}
     else{setQIdx(i=>i+1);setSelected(null);}
   }
 
-  async function saveResult(){
+  function saveResult(){
     const pct=Math.round((missionScore/missionQs.length)*100);
     if(pct<70)return;
     try{
-      const existing=await UserProgress.filter({user_id:user.id});
-      const prev=existing[0]||{};
+      const prev = Progress.get(user.id);
       const newXP=(prev.xp||0)+activeMission.xp;
       const newCoins=(prev.coins||0)+activeMission.coins;
       const prevCompleted=prev.completed_missions||[];
@@ -1094,9 +1159,8 @@ export default function App(){
       const earned=badges.filter(b=>!pb.includes(b));
       const BDEFS={first_quest:{icon:"🎯",name:"First Quest",desc:"Complete your first mission"},streak_3:{icon:"🔥",name:"On Fire",desc:"3-day streak"},streak_7:{icon:"💎",name:"Diamond",desc:"7-day streak"},perfect:{icon:"⭐",name:"Flawless",desc:"100% score"},boss_slayer:{icon:"👹",name:"Boss Slayer",desc:"Defeat a Boss"},level_5:{icon:"🚀",name:"Rising Star",desc:"Reach Level 5"},level_10:{icon:"👑",name:"Champion",desc:"Reach Level 10"},ten_missions:{icon:"💯",name:"Veteran",desc:"Complete 10 missions"}};
       if(earned.length>0){const b=BDEFS[earned[0]];if(b)setTimeout(()=>setPopBadge(b),2800);}
-      const data={user_id:user.id,xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate};
-      if(existing[0])await UserProgress.update(existing[0].id,data);
-      else await UserProgress.create(data);
+      const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,subscription:prev.subscription||""};
+      Progress.save(user.id, data);
       setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate}));
       if(nl>curLevel)setTimeout(()=>SFX.levelup(),600);
     }catch(e){console.error(e);}
@@ -1369,7 +1433,7 @@ export default function App(){
   if(!user || !isPremium){
     return(
       <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0a0820 0%,#150d3e 50%,#0a0820 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"0 16px 40px"}}>
-        {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
+        {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuthSuccess={handleAuthSuccess}/>}
 
         {/* Stars background */}
         <div style={{position:"fixed",inset:0,overflow:"hidden",pointerEvents:"none"}}>
@@ -1451,7 +1515,7 @@ export default function App(){
   // ── HOME ───────────────────────────────────────────────────────────────────
   return(
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
-      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)}/>}
+      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuthSuccess={handleAuthSuccess}/>}
       {showSub&&<SubscriptionModal user={user} onClose={()=>setShowSub(false)}/>}
       {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
 
