@@ -1060,7 +1060,6 @@ export default function App(){
   },[timerActive,timeLeft]);
 
   function isMissionUnlocked(world,mission){
-    if(curLevel<world.unlockLevel)return false;
     const idx=world.missions.indexOf(mission);
     if(idx===0)return true;
     return player.completed_missions.includes(world.missions[idx-1].id);
@@ -1223,7 +1222,6 @@ export default function App(){
   // ── WORLD DETAIL ───────────────────────────────────────────────────────────
   if(screen==="map"&&activeWorld){
     const world=activeWorld;
-    const locked=curLevel<world.unlockLevel;
     return(
       <div style={{minHeight:"100vh",background:`linear-gradient(180deg,${world.colour}cc 0%,#0f0c29 100%)`}}>
         <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
@@ -1234,13 +1232,8 @@ export default function App(){
               <div style={{color:"rgba(255,255,255,0.55)",fontSize:12}}>{world.desc}</div>
             </div>
           </div>
-          {locked&&<div style={{background:"rgba(0,0,0,0.4)",borderRadius:18,padding:"24px",textAlign:"center",marginBottom:16}}>
-            <div style={{fontSize:48,marginBottom:8}}>🔒</div>
-            <div style={{color:"white",fontWeight:800,fontSize:17}}>Unlocks at Level {world.unlockLevel}</div>
-            <div style={{color:"rgba(255,255,255,0.55)",fontSize:13,marginTop:4}}>You're Level {curLevel} — keep going!</div>
-          </div>}
           {world.missions.map((mission,idx)=>{
-            const unlocked=!locked&&isMissionUnlocked(world,mission);
+            const unlocked=isMissionUnlocked(world,mission);
             const completed=isCompleted(mission.id);
             const trickObj=mission.trick?TRICKS[mission.trick]:null;
             const trickUnlocked=trickObj&&player.completed_missions.includes(mission.id);
@@ -1550,26 +1543,24 @@ export default function App(){
 
         {/* Worlds */}
         {WORLDS.map((world,i)=>{
-          const locked=curLevel<world.unlockLevel;
           const done=world.missions.filter(m=>isCompleted(m.id)).length;
           const total=world.missions.length;
           const pct=Math.round((done/total)*100);
           const next=world.missions.find(m=>!isCompleted(m.id)&&isMissionUnlocked(world,m));
           return(
             <div key={world.id} onClick={()=>{SFX.click();setActiveWorld(world);setScreen("map");}}
-              style={{background:locked?"rgba(0,0,0,0.32)":world.gradient,borderRadius:22,padding:"20px",marginBottom:14,cursor:"pointer",boxShadow:locked?"none":"0 10px 40px rgba(0,0,0,0.4)",opacity:locked?0.55:1,animation:`slideUp ${0.15+i*0.08}s ease`}}>
+              style={{background:world.gradient,borderRadius:22,padding:"20px",marginBottom:14,cursor:"pointer",boxShadow:"0 10px 40px rgba(0,0,0,0.4)",animation:`slideUp ${0.15+i*0.08}s ease`}}>
               <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
-                <div style={{fontSize:46,lineHeight:1,flexShrink:0,animation:locked?"none":"worldFloat 4s infinite"}}>{world.icon}</div>
+                <div style={{fontSize:46,lineHeight:1,flexShrink:0,animation:"worldFloat 4s infinite"}}>{world.icon}</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div>
                       <div style={{color:"white",fontWeight:900,fontSize:18,marginBottom:2}}>{world.name}</div>
-                      <div style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:locked?0:8}}>{world.desc}</div>
+                      <div style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:8}}>{world.desc}</div>
                     </div>
-                    {locked&&<div style={{background:"rgba(0,0,0,0.38)",borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.45)",flexShrink:0,marginLeft:8}}>🔒 Lv.{world.unlockLevel}</div>}
-                    {!locked&&done===total&&<div style={{color:"#FCD34D",fontSize:12,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
+                    {done===total&&<div style={{color:"#FCD34D",fontSize:12,fontWeight:800,flexShrink:0,marginLeft:8}}>⭐ DONE!</div>}
                   </div>
-                  {!locked&&(
+                  <>
                     <>
                       <div style={{height:6,background:"rgba(255,255,255,0.2)",borderRadius:3,overflow:"hidden",marginBottom:5}}>
                         <div style={{height:"100%",width:`${pct}%`,background:"rgba(255,255,255,0.85)",borderRadius:3,transition:"width 1.2s"}}/>
@@ -1577,10 +1568,10 @@ export default function App(){
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                         <span style={{color:"rgba(255,255,255,0.6)",fontSize:11}}>{done}/{total} missions</span>
                         {next&&<span style={{background:"rgba(0,0,0,0.2)",color:"white",fontWeight:700,fontSize:11,borderRadius:8,padding:"3px 8px"}}>▶ {next.name}</span>}
-                        {done===total&&!locked&&<span style={{color:"#FCD34D",fontSize:12,fontWeight:800}}>Boss slain ⚔️</span>}
+                        {done===total&&<span style={{color:"#FCD34D",fontSize:12,fontWeight:800}}>Boss slain ⚔️</span>}
                       </div>
                     </>
-                  )}
+                  </>
                 </div>
               </div>
             </div>
