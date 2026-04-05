@@ -811,7 +811,7 @@ function SchoolsScreen({goTo}) {
 }
 
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"leaderboard",icon:"🏆",label:"Ranks"},{id:"schools",icon:"🏫",label:"Schools"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"schools",icon:"🏫",label:"Schools"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
@@ -1492,7 +1492,6 @@ export default function App(){
   // Player
   const [player,setPlayer]=useState({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});
   const [visitorCount,setVisitorCount]=useState(null);
-  const [leaderboard,setLeaderboard]=useState([]);
 
   const today=new Date().toISOString().split("T")[0];
   const {level:curLevel}=calcLevel(player.xp);
@@ -1726,56 +1725,6 @@ export default function App(){
       </div>
     );
   }
-
-  // ── LEADERBOARD ────────────────────────────────────────────────────────────
-  if(screen==="leaderboard")return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)"}}>
-      <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
-        <div style={{padding:"14px 0 8px",display:"flex",alignItems:"center",gap:12}}>
-          <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>← Back</button>
-          <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>🏆 Leaderboard</h2>
-        </div>
-        {leaderboard.length>=3&&(
-          <div style={{display:"flex",justifyContent:"center",alignItems:"flex-end",gap:6,marginBottom:16}}>
-            {[leaderboard[1],leaderboard[0],leaderboard[2]].map((e,i)=>{
-              if(!e)return null;
-              const medals=["🥈","🥇","🥉"];const hs=["70px","90px","58px"];
-              const pos=[2,1,3][i];const isMe=user&&e.user_id===user.id;
-              const rank=getRank(calcLevel(e.xp||0).level);
-              return <div key={pos} style={{textAlign:"center",flex:1}}>
-                <div style={{fontSize:22,marginBottom:4}}>{medals[i]}</div>
-                <div style={{background:isMe?"rgba(79,70,229,0.4)":"rgba(255,255,255,0.08)",borderRadius:"12px 12px 0 0",height:hs[i],display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",padding:"8px 4px",border:isMe?"2px solid #7C3AED":"none"}}>
-                  <div style={{fontSize:10,fontWeight:800,color:"white"}}>{isMe?"⭐ You":`#${pos}`}</div>
-                  <div style={{fontSize:11,color:"#FCD34D",fontWeight:700}}>{e.xp||0}XP</div>
-                  <div style={{fontSize:13}}>{rank.icon}</div>
-                </div>
-              </div>;
-            })}
-          </div>
-        )}
-        <div style={{background:"rgba(255,255,255,0.05)",borderRadius:20,overflow:"hidden"}}>
-          {leaderboard.map((e,i)=>{
-            const isMe=user&&e.user_id===user.id;
-            const rank=getRank(calcLevel(e.xp||0).level);
-            const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":`#${i+1}`;
-            return <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",background:isMe?"rgba(79,70,229,0.22)":"transparent",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
-              <div style={{width:26,fontWeight:900,fontSize:14,color:i<3?"#FCD34D":"rgba(255,255,255,0.35)"}}>{medal}</div>
-              <div style={{width:34,height:34,borderRadius:"50%",background:rank.colour,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>{rank.icon}</div>
-              <div style={{flex:1}}>
-                <div style={{color:"white",fontWeight:700,fontSize:14}}>{isMe?`⭐ ${user.full_name||"You"}`:`Player ${i+1}`}</div>
-                <div style={{color:"rgba(255,255,255,0.35)",fontSize:11}}>{rank.title} · 🔥{e.streak_days||0}</div>
-              </div>
-              <div style={{fontWeight:800,fontSize:14,color:"#FCD34D"}}>{e.xp||0} XP</div>
-            </div>;
-          })}
-          {!user&&<div style={{padding:16,textAlign:"center"}}>
-            <button onClick={()=>setShowAuth(true)} style={{padding:"12px 24px",borderRadius:12,background:"white",color:"#3730a3",fontWeight:800,fontSize:14,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In to Compete →</button>
-          </div>}
-        </div>
-      </div>
-      <BottomNav screen={screen} goTo={goTo}/>
-    </div>
-  );
 
   // ── TRICKS ─────────────────────────────────────────────────────────────────
   if(screen==="tricks")return(
