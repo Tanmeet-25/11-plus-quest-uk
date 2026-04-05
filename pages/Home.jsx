@@ -45,13 +45,8 @@ const Progress = {
   save: (uid, data) => LS.set(Progress.key(uid), data),
 };
 
-// ─── VISITOR COUNTER (calls trackVisitor backend function) ────────────────────
-async function trackVisitorCount() {
-  try {
-    const res = await fetch("/api/functions/trackVisitor", { method: "POST" });
-    if(res.ok){ const d = await res.json(); return d.count || null; }
-  } catch {}
-  // Fallback: local counter
+// ─── VISITOR COUNTER (fully local) ────────────────────────────────────────────
+function trackVisitorCount() {
   const c = (LS.get("q11_visitors", 0) || 0) + 1;
   LS.set("q11_visitors", c);
   return c;
@@ -520,25 +515,10 @@ function isMissionFree(worldId, missionId) {
 function PremiumModal({onClose, user, onSignIn}){
   const [loading, setLoading] = useState(false);
 
-  async function startTrial(){
+  function startTrial(){
     if(!user){ onSignIn(); return; }
-    setLoading(true);
-    try {
-      // Try backend function first
-      const res = await fetch("/api/functions/startSubscription", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ userId: user.id, email: user.email || "" })
-      });
-      if(res.ok){
-        const data = await res.json();
-        if(data.url){ window.location.href = data.url; return; }
-      }
-    } catch(e){}
-    // Fallback: direct payment link with prefilled email
     const email = user?.email || "";
-    const url = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
-    window.location.href = url;
+    window.location.href = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
   }
 
   return(
@@ -782,23 +762,7 @@ function SubscriptionModal({user, onClose, inline=false}) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  async function handleSubscribe() {
-    setLoading(true);
-    setErr("");
-    try {
-      const res = await fetch("/api/functions/startSubscription", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ userId: user?.id || "", email: user?.email || "" })
-      });
-      if(res.ok){
-        const data = await res.json();
-        if(data.url){ window.location.href = data.url; return; }
-        if(data.error) throw new Error(data.error);
-      }
-    } catch(e){
-      // Fallback to direct payment link
-    }
+  function handleSubscribe() {
     const email = user?.email || "";
     window.location.href = STRIPE_PAYMENT_LINK + (email ? `?prefilled_email=${encodeURIComponent(email)}` : "");
   }
@@ -1065,7 +1029,8 @@ export default function App(){
   const dailyChallenge=DAILY[new Date().getDay()];
 
   useEffect(()=>{
-    (async()=>{ const c = await trackVisitorCount(); if(c) setVisitorCount(c); })();
+    const c = trackVisitorCount();
+    if(c) setVisitorCount(c);
   },[]);
 
   // Mark subscription on return from Stripe
@@ -1406,16 +1371,9 @@ export default function App(){
   function GateSubscribeButton({user}){
     const [loading,setLoading]=useState(false);
     const [gErr,setGErr]=useState("");
-    async function doSub(){
-      setLoading(true); setGErr("");
-      try{
-        const res=await fetch("/api/functions/startSubscription",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:user?.id||"",email:user?.email||""})});
-        if(res.ok){const d=await res.json();if(d.url){window.location.href=d.url;return;}if(d.error)throw new Error(d.error);}
-        throw new Error("No URL");
-      }catch(e){
-        const email=user?.email||"";
-        window.location.href=STRIPE_PAYMENT_LINK+(email?`?prefilled_email=${encodeURIComponent(email)}`:"");
-      }
+    function doSub(){
+      const email=user?.email||"";
+      window.location.href=STRIPE_PAYMENT_LINK+(email?`?prefilled_email=${encodeURIComponent(email)}`:"");
     }
     return(
       <>
