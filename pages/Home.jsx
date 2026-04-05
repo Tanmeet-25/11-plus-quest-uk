@@ -1,5 +1,7 @@
-// v5.0 - GAMIFIED 11+ QUEST | STANDALONE | NO SDK | CUSTOM AUTH
+// v6.0 - GAMIFIED 11+ QUEST | BASE44 SDK AUTH | CLOUD PROGRESS
 import { useState, useEffect, useRef, useCallback } from "react";
+import { User } from "@/api/entities";
+import { UserProgress } from "@/api/entities";
 
 // ─── LOCAL STORAGE HELPERS ────────────────────────────────────────────────────
 const LS = {
@@ -8,41 +10,10 @@ const LS = {
   del: (k) => { try { localStorage.removeItem(k); } catch {} },
 };
 
-// ─── AUTH HELPERS (custom, no Base44 SDK) ────────────────────────────────────
-// Users stored as: auth_users = [{id, email, password (hashed naive), name, created}]
-// Current session: auth_session = {id, email, name}
-// IMPORTANT: This is a client-side auth for demo/MVP purposes.
-// For production, replace with a real auth backend.
-function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;} return h.toString(16); }
-const Auth = {
-  getUsers: () => LS.get("q11_users", []),
-  getSession: () => LS.get("q11_session", null),
-  login: (email, password) => {
-    const users = Auth.getUsers();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === hashStr(password));
-    if(!user) throw new Error("Incorrect email or password.");
-    const session = {id: user.id, email: user.email, name: user.name};
-    LS.set("q11_session", session);
-    return session;
-  },
-  signup: (email, password, name) => {
-    const users = Auth.getUsers();
-    if(users.find(u => u.email.toLowerCase() === email.toLowerCase())) throw new Error("Email already registered.");
-    const id = "u_" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-    const newUser = {id, email, password: hashStr(password), name: name || email.split("@")[0], created: new Date().toISOString()};
-    LS.set("q11_users", [...users, newUser]);
-    const session = {id, email, name: newUser.name};
-    LS.set("q11_session", session);
-    return session;
-  },
-  logout: () => { LS.del("q11_session"); },
-};
-
-// ─── PROGRESS HELPERS (localStorage, keyed by user id) ───────────────────────
+// ─── PROGRESS HELPERS (Base44 DB + localStorage fallback) ─────────────────────
 const Progress = {
-  key: (uid) => `q11_progress_${uid}`,
-  get: (uid) => LS.get(Progress.key(uid), {xp:0,coins:0,streak_days:0,last_practice_date:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:"",subscription:""}),
-  save: (uid, data) => LS.set(Progress.key(uid), data),
+  getLocal: (uid) => LS.get(`q11_progress_${uid}`, {xp:0,coins:0,streak_days:0,last_practice_date:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""}),
+  saveLocal: (uid, data) => LS.set(`q11_progress_${uid}`, data),
 };
 
 // ─── VISITOR COUNTER (fully local) ────────────────────────────────────────────
@@ -625,17 +596,31 @@ function AuthModal({onClose, onAuthSuccess}){
   const [error,setError]=useState("");
   const [loading,setLoading]=useState(false);
 
-  function handleSubmit(e){
+  async function handleSubmit(e){
     e.preventDefault(); setError(""); setLoading(true);
     try{
-      let session;
-      if(mode==="login") session = Auth.login(email, password);
-      else session = Auth.signup(email, password, name);
-      onAuthSuccess(session);
+      if(mode==="login"){
+        await User.login(email, password);
+      } else {
+        await User.register(email, password, {full_name: name||email.split("@")[0]});
+      }
+      const me = await User.me();
+      onAuthSuccess(me);
       onClose();
     } catch(err){
-      setError(err.message||"Something went wrong. Please try again.");
+      setError(err?.response?.data?.detail || err?.message || "Something went wrong. Please try again.");
     } finally{setLoading(false);}
+  }
+
+  async function handleGoogle(){
+    setLoading(true);
+    try{
+      await User.loginWithGoogle();
+      // Page will reload after OAuth redirect
+    } catch(err){
+      setError(err?.message||"Google sign-in failed.");
+      setLoading(false);
+    }
   }
 
   return(
@@ -648,13 +633,18 @@ function AuthModal({onClose, onAuthSuccess}){
           </div>
           <button onClick={onClose} style={{background:"#f3f4f6",border:"none",width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
+        <button onClick={handleGoogle} disabled={loading} style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:14,cursor:"pointer",fontFamily:"inherit",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"white"}}>
+          <img src="https://www.google.com/favicon.ico" width={16} height={16} alt="G"/>
+          Continue with Google
+        </button>
+        <div style={{textAlign:"center",color:"#9ca3af",fontSize:12,marginBottom:14}}>— or —</div>
         <form onSubmit={handleSubmit}>
-          {mode==="register"&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" required style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>}
+          {mode==="register"&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>}
           <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" required style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:10,boxSizing:"border-box",fontFamily:"inherit"}}/>
           <input value={password} onChange={e=>setPass(e.target.value)} placeholder="Password" type="password" required style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:14,boxSizing:"border-box",fontFamily:"inherit"}}/>
           {error&&<div style={{background:"#FEF2F2",borderRadius:10,padding:"10px 12px",marginBottom:12,color:"#DC2626",fontSize:13,fontWeight:600}}>{error}</div>}
           <button type="submit" disabled={loading} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:15,cursor:loading?"not-allowed":"pointer",fontFamily:"inherit",opacity:loading?0.7:1}}>
-            {loading?"⏳ Signing in...":(mode==="login"?"Sign In →":"Create Account →")}
+            {loading?"⏳ Please wait...":(mode==="login"?"Sign In →":"Create Account →")}
           </button>
         </form>
         <p style={{textAlign:"center",fontSize:13,color:"#6b7280",marginTop:14,marginBottom:0}}>
@@ -1448,26 +1438,39 @@ function LearnScreen({goTo, player}){
 }
 
 export default function App(){
-  // ── Custom auth (no Base44 SDK) ──────────────────────────────────────────
-  const [user, setUser] = useState(() => Auth.getSession());
+  // ── Base44 SDK auth ─────────────────────────────────────────────────────
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  function handleAuthSuccess(session){
-    setUser(session);
-    // Load progress for newly logged-in user
-    const prog = Progress.get(session.id);
-    setPlayer({
-      xp: prog.xp||0, coins: prog.coins||0, streak: prog.streak_days||0,
-      last_practice: prog.last_practice_date||"",
-      completed_missions: prog.completed_missions||[],
-      badges: prog.badges||[], daily_missions_done: prog.daily_missions_done||0,
-      daily_date: prog.daily_date||"", subscription: prog.subscription||""
-    });
+  // Load current user on mount
+  useEffect(()=>{
+    User.me().then(u=>{ setUser(u); }).catch(()=>{ setUser(null); }).finally(()=>setAuthLoading(false));
+  },[]);
+
+  async function handleAuthSuccess(u){
+    setUser(u);
+    // Load cloud progress for newly signed-in user
+    try{
+      const rows = await UserProgress.filter({user_id: u.id});
+      if(rows.length>0){
+        const d = rows[0];
+        setPlayer({xp:d.xp||0, coins:d.coins||0, streak:d.streak_days||0, last_practice:d.last_practice_date||"",
+          completed_missions:d.completed_missions||[], badges:d.badges||[],
+          daily_missions_done:d.daily_missions_done||0, daily_date:d.daily_date||""});
+      } else {
+        // Migrate local progress to cloud on first sign-in
+        const local = Progress.getLocal(u.id);
+        setPlayer({xp:local.xp||0, coins:local.coins||0, streak:local.streak_days||0, last_practice:local.last_practice_date||"",
+          completed_missions:local.completed_missions||[], badges:local.badges||[],
+          daily_missions_done:local.daily_missions_done||0, daily_date:local.daily_date||""});
+      }
+    }catch(e){ console.error("Progress load error",e); }
   }
 
-  function logout(){
-    Auth.logout();
+  async function logout(){
+    await User.logout();
     setUser(null);
-    setPlayer({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:"",subscription:""});
+    setPlayer({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});
   }
 
   const [screen,setScreen]=useState("home");
@@ -1503,14 +1506,7 @@ export default function App(){
     if(c) setVisitorCount(c);
   },[]);
 
-  useEffect(()=>{
-    if(!user)return;
-    const d = Progress.get(user.id);
-    setPlayer({xp:d.xp||0, coins:d.coins||0, streak:d.streak_days||0, last_practice:d.last_practice_date||"",
-      completed_missions:d.completed_missions||[], badges:d.badges||[],
-      daily_missions_done:d.daily_missions_done||0, daily_date:d.daily_date||"",
-      subscription:d.subscription||""});
-  },[user]);
+  // Progress is loaded in handleAuthSuccess after sign-in
 
   useEffect(()=>{
     if(timerActive&&timeLeft>0){timerRef.current=setTimeout(()=>setTimeLeft(t=>t-1),1000);}
@@ -1553,7 +1549,7 @@ export default function App(){
     const pct=Math.round((missionScore/missionQs.length)*100);
     if(pct<70)return;
     try{
-      const prev = Progress.get(user.id);
+      const prev = {...player, xp:player.xp||0, coins:player.coins||0, streak_days:player.streak||0, last_practice_date:player.last_practice||'', completed_missions:player.completed_missions||[], badges:player.badges||[], daily_missions_done:player.daily_missions_done||0, daily_date:player.daily_date||''};
       const newXP=(prev.xp||0)+activeMission.xp;
       const newCoins=(prev.coins||0)+activeMission.coins;
       const prevCompleted=prev.completed_missions||[];
@@ -1578,7 +1574,18 @@ export default function App(){
       const BDEFS={first_quest:{icon:"🎯",name:"First Quest",desc:"Complete your first mission"},streak_3:{icon:"🔥",name:"On Fire",desc:"3-day streak"},streak_7:{icon:"💎",name:"Diamond",desc:"7-day streak"},perfect:{icon:"⭐",name:"Flawless",desc:"100% score"},boss_slayer:{icon:"👹",name:"Boss Slayer",desc:"Defeat a Boss"},level_5:{icon:"🚀",name:"Rising Star",desc:"Reach Level 5"},level_10:{icon:"👑",name:"Champion",desc:"Reach Level 10"},ten_missions:{icon:"💯",name:"Veteran",desc:"Complete 10 missions"}};
       if(earned.length>0){const b=BDEFS[earned[0]];if(b)setTimeout(()=>setPopBadge(b),2800);}
       const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,subscription:prev.subscription||""};
-      Progress.save(user.id, data);
+      // Save to cloud DB (async, fire-and-forget)
+      UserProgress.filter({user_id:user.id}).then(rows=>{
+        const payload = {user_id:user.id, xp:newXP, coins:newCoins, level:nl, streak_days:streak,
+          last_practice_date:today, completed_missions:newCompleted, badges,
+          daily_missions_done:dd, daily_date:ddate, total_questions:(prev.total_questions||0)+missionQs.length,
+          total_correct:(prev.total_correct||0)+missionScore};
+        if(rows.length>0) UserProgress.update(rows[0].id, payload).catch(e=>console.error(e));
+        else UserProgress.create(payload).catch(e=>console.error(e));
+      }).catch(()=>{
+        // Fallback to localStorage if DB fails
+        Progress.saveLocal(user.id, data);
+      });
       setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate}));
       if(nl>curLevel)setTimeout(()=>SFX.levelup(),600);
     }catch(e){console.error(e);}
