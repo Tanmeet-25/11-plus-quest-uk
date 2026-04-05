@@ -1,7 +1,6 @@
 // v6.0 - GAMIFIED 11+ QUEST | BASE44 SDK AUTH | CLOUD PROGRESS
 import { useState, useEffect, useRef, useCallback } from "react";
 import { User } from "@/api/entities";
-import { UserProgress } from "@/api/entities";
 
 // ─── LOCAL STORAGE HELPERS ────────────────────────────────────────────────────
 const LS = {
@@ -1447,24 +1446,13 @@ export default function App(){
     User.me().then(u=>{ setUser(u); }).catch(()=>{ setUser(null); }).finally(()=>setAuthLoading(false));
   },[]);
 
-  async function handleAuthSuccess(u){
+  function handleAuthSuccess(u){
     setUser(u);
-    // Load cloud progress for newly signed-in user
-    try{
-      const rows = await UserProgress.filter({user_id: u.id});
-      if(rows.length>0){
-        const d = rows[0];
-        setPlayer({xp:d.xp||0, coins:d.coins||0, streak:d.streak_days||0, last_practice:d.last_practice_date||"",
-          completed_missions:d.completed_missions||[], badges:d.badges||[],
-          daily_missions_done:d.daily_missions_done||0, daily_date:d.daily_date||""});
-      } else {
-        // Migrate local progress to cloud on first sign-in
-        const local = Progress.getLocal(u.id);
-        setPlayer({xp:local.xp||0, coins:local.coins||0, streak:local.streak_days||0, last_practice:local.last_practice_date||"",
-          completed_missions:local.completed_missions||[], badges:local.badges||[],
-          daily_missions_done:local.daily_missions_done||0, daily_date:local.daily_date||""});
-      }
-    }catch(e){ console.error("Progress load error",e); }
+    // Load local progress keyed by user id
+    const local = Progress.getLocal(u.id);
+    setPlayer({xp:local.xp||0, coins:local.coins||0, streak:local.streak_days||0, last_practice:local.last_practice_date||"",
+      completed_missions:local.completed_missions||[], badges:local.badges||[],
+      daily_missions_done:local.daily_missions_done||0, daily_date:local.daily_date||""});
   }
 
   async function logout(){
@@ -1573,19 +1561,8 @@ export default function App(){
       const earned=badges.filter(b=>!pb.includes(b));
       const BDEFS={first_quest:{icon:"🎯",name:"First Quest",desc:"Complete your first mission"},streak_3:{icon:"🔥",name:"On Fire",desc:"3-day streak"},streak_7:{icon:"💎",name:"Diamond",desc:"7-day streak"},perfect:{icon:"⭐",name:"Flawless",desc:"100% score"},boss_slayer:{icon:"👹",name:"Boss Slayer",desc:"Defeat a Boss"},level_5:{icon:"🚀",name:"Rising Star",desc:"Reach Level 5"},level_10:{icon:"👑",name:"Champion",desc:"Reach Level 10"},ten_missions:{icon:"💯",name:"Veteran",desc:"Complete 10 missions"}};
       if(earned.length>0){const b=BDEFS[earned[0]];if(b)setTimeout(()=>setPopBadge(b),2800);}
-      const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,subscription:prev.subscription||""};
-      // Save to cloud DB (async, fire-and-forget)
-      UserProgress.filter({user_id:user.id}).then(rows=>{
-        const payload = {user_id:user.id, xp:newXP, coins:newCoins, level:nl, streak_days:streak,
-          last_practice_date:today, completed_missions:newCompleted, badges,
-          daily_missions_done:dd, daily_date:ddate, total_questions:(prev.total_questions||0)+missionQs.length,
-          total_correct:(prev.total_correct||0)+missionScore};
-        if(rows.length>0) UserProgress.update(rows[0].id, payload).catch(e=>console.error(e));
-        else UserProgress.create(payload).catch(e=>console.error(e));
-      }).catch(()=>{
-        // Fallback to localStorage if DB fails
-        Progress.saveLocal(user.id, data);
-      });
+      const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate};
+      if(user) Progress.saveLocal(user.id, data);
       setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate}));
       if(nl>curLevel)setTimeout(()=>SFX.levelup(),600);
     }catch(e){console.error(e);}
