@@ -1904,6 +1904,7 @@ export default function App(){
   const [qIdx,setQIdx]=useState(0);
   const [selected,setSelected]=useState(null);
   const [missionScore,setMissionScore]=useState(0);
+  const [finalDisplayScore,setFinalDisplayScore]=useState(0);
   const [missionDone,setMissionDone]=useState(false);
   const [newTrick,setNewTrick]=useState(null);
   const [timeLeft,setTimeLeft]=useState(null);
@@ -1962,7 +1963,7 @@ export default function App(){
     const pool=[...(QBANK[qbankKey]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
     if(!pool.length)return;
     setActiveMission({...mission,_worldId:worldId});
-    setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setMissionDone(false);setNewTrick(null);setFlashAnim(null);
+    setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setFinalDisplayScore(0);setMissionDone(false);setNewTrick(null);setFlashAnim(null);
     if(mission.isBoss){setTimeLeft(mission.questions*25);setTimerActive(true);}else{setTimeLeft(null);setTimerActive(false);}
     setScreen("mission");
   }
@@ -1977,12 +1978,21 @@ export default function App(){
   }
 
   function nextQ(){
-    if(qIdx+1>=missionQs.length){setTimerActive(false);setMissionDone(true);if(user)saveResult();}
+    if(qIdx+1>=missionQs.length){
+      setTimerActive(false);
+      setMissionDone(true);
+      // Pass final score explicitly — missionScore state may be stale on last question
+      const lastWasCorrect = selected===missionQs[qIdx].answer;
+      const finalScore = missionScore + (lastWasCorrect?1:0);
+      setFinalDisplayScore(finalScore);
+      saveResult(finalScore);
+    }
     else{setQIdx(i=>i+1);setSelected(null);}
   }
 
-  function saveResult(){
-    const pct=Math.round((missionScore/missionQs.length)*100);
+  function saveResult(finalScore){
+    const score = finalScore!==undefined ? finalScore : missionScore;
+    const pct=Math.round((score/missionQs.length)*100);
     if(pct<70)return;
     try{
       const prev = {...player, xp:player.xp||0, coins:player.coins||0, streak_days:player.streak||0, last_practice_date:player.last_practice||'', completed_missions:player.completed_missions||[], badges:player.badges||[], daily_missions_done:player.daily_missions_done||0, daily_date:player.daily_date||''};
@@ -2162,9 +2172,9 @@ export default function App(){
   if(screen==="mission"&&missionDone)return(
     <>
       {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
-      <MissionComplete mission={activeMission} score={missionScore} total={missionQs.length}
-        xpEarned={Math.round((missionScore/missionQs.length)*100)>=70?activeMission?.xp:0}
-        coinsEarned={Math.round((missionScore/missionQs.length)*100)>=70?activeMission?.coins:0}
+      <MissionComplete mission={activeMission} score={finalDisplayScore} total={missionQs.length}
+        xpEarned={Math.round((finalDisplayScore/missionQs.length)*100)>=70?activeMission?.xp:0}
+        coinsEarned={Math.round((finalDisplayScore/missionQs.length)*100)>=70?activeMission?.coins:0}
         newTrick={newTrick} onContinue={()=>setScreen("map")} onRetry={()=>startMission(activeMission,activeMission._worldId)}/>
     </>
   );
