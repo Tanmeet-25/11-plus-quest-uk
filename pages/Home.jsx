@@ -34,18 +34,18 @@ const YEAR_GROUP_TO_AGE_GROUP = {
 function resolveAgeGroup(role, answers){
   if(role==="student"){
     const a=parseInt(answers.age||0);
-    if(a<=4)  return "toddler";
-    if(a<=7)  return "early";
-    if(a<=9)  return "junior";
-    if(a<=11) return "core";
+    if(a<=3)  return "toddler";
+    if(a<=6)  return "early";
+    if(a<=8)  return "junior";
+    if(a<=10) return "core";
     return "advanced";
   }
   if(role==="parent"){
     const a=parseInt(answers.childAge||0);
-    if(a<=4)  return "toddler";
-    if(a<=7)  return "early";
-    if(a<=9)  return "junior";
-    if(a<=11) return "core";
+    if(a<=3)  return "toddler";
+    if(a<=6)  return "early";
+    if(a<=8)  return "junior";
+    if(a<=10) return "core";
     return "advanced";
   }
   if(role==="teacher"||role==="tutor"){
@@ -598,11 +598,11 @@ const QBANK={
 // free: true → all missions playable without account; false → need account (still no paywall)
 
 const AGE_GROUPS = [
-  {id:"toddler", label:"Ages 3–4",   icon:"🐣", desc:"Shapes, colours & counting — totally free!", free:true, friendlyMode:true},
-  {id:"early",   label:"Ages 4–7",   icon:"🌈", desc:"Numbers, phonics & first words",             friendlyMode:true},
-  {id:"junior",  label:"Ages 7–9",   icon:"🌱", desc:"Foundation skills — build confidence"},
-  {id:"core",    label:"Ages 9–11",  icon:"⭐", desc:"11+ core content — exam ready"},
-  {id:"advanced",label:"Ages 11–13", icon:"🚀", desc:"Beyond 11+ — challenge yourself"},
+  {id:"toddler", label:"Ages 2–3",   icon:"🐣", desc:"Shapes, colours & counting — totally free!", free:true, friendlyMode:true},
+  {id:"early",   label:"Ages 3–6",   icon:"🌈", desc:"Numbers, phonics & first words",             friendlyMode:true},
+  {id:"junior",  label:"Ages 6–8",   icon:"🌱", desc:"Foundation skills — build confidence"},
+  {id:"core",    label:"Ages 8–10",  icon:"⭐", desc:"11+ core content — exam ready"},
+  {id:"advanced",label:"Ages 10–12", icon:"🚀", desc:"Beyond 11+ — challenge yourself"},
   {id:"shadow",  label:"Shadow Realm",icon:"💀", desc:"Unlocked after completing all worlds — ×2 XP", isShadow:true},
 ];
 
@@ -1801,7 +1801,7 @@ function OnboardingScreen({onComplete}){
 
         {role==="student"&&(
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
-            {[3,4,5,6,7,8,9,10,11,12,13].map(a=>(
+            {[2,3,4,5,6,7,8,9,10,11,12].map(a=>(
               <button key={a} onClick={()=>{SFX.click();setAnswers({age:a});setStep(2);}}
                 style={{background:answers.age===a?"#4F46E5":"rgba(255,255,255,0.1)",border:"2px solid "+(answers.age===a?"#4F46E5":"rgba(255,255,255,0.15)"),borderRadius:14,padding:"14px 8px",color:"white",fontWeight:800,fontSize:18,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
                 {a}
@@ -1812,7 +1812,7 @@ function OnboardingScreen({onComplete}){
 
         {role==="parent"&&(
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
-            {[3,4,5,6,7,8,9,10,11,12,13].map(a=>(
+            {[2,3,4,5,6,7,8,9,10,11,12].map(a=>(
               <button key={a} onClick={()=>{SFX.click();setAnswers({childAge:a});setStep(2);}}
                 style={{background:answers.childAge===a?"#059669":"rgba(255,255,255,0.1)",border:"2px solid "+(answers.childAge===a?"#059669":"rgba(255,255,255,0.15)"),borderRadius:14,padding:"14px 8px",color:"white",fontWeight:800,fontSize:18,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
                 {a}
