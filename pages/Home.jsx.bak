@@ -1,4 +1,4 @@
-// v8.0 - ONBOARDING + AGE GROUPS 3-4, 4-7 + ROLE-BASED FLOW + FRIENDLY HOME SCREEN
+// v7.0 - GAMIFIED 11+ QUEST | PRESTIGE + MASTERY + DAILY CHALLENGES + SHADOW WORLDS
 import { useState, useEffect, useRef, useCallback } from "react";
 import { User } from "@/api/entities";
 
@@ -14,46 +14,6 @@ const Progress = {
   getLocal: (uid) => LS.get(`q11_progress_${uid}`, {xp:0,coins:0,streak_days:0,last_practice_date:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""}),
   saveLocal: (uid, data) => LS.set(`q11_progress_${uid}`, data),
 };
-
-// ─── ONBOARDING PROFILE HELPERS ───────────────────────────────────────────────
-const Profile = {
-  get: ()   => LS.get('q11_profile', null),
-  save: (p) => LS.set('q11_profile', p),
-  clear: ()  => LS.del('q11_profile'),
-};
-// role: "student" | "parent" | "teacher" | "tutor"
-// ageGroup: "toddler"|"early"|"junior"|"core"|"advanced" (resolved from answers)
-// yearGroup: for teachers/tutors
-// childAge: for parents
-// studentAge: for students
-const YEAR_GROUP_TO_AGE_GROUP = {
-  "Reception":"toddler", "Year 1":"toddler", "Year 2":"early",
-  "Year 3":"early","Year 4":"junior","Year 5":"core","Year 6":"core",
-  "Year 7":"advanced","Year 8":"advanced","Year 9":"advanced",
-};
-function resolveAgeGroup(role, answers){
-  if(role==="student"){
-    const a=parseInt(answers.age||0);
-    if(a<=4)  return "toddler";
-    if(a<=7)  return "early";
-    if(a<=9)  return "junior";
-    if(a<=11) return "core";
-    return "advanced";
-  }
-  if(role==="parent"){
-    const a=parseInt(answers.childAge||0);
-    if(a<=4)  return "toddler";
-    if(a<=7)  return "early";
-    if(a<=9)  return "junior";
-    if(a<=11) return "core";
-    return "advanced";
-  }
-  if(role==="teacher"||role==="tutor"){
-    return YEAR_GROUP_TO_AGE_GROUP[answers.yearGroup]||"core";
-  }
-  return "core";
-}
-
 
 // ─── VISITOR COUNTER (fully local) ────────────────────────────────────────────
 function trackVisitorCount() {
@@ -103,126 +63,6 @@ function calcLevel(xp){let l=1,x=xp;while(x>=xpForLevel(l)){x-=xpForLevel(l);l++
 
 // ─── QUESTIONS ────────────────────────────────────────────────────────────────
 const QBANK={
-
-  // ── TODDLER QUESTIONS (friendly, visual emoji-based) ──────────────────────
-  toddler:{
-    "Toddler Shapes":[
-      {q:"🔵 What shape is this?",vis:"🔵",options:["Circle","Square","Triangle","Star"],answer:"Circle",explanation:"A circle is round like a ball! ⚽"},
-      {q:"🟥 What shape is this?",vis:"🟥",options:["Triangle","Rectangle","Circle","Star"],answer:"Rectangle",explanation:"A rectangle has 4 sides! 📦"},
-      {q:"🔺 What shape is this?",vis:"🔺",options:["Circle","Square","Triangle","Heart"],answer:"Triangle",explanation:"A triangle has 3 sides! 🍕"},
-      {q:"🟨 What shape is this?",vis:"🟨",options:["Circle","Square","Triangle","Diamond"],answer:"Square",explanation:"A square has 4 equal sides! 🎁"},
-      {q:"Which shape has NO corners?",vis:"🔵 🟥 🔺",options:["Circle","Square","Triangle","Rectangle"],answer:"Circle",explanation:"Circles are smooth — no corners! 😊"},
-    ],
-    "Toddler Colours":[
-      {q:"🍎 What colour is an apple?",vis:"🍎",options:["Blue","Red","Yellow","Green"],answer:"Red",explanation:"Apples are red! 🍎❤️"},
-      {q:"🌞 What colour is the sun?",vis:"🌞",options:["Blue","Purple","Yellow","Green"],answer:"Yellow",explanation:"The sun is yellow and bright! ☀️"},
-      {q:"🌊 What colour is the sea?",vis:"🌊",options:["Red","Yellow","Orange","Blue"],answer:"Blue",explanation:"The sea is blue! 🐬"},
-      {q:"🍀 What colour is grass?",vis:"🍀",options:["Pink","Green","Brown","White"],answer:"Green",explanation:"Grass is green! 🌿"},
-      {q:"🐘 What colour is an elephant?",vis:"🐘",options:["Purple","Blue","Grey","Yellow"],answer:"Grey",explanation:"Elephants are grey! 🐘"},
-    ],
-    "Toddler Counting":[
-      {q:"🐶🐶 How many dogs?",vis:"🐶🐶",options:["1","2","3","4"],answer:"2",explanation:"Count: 🐶 one, 🐶 two! = 2 dogs"},
-      {q:"⭐⭐⭐ How many stars?",vis:"⭐⭐⭐",options:["2","3","4","5"],answer:"3",explanation:"Count: 1, 2, 3 stars! ⭐⭐⭐"},
-      {q:"🍎🍎🍎🍎 How many apples?",vis:"🍎🍎🍎🍎",options:["3","4","5","6"],answer:"4",explanation:"Count: 1, 2, 3, 4 apples! 🍎"},
-      {q:"What comes after 4?",vis:"1 → 2 → 3 → 4 → ?",options:["3","5","6","7"],answer:"5",explanation:"After 4 comes 5! Count on your fingers 🖐"},
-      {q:"🦆🦆🦆🦆🦆 How many ducks?",vis:"🦆🦆🦆🦆🦆",options:["4","5","6","7"],answer:"5",explanation:"5 ducks! Quack quack! 🦆"},
-    ],
-    "Toddler Animals":[
-      {q:"🐶 What sound does a dog make?",vis:"🐶",options:["Moo","Woof","Meow","Quack"],answer:"Woof",explanation:"Dogs say WOOF! 🐾"},
-      {q:"🐱 What sound does a cat make?",vis:"🐱",options:["Woof","Moo","Meow","Oink"],answer:"Meow",explanation:"Cats say MEOW! 🐾"},
-      {q:"🐄 What sound does a cow make?",vis:"🐄",options:["Quack","Woof","Baa","Moo"],answer:"Moo",explanation:"Cows say MOO! 🥛"},
-      {q:"🐑 What sound does a sheep make?",vis:"🐑",options:["Moo","Woof","Baa","Oink"],answer:"Baa",explanation:"Sheep say BAA! 🌿"},
-      {q:"Which animal can fly? 🐦🐶🐄🐟",vis:"🐦 🐶 🐄 🐟",options:["Dog","Bird","Cow","Fish"],answer:"Bird",explanation:"Birds have wings and can fly! 🐦✈️"},
-    ],
-    "Toddler Patterns":[
-      {q:"🔴🔵🔴🔵🔴? What comes next?",vis:"🔴🔵🔴🔵🔴 ❓",options:["🔴","🔵","🟡","🟢"],answer:"🔵",explanation:"Red Blue Red Blue... next is Blue! 🔵"},
-      {q:"⭐🌙⭐🌙⭐? What comes next?",vis:"⭐🌙⭐🌙⭐ ❓",options:["⭐","🌙","☀️","🌟"],answer:"🌙",explanation:"Star Moon Star Moon... next is Moon! 🌙"},
-      {q:"🐶🐱🐶🐱? What comes next?",vis:"🐶🐱🐶🐱 ❓",options:["🐶","🐱","🐄","🐸"],answer:"🐶",explanation:"Dog Cat Dog Cat... next is Dog! 🐶"},
-      {q:"🔵🔵🔴🔵🔵? What comes next?",vis:"🔵🔵🔴🔵🔵 ❓",options:["🔵","🔴","🟡","🟢"],answer:"🔴",explanation:"Blue Blue Red... then Blue Blue Red again! 🔴"},
-      {q:"1 2 3 1 2 3 1? What comes next?",vis:"1 2 3 1 2 3 1 ❓",options:["1","2","3","4"],answer:"2",explanation:"The pattern is 1 2 3 repeating — next is 2!"},
-    ],
-    "Toddler Size":[
-      {q:"🐘🐭 Which is BIGGER?",vis:"🐘 vs 🐭",options:["Elephant","Mouse","Same","Neither"],answer:"Elephant",explanation:"The elephant is much bigger than the mouse! 🐘"},
-      {q:"🌳🌱 Which is TALLER?",vis:"🌳 vs 🌱",options:["Tree","Seedling","Same","Neither"],answer:"Tree",explanation:"The big tree is taller! 🌳"},
-      {q:"🍉🍇 Which is SMALLER?",vis:"🍉 vs 🍇",options:["Watermelon","Grapes","Same","Neither"],answer:"Grapes",explanation:"Grapes are tiny compared to a watermelon! 🍇"},
-      {q:"5 apples or 2 apples — which is MORE?",vis:"🍎🍎🍎🍎🍎 vs 🍎🍎",options:["5 apples","2 apples","Same","Neither"],answer:"5 apples",explanation:"5 is more than 2! Count them! 🍎"},
-      {q:"Which number is BIGGER: 7 or 3?",vis:"7 vs 3",options:["7","3","Same","Neither"],answer:"7",explanation:"7 is bigger than 3! ✨"},
-    ],
-    "Early BOSS":[
-      {q:"🔵🟥🔺 Which is a TRIANGLE?",vis:"🔵 🟥 🔺",options:["Circle","Rectangle","Triangle","Square"],answer:"Triangle",explanation:"🔺 has 3 sides — that's a triangle!"},
-      {q:"🌞 What colour is the sun?",vis:"🌞",options:["Blue","Red","Yellow","Green"],answer:"Yellow",explanation:"Yellow! ☀️"},
-      {q:"🐶🐶🐶 How many dogs?",vis:"🐶🐶🐶",options:["2","3","4","5"],answer:"3",explanation:"Count: 1, 2, 3! 🐶"},
-      {q:"🔴🔵🔴🔵? What comes next?",vis:"🔴🔵🔴🔵 ❓",options:["🔴","🔵","🟡","🟢"],answer:"🔴",explanation:"Red Blue Red Blue → Red! 🔴"},
-      {q:"🐘🐭 Which is bigger?",vis:"🐘 vs 🐭",options:["Elephant","Mouse","Same","Neither"],answer:"Elephant",explanation:"Elephant is the biggest! 🐘"},
-    ],
-  },
-  // ── EARLY YEARS QUESTIONS (age 4–7, visual, simple) ──────────────────────
-  early:{
-    "Early Counting":[
-      {q:"Count the 🍎: 🍎🍎🍎🍎🍎🍎",vis:"🍎🍎🍎🍎🍎🍎",options:["5","6","7","8"],answer:"6",explanation:"Count carefully: 1,2,3,4,5,6! Six apples! 🍎"},
-      {q:"What is 10 + 5?",vis:"🔟 ➕ 5️⃣",options:["13","14","15","16"],answer:"15",explanation:"10 + 5 = 15. Count on from 10! 🖐"},
-      {q:"What comes after 19?",vis:"17 → 18 → 19 → ❓",options:["18","20","21","22"],answer:"20",explanation:"After 19 comes 20! 🎉"},
-      {q:"How many tens are in 30?",vis:"10 + 10 + 10 = 30",options:["1","2","3","4"],answer:"3",explanation:"30 = 3 groups of 10! ✋✋✋"},
-      {q:"Which number is between 5 and 7?",vis:"5 ❓ 7",options:["4","6","8","9"],answer:"6",explanation:"5, 6, 7 — six is in the middle!"},
-    ],
-    "Early Addition":[
-      {q:"3 + 4 = ?",vis:"🍎🍎🍎 + 🍎🍎🍎🍎",options:["5","6","7","8"],answer:"7",explanation:"Count all the apples: 3 + 4 = 7! 🍎"},
-      {q:"5 + 5 = ?",vis:"🖐 + 🖐",options:["8","9","10","11"],answer:"10",explanation:"Both hands have 5 fingers — 10 altogether! 🖐🖐"},
-      {q:"6 + 3 = ?",vis:"🔵🔵🔵🔵🔵🔵 + 🔵🔵🔵",options:["7","8","9","10"],answer:"9",explanation:"Start at 6, count on 3: 7, 8, 9! 🔵"},
-      {q:"8 + 2 = ?",vis:"8️⃣ ➕ 2️⃣",options:["8","9","10","11"],answer:"10",explanation:"8 + 2 makes a perfect 10! ✨"},
-      {q:"4 + 4 = ?",vis:"🐣🐣🐣🐣 + 🐣🐣🐣🐣",options:["6","7","8","9"],answer:"8",explanation:"Double 4 = 8. Two groups of 4 chicks! 🐣"},
-    ],
-    "Early Subtraction":[
-      {q:"7 - 3 = ?",vis:"🍎🍎🍎🍎🍎🍎🍎 ➖ 🍎🍎🍎",options:["3","4","5","6"],answer:"4",explanation:"Start at 7, count back 3: 6, 5, 4! 🍎"},
-      {q:"10 - 4 = ?",vis:"🔟 ➖ 4️⃣",options:["4","5","6","7"],answer:"6",explanation:"10 take away 4 = 6! 🎈"},
-      {q:"8 - 5 = ?",vis:"🌟🌟🌟🌟🌟🌟🌟🌟 ➖ 🌟🌟🌟🌟🌟",options:["2","3","4","5"],answer:"3",explanation:"8 take away 5 = 3 stars left! ⭐⭐⭐"},
-      {q:"6 - 2 = ?",vis:"🐣🐣🐣🐣🐣🐣 ➖ 🐣🐣",options:["3","4","5","6"],answer:"4",explanation:"6 chicks, 2 fly away, 4 left! 🐣🐣🐣🐣"},
-      {q:"5 - 0 = ?",vis:"5️⃣ ➖ 0️⃣",options:["0","4","5","6"],answer:"5",explanation:"Taking away nothing leaves the same! 😊"},
-    ],
-    "Early Phonics":[
-      {q:"🐱 What sound does CAT start with?",vis:"🐱 = C-A-T",options:["S","B","C","D"],answer:"C",explanation:"Cat starts with the /k/ sound — letter C! 🐱"},
-      {q:"🐝 What sound does BEE start with?",vis:"🐝 = B-E-E",options:["D","B","P","G"],answer:"B",explanation:"Bee starts with /b/ — letter B! 🐝"},
-      {q:"🌞 SUN — what letter does it end with?",vis:"S-U-N 🌞",options:["S","U","N","M"],answer:"N",explanation:"S-U-N, the last sound is /n/! ☀️"},
-      {q:"Which word rhymes with CAT? 🐱",vis:"🐱 CAT rhymes with ___",options:["Dog","Bat","Cup","Run"],answer:"Bat",explanation:"Cat, Bat — they both end in -AT! 🦇🐱"},
-      {q:"🐸 FROG — how many sounds (phonemes)?",vis:"F-R-O-G 🐸",options:["2","3","4","5"],answer:"4",explanation:"F-R-O-G has 4 sounds! Say each one. 🐸"},
-    ],
-    "Early Words":[
-      {q:"Which is a NAMING word (noun)? 🐶",vis:"🐶 run happy dog",options:["Run","Happy","Dog","Quick"],answer:"Dog",explanation:"A noun is a naming word. Dog is a thing! 🐶"},
-      {q:"🏃 Which is a DOING word (verb)?",vis:"run big apple blue",options:["Big","Apple","Blue","Run"],answer:"Run",explanation:"A verb is a doing word. Run is an action! 🏃"},
-      {q:"Which word describes how something looks (adjective)?",vis:"jump fluffy cat quickly",options:["Jump","Cat","Quickly","Fluffy"],answer:"Fluffy",explanation:"Fluffy describes what the cat is like! 🐱"},
-      {q:"Opposite of BIG?",vis:"BIG ↔ ?",options:["Tall","Small","Long","Heavy"],answer:"Small",explanation:"Big and small are opposites! 🐘🐭"},
-      {q:"Which word completes: The dog ___ in the park.",vis:"The dog ___ in the park 🐶",options:["Big","Ran","Apple","Blue"],answer:"Ran",explanation:"Ran is the doing word (verb) that fits! 🐶🏃"},
-    ],
-    "Early Spelling":[
-      {q:"🐱 How do you spell CAT?",vis:"🐱 = _ A T",options:["BAT","CAT","HAT","FAT"],answer:"CAT",explanation:"C-A-T. The /k/ sound is the letter C! 🐱"},
-      {q:"🐕 How do you spell DOG?",vis:"🐕 = D O _",options:["DOG","COG","LOG","HOG"],answer:"DOG",explanation:"D-O-G. The /g/ at the end! 🐕"},
-      {q:"Choose the correct spelling:",vis:"🌞 the s_n",options:["SAN","SIN","SUN","SON"],answer:"SUN",explanation:"The sun in the sky is S-U-N! ☀️"},
-      {q:"🐠 F_SH — missing letter?",vis:"🐠 F _ S H",options:["A","E","I","O"],answer:"I",explanation:"FISH — F-I-S-H! 🐠"},
-      {q:"Which is spelt correctly?",vis:"🌳 a tall ___",options:["TREA","TREE","TRIE","TROE"],answer:"TREE",explanation:"T-R-E-E! Trees are tall! 🌳"},
-    ],
-    "Early Shapes":[
-      {q:"How many sides does a triangle have?",vis:"🔺",options:["2","3","4","5"],answer:"3",explanation:"🔺 A triangle always has 3 sides! Count them!"},
-      {q:"How many corners does a square have?",vis:"🟥",options:["2","3","4","5"],answer:"4",explanation:"A square has 4 corners and 4 equal sides! 🟥"},
-      {q:"🔵 What shape has NO sides?",vis:"🔵 🔺 🟥 🔷",options:["Triangle","Square","Circle","Rectangle"],answer:"Circle",explanation:"Circles are curved with no sides or corners! 🔵"},
-      {q:"A shape with 6 sides is called a?",vis:"⬡",options:["Pentagon","Hexagon","Octagon","Heptagon"],answer:"Hexagon",explanation:"Hex = 6! A hexagon has 6 sides. Like a honeycomb! 🍯"},
-      {q:"How many sides does a rectangle have?",vis:"▬",options:["3","4","5","6"],answer:"4",explanation:"A rectangle has 4 sides — 2 long and 2 short! ▬"},
-    ],
-    "Early Measurement":[
-      {q:"🌡️ Which unit measures temperature?",vis:"🌡️ Cold ❄️ → Hot 🔥",options:["Metres","Kilograms","Degrees","Litres"],answer:"Degrees",explanation:"We measure temperature in degrees! 🌡️"},
-      {q:"Which is HEAVIER? 🐘 or 🐦",vis:"🐘 vs 🐦",options:["Elephant","Bird","Same","Neither"],answer:"Elephant",explanation:"Elephants weigh thousands of kilograms! 🐘"},
-      {q:"We measure length in?",vis:"📏 How long is it?",options:["Litres","Degrees","Metres","Seconds"],answer:"Metres",explanation:"Length is measured in metres (or cm)! 📏"},
-      {q:"1 minute = how many seconds?",vis:"⏱️ 1 minute = __ seconds",options:["10","30","60","100"],answer:"60",explanation:"1 minute = 60 seconds! Tick tock! ⏰"},
-      {q:"Which holds MORE liquid? 🪣 or 🥄",vis:"🪣 bucket vs 🥄 spoon",options:["Bucket","Spoon","Same","Neither"],answer:"Bucket",explanation:"A bucket holds much more than a spoon! 🪣"},
-    ],
-    "Early BOSS":[
-      {q:"5 + 6 = ?",vis:"5️⃣ ➕ 6️⃣",options:["9","10","11","12"],answer:"11",explanation:"Count on from 5: 6,7,8,9,10,11!"},
-      {q:"🐱 CAT starts with?",vis:"🐱 C-A-T",options:["A","B","C","D"],answer:"C",explanation:"Cat starts with C!"},
-      {q:"How many sides on a triangle?",vis:"🔺",options:["2","3","4","5"],answer:"3",explanation:"3 sides on a triangle!"},
-      {q:"9 - 4 = ?",vis:"9️⃣ ➖ 4️⃣",options:["3","4","5","6"],answer:"5",explanation:"9 take away 4 = 5!"},
-      {q:"Which word rhymes with DOG?",vis:"DOG 🐶 rhymes with ___",options:["Cat","Log","Run","Big"],answer:"Log",explanation:"Dog, Log — both end in -OG! 🪵🐶"},
-      {q:"How many corners does a square have?",vis:"🟥",options:["2","3","4","5"],answer:"4",explanation:"4 corners! 🟥"},
-    ],
-  },
   maths:{
     "Times Tables":[
       {q:"6 × 7 = ?",options:["36","42","48","54"],answer:"42",explanation:"6×7=42. Tip: 5×7=35, +7=42."},
@@ -598,63 +438,15 @@ const QBANK={
 // free: true → all missions playable without account; false → need account (still no paywall)
 
 const AGE_GROUPS = [
-  {id:"toddler", label:"Ages 3–4",   icon:"🐣", desc:"Shapes, colours & counting — totally free!", free:true, friendlyMode:true},
-  {id:"early",   label:"Ages 4–7",   icon:"🌈", desc:"Numbers, phonics & first words",             friendlyMode:true},
-  {id:"junior",  label:"Ages 7–9",   icon:"🌱", desc:"Foundation skills — build confidence"},
-  {id:"core",    label:"Ages 9–11",  icon:"⭐", desc:"11+ core content — exam ready"},
-  {id:"advanced",label:"Ages 11–13", icon:"🚀", desc:"Beyond 11+ — challenge yourself"},
-  {id:"shadow",  label:"Shadow Realm",icon:"💀", desc:"Unlocked after completing all worlds — ×2 XP", isShadow:true},
+  {id:"junior",   label:"Ages 7–9",   icon:"🌱", desc:"Foundation skills — build confidence"},
+  {id:"core",     label:"Ages 9–11",  icon:"⭐", desc:"11+ core content — exam ready"},
+  {id:"advanced", label:"Ages 11–13", icon:"🚀", desc:"Beyond 11+ — challenge yourself"},
+  {id:"shadow",   label:"Shadow Realm", icon:"💀", desc:"Unlocked after completing all worlds — ×2 XP", isShadow:true},
 ];
 
 const WORLDS=[
-  // ───────────────── TODDLER (3–4) — ALL FREE ─────────────────
-  {id:"t_shapes",   ageGroup:"toddler", free:true,
-   name:"Shape Garden",      icon:"🌸",colour:"#F472B6",gradient:"linear-gradient(135deg,#F472B6,#EC4899)",
-   desc:"Learn about circles, squares and triangles!",
-   missions:[
-    {id:"tg_shapes",name:"Shape Fun",      icon:"🔵",topic:"Toddler Shapes",   xp:20,coins:5,questions:5,friendly:true},
-    {id:"tg_col",   name:"Colour World",   icon:"🎨",topic:"Toddler Colours",  xp:20,coins:5,questions:5,friendly:true},
-    {id:"tg_count", name:"Count with Me",  icon:"🔢",topic:"Toddler Counting", xp:25,coins:6,questions:5,friendly:true},
-   ]},
-  {id:"t_animals",  ageGroup:"toddler", free:true,
-   name:"Animal Farm",       icon:"🐄",colour:"#34D399",gradient:"linear-gradient(135deg,#34D399,#10B981)",
-   desc:"Learn animals, sounds and patterns!",
-   missions:[
-    {id:"ta_anim",  name:"Animal Friends", icon:"🐶",topic:"Toddler Animals",  xp:20,coins:5,questions:5,friendly:true},
-    {id:"ta_pat",   name:"Pattern Play",   icon:"🔄",topic:"Toddler Patterns", xp:25,coins:6,questions:5,friendly:true},
-    {id:"ta_size",  name:"Big & Small",    icon:"📏",topic:"Toddler Size",     xp:20,coins:5,questions:5,friendly:true},
-   ]},
-
-  // ───────────────── EARLY (4–7) ─────────────────
-  {id:"e_numbers",  ageGroup:"early",
-   name:"Number Jungle",     icon:"🌴",colour:"#FBBF24",gradient:"linear-gradient(135deg,#FBBF24,#F59E0B)",
-   desc:"Counting, adding and simple sums!",
-   missions:[
-    {id:"en_count", name:"Count to 20",    icon:"🔢",topic:"Early Counting",   xp:30,coins:7,questions:5,friendly:true},
-    {id:"en_add",   name:"Adding Fun",     icon:"➕",topic:"Early Addition",   xp:35,coins:8,questions:5,friendly:true},
-    {id:"en_sub",   name:"Take Away!",     icon:"➖",topic:"Early Subtraction",xp:35,coins:8,questions:5,friendly:true},
-    {id:"en_boss",  name:"⭐ Jungle Star",  icon:"🦁",topic:"Early BOSS",       xp:100,coins:25,questions:6,isBoss:true,friendly:true},
-   ]},
-  {id:"e_letters",  ageGroup:"early",
-   name:"Letter Land",       icon:"🔤",colour:"#818CF8",gradient:"linear-gradient(135deg,#818CF8,#6366F1)",
-   desc:"Phonics, letters and first words!",
-   missions:[
-    {id:"el_phon",  name:"Phonics Play",   icon:"🎵",topic:"Early Phonics",   xp:30,coins:7,questions:5,friendly:true},
-    {id:"el_words", name:"First Words",    icon:"📖",topic:"Early Words",     xp:35,coins:8,questions:5,friendly:true},
-    {id:"el_spell", name:"Spell It!",      icon:"✍️",topic:"Early Spelling",  xp:35,coins:8,questions:5,friendly:true},
-    {id:"el_boss",  name:"⭐ Letter Star",  icon:"🦋",topic:"Early BOSS",      xp:100,coins:25,questions:6,isBoss:true,friendly:true},
-   ]},
-  {id:"e_shapes2",  ageGroup:"early",
-   name:"Shape Castle",      icon:"🏰",colour:"#F87171",gradient:"linear-gradient(135deg,#F87171,#EF4444)",
-   desc:"2D shapes, patterns and measurements!",
-   missions:[
-    {id:"es_shape", name:"Shape Spotters",  icon:"🔷",topic:"Early Shapes",   xp:30,coins:7,questions:5,friendly:true},
-    {id:"es_meas",  name:"Long or Short?",  icon:"📏",topic:"Early Measurement",xp:35,coins:8,questions:5,friendly:true},
-    {id:"es_boss",  name:"⭐ Castle Star",   icon:"👑",topic:"Early BOSS",     xp:100,coins:25,questions:6,isBoss:true,friendly:true},
-   ]},
-
   // ───────────────── JUNIOR (7–9) ─────────────────
-  {id:"j_numbers",  ageGroup:"junior",
+  {id:"j_numbers",  ageGroup:"junior", free:true,
    name:"Number Island",      icon:"🏝️",colour:"#0EA5E9",gradient:"linear-gradient(135deg,#0EA5E9,#0284C7)",
    desc:"Counting, addition, subtraction & place value",
    missions:[
@@ -1736,133 +1528,6 @@ function LearnScreen({goTo, player}){
   return null;
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// ONBOARDING FLOW
-// ═══════════════════════════════════════════════════════════════════════════════
-function OnboardingScreen({onComplete}){
-  const [step,setStep]=useState(0); // 0=role, 1=detail, 2=name
-  const [role,setRole]=useState(null);
-  const [answers,setAnswers]=useState({});
-  const [name,setName]=useState("");
-
-  const ROLES=[
-    {id:"student", icon:"🎒", label:"Student",       desc:"I'm learning for fun or exams!", colour:"linear-gradient(135deg,#4F46E5,#7C3AED)"},
-    {id:"parent",  icon:"👨‍👩‍👧", label:"Parent",        desc:"I'm helping my child practise",  colour:"linear-gradient(135deg,#059669,#047857)"},
-    {id:"teacher", icon:"📚", label:"Teacher",       desc:"I'm using this in class",        colour:"linear-gradient(135deg,#D97706,#B45309)"},
-    {id:"tutor",   icon:"🎓", label:"Tutor / Coach", desc:"I'm tutoring students",          colour:"linear-gradient(135deg,#DC2626,#991B1B)"},
-  ];
-
-  const YEAR_GROUPS=["Reception","Year 1","Year 2","Year 3","Year 4","Year 5","Year 6","Year 7","Year 8","Year 9"];
-
-  function finish(){
-    const ageGroup = resolveAgeGroup(role, answers);
-    const profile = {role, answers, name:name||"Explorer", ageGroup, onboarded:true};
-    Profile.save(profile);
-    onComplete(profile);
-  }
-
-  // Step 0 — choose role
-  if(step===0) return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29,#1a1560)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
-      <div style={{textAlign:"center",marginBottom:32,animation:"popIn 0.5s ease"}}>
-        <div style={{fontSize:64,marginBottom:12}}>🎓</div>
-        <h1 style={{color:"white",fontWeight:900,fontSize:28,margin:"0 0 8px"}}>Welcome to<br/>11+ Quest!</h1>
-        <p style={{color:"rgba(255,255,255,0.55)",fontSize:15,margin:0}}>First, tell us who you are 👇</p>
-      </div>
-      <div style={{width:"100%",maxWidth:400,display:"flex",flexDirection:"column",gap:12}}>
-        {ROLES.map(r=>(
-          <button key={r.id} onClick={()=>{SFX.click();setRole(r.id);setStep(1);}}
-            style={{background:r.colour,border:"none",borderRadius:20,padding:"18px 20px",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,fontFamily:"inherit",boxShadow:"0 4px 20px rgba(0,0,0,0.4)",animation:"slideUp 0.3s ease"}}>
-            <span style={{fontSize:36}}>{r.icon}</span>
-            <div>
-              <div style={{color:"white",fontWeight:900,fontSize:18}}>{r.label}</div>
-              <div style={{color:"rgba(255,255,255,0.7)",fontSize:13}}>{r.desc}</div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Step 1 — role-specific details
-  if(step===1) return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29,#1a1560)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
-      <div style={{width:"100%",maxWidth:400}}>
-        <div style={{textAlign:"center",marginBottom:28,animation:"popIn 0.4s ease"}}>
-          <div style={{fontSize:52,marginBottom:8}}>{ROLES.find(r=>r.id===role)?.icon}</div>
-          <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 6px"}}>
-            {role==="student"&&"How old are you? 🎂"}
-            {role==="parent"&&"How old is your child? 👧"}
-            {(role==="teacher"||role==="tutor")&&"What year group? 📚"}
-          </h2>
-          <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,margin:0}}>We'll pick the right content for you</p>
-        </div>
-
-        {role==="student"&&(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
-            {[3,4,5,6,7,8,9,10,11,12,13].map(a=>(
-              <button key={a} onClick={()=>{SFX.click();setAnswers({age:a});setStep(2);}}
-                style={{background:answers.age===a?"#4F46E5":"rgba(255,255,255,0.1)",border:"2px solid "+(answers.age===a?"#4F46E5":"rgba(255,255,255,0.15)"),borderRadius:14,padding:"14px 8px",color:"white",fontWeight:800,fontSize:18,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
-                {a}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {role==="parent"&&(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
-            {[3,4,5,6,7,8,9,10,11,12,13].map(a=>(
-              <button key={a} onClick={()=>{SFX.click();setAnswers({childAge:a});setStep(2);}}
-                style={{background:answers.childAge===a?"#059669":"rgba(255,255,255,0.1)",border:"2px solid "+(answers.childAge===a?"#059669":"rgba(255,255,255,0.15)"),borderRadius:14,padding:"14px 8px",color:"white",fontWeight:800,fontSize:18,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
-                {a}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {(role==="teacher"||role==="tutor")&&(
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {YEAR_GROUPS.map(yg=>(
-              <button key={yg} onClick={()=>{SFX.click();setAnswers({yearGroup:yg});setStep(2);}}
-                style={{background:"rgba(255,255,255,0.08)",border:"2px solid rgba(255,255,255,0.15)",borderRadius:14,padding:"14px 18px",color:"white",fontWeight:700,fontSize:15,cursor:"pointer",textAlign:"left",fontFamily:"inherit",transition:"all 0.15s"}}>
-                📖 {yg} <span style={{color:"rgba(255,255,255,0.4)",fontSize:12,marginLeft:8}}>{YEAR_GROUP_TO_AGE_GROUP[yg]&&"→ "+AGE_GROUPS.find(ag=>ag.id===YEAR_GROUP_TO_AGE_GROUP[yg])?.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <button onClick={()=>setStep(0)} style={{marginTop:20,background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:13,cursor:"pointer",width:"100%",textAlign:"center",fontFamily:"inherit"}}>← Back</button>
-      </div>
-    </div>
-  );
-
-  // Step 2 — name (optional)
-  return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29,#1a1560)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
-      <div style={{width:"100%",maxWidth:380,textAlign:"center",animation:"popIn 0.4s ease"}}>
-        <div style={{fontSize:52,marginBottom:12}}>👋</div>
-        <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>What shall we call you?</h2>
-        <p style={{color:"rgba(255,255,255,0.5)",fontSize:13,margin:"0 0 24px"}}>Totally optional!</p>
-        <input
-          type="text"
-          placeholder={role==="parent"?"Your child's name e.g. Sophie":"Your name e.g. Alex"}
-          value={name}
-          onChange={e=>setName(e.target.value)}
-          onKeyDown={e=>e.key==="Enter"&&finish()}
-          maxLength={20}
-          style={{width:"100%",padding:"16px 18px",borderRadius:16,border:"2px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.08)",color:"white",fontSize:16,fontFamily:"inherit",outline:"none",boxSizing:"border-box",marginBottom:16}}
-        />
-        <button onClick={finish}
-          style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",animation:"pulse 2s infinite"}}>
-          Let's Go! 🚀
-        </button>
-        <button onClick={()=>setStep(1)} style={{marginTop:12,background:"none",border:"none",color:"rgba(255,255,255,0.4)",fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>← Back</button>
-      </div>
-    </div>
-  );
-}
-
 export default function App(){
   // ── Base44 SDK auth ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null);
@@ -1912,7 +1577,6 @@ export default function App(){
   const timerRef=useRef(null);
 
   // Player
-  const [profile,setProfile]=useState(()=>Profile.get());
   const [player,setPlayer]=useState({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:"",mastery:{},prestige:0,prestige_mult:1,weekly_progress:{},week_key:"",rival_bests:{}});
   const [visitorCount,setVisitorCount]=useState(null);
 
@@ -1924,20 +1588,6 @@ export default function App(){
   useEffect(()=>{
     const c = trackVisitorCount();
     if(c) setVisitorCount(c);
-    // Load guest progress if not logged in
-    const guestProgress = LS.get('q11_guest_progress', null);
-    if(guestProgress){
-      setPlayer(p=>({...p,
-        xp:guestProgress.xp||0, coins:guestProgress.coins||0,
-        streak:guestProgress.streak_days||0, last_practice:guestProgress.last_practice_date||"",
-        completed_missions:guestProgress.completed_missions||[], badges:guestProgress.badges||[],
-        daily_missions_done:guestProgress.daily_missions_done||0, daily_date:guestProgress.daily_date||"",
-        mastery:guestProgress.mastery||{}, prestige:guestProgress.prestige||0,
-        prestige_mult:getPrestigeMultiplier(guestProgress.prestige||0),
-        weekly_progress:guestProgress.weekly_progress||{}, week_key:guestProgress.week_key||"",
-        rival_bests:guestProgress.rival_bests||{}
-      }));
-    }
   },[]);
 
   // Progress is loaded in handleAuthSuccess after sign-in
@@ -1957,9 +1607,7 @@ export default function App(){
 
   function startMission(mission,worldId){
     SFX.click();
-    // Route toddler/early worlds to their qbank section
-    const qbankKey = worldId.startsWith("t_")?"toddler":worldId.startsWith("e_")&&worldId!=="english"?"early":worldId;
-    const pool=[...(QBANK[qbankKey]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
+    const pool=[...(QBANK[worldId]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
     if(!pool.length)return;
     setActiveMission({...mission,_worldId:worldId});
     setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setMissionDone(false);setNewTrick(null);setFlashAnim(null);
@@ -2069,7 +1717,6 @@ export default function App(){
       }
       const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,mastery:prevMastery,prestige:prev.prestige||0,prestige_mult:mult,weekly_progress:wp,week_key:weekNum,rival_bests:prevRivals};
       if(user) Progress.saveLocal(user.id, data);
-      else LS.set('q11_guest_progress', data);
       setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,mastery:prevMastery,weekly_progress:wp,week_key:weekNum,rival_bests:prevRivals}));
       if(nl>curLevel)setTimeout(()=>SFX.levelup(),600);
     }catch(e){console.error(e);}
@@ -2117,12 +1764,7 @@ export default function App(){
               <span style={{fontSize:11,fontWeight:700,color:"#9ca3af",textTransform:"uppercase",letterSpacing:"1px"}}>{q.topic||activeMission?.name}</span>
               <span style={{fontSize:12,color:"#9ca3af"}}>{qIdx+1} / {missionQs.length}</span>
             </div>
-            {activeMission?.friendly&&q.vis&&(
-              <div style={{textAlign:"center",background:"#F0F9FF",borderRadius:14,padding:"14px 10px",marginBottom:14,fontSize:q.vis.length<8?52:q.vis.length<16?36:22,lineHeight:1.4,letterSpacing:"3px",border:"2px solid #BAE6FD"}}>
-                {q.vis}
-              </div>
-            )}
-            <p style={{fontWeight:800,fontSize:activeMission?.friendly?19:18,color:"#111827",margin:"0 0 20px",lineHeight:1.5}}>{q.q}</p>
+            <p style={{fontWeight:800,fontSize:18,color:"#111827",margin:"0 0 20px",lineHeight:1.4}}>{q.q}</p>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {q.options.map(opt=>{
                 const isSel=selected===opt,isAns=opt===q.answer;
@@ -2134,7 +1776,7 @@ export default function App(){
                 }
                 return(
                   <button key={opt} onClick={()=>handleAnswer(opt)}
-                    style={{padding:activeMission?.friendly?"18px 16px":"14px 16px",borderRadius:16,border,background:bg,color:col,fontWeight:700,fontSize:activeMission?.friendly?16:14,cursor:selected?"default":"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",transition:"all 0.2s",boxShadow:shadow}}>
+                    style={{padding:"14px 16px",borderRadius:14,border,background:bg,color:col,fontWeight:700,fontSize:14,cursor:selected?"default":"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center",transition:"all 0.2s",boxShadow:shadow}}>
                     <span>{opt}</span>
                     {selected&&isAns&&<span style={{animation:"starBurst 0.4s ease"}}>✅</span>}
                     {selected&&isSel&&!isAns&&<span>❌</span>}
@@ -2319,7 +1961,7 @@ export default function App(){
                 PRESTIGE_BADGES.forEach(pb=>{const n=parseInt(pb.id.split("_")[1]);if(newPrestige>=n&&!badges.includes(pb.id))badges.push(pb.id);});
                 const newPlayer={...player,completed_missions:[],daily_missions_done:0,daily_date:"",weekly_progress:{},week_key:"",prestige:newPrestige,prestige_mult:newMult,badges};
                 setPlayer(newPlayer);
-                if(user){const d={...newPlayer,streak_days:newPlayer.streak,last_practice_date:newPlayer.last_practice};Progress.saveLocal(user.id,d);}else{LS.set('q11_guest_progress',{...newPlayer,streak_days:newPlayer.streak,last_practice_date:newPlayer.last_practice});}
+                if(user){const d={...newPlayer,streak_days:newPlayer.streak,last_practice_date:newPlayer.last_practice};Progress.saveLocal(user.id,d);}
                 SFX.levelup();
                 setTimeout(()=>setPopBadge({icon:"🔁",name:`Prestige ${newPrestige}!`,desc:`×${newMult} XP multiplier active — you legend.`}),500);
                 goTo("home");
@@ -2351,24 +1993,20 @@ export default function App(){
 
 
   // ── HOME ───────────────────────────────────────────────────────────────────
-  const isYoungMode = profile?.ageGroup==="toddler"||profile?.ageGroup==="early";
-  const homeBg = isYoungMode
-    ? "linear-gradient(180deg,#0d4f8c 0%,#1a6bb5 40%,#0f3460 100%)"
-    : "linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)";
-
   return(
-    <div style={{minHeight:"100vh",background:homeBg}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29 0%,#1a1560 45%,#0f0c29 100%)"}}>
       {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuthSuccess={handleAuthSuccess}/>}
+      
       {popBadge&&<BadgePop badge={popBadge} onClose={()=>setPopBadge(null)}/>}
 
       {/* Top bar */}
-      <div style={{position:"sticky",top:0,zIndex:100,background:isYoungMode?"rgba(10,50,100,0.96)":"rgba(15,12,41,0.96)",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,0.1)",padding:"10px 16px"}}>
+      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(15,12,41,0.96)",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"10px 16px"}}>
         <div style={{maxWidth:520,margin:"0 auto",display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:isYoungMode?28:22}}>{isYoungMode?"🌈":"🎓"}</span>
+          <span style={{fontSize:22}}>🎓</span>
           <div style={{flex:1}}><XPBar xp={player.xp}/></div>
           <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{background:"rgba(252,211,77,0.15)",border:"1px solid rgba(252,211,77,0.35)",borderRadius:10,padding:"4px 9px",fontSize:isYoungMode?13:12,fontWeight:800,color:"#FCD34D"}}>🪙{player.coins}</div>
-            <div style={{background:"rgba(249,115,22,0.15)",border:"1px solid rgba(249,115,22,0.35)",borderRadius:10,padding:"4px 9px",fontSize:isYoungMode?13:12,fontWeight:800,color:"#F97316"}}>🔥{player.streak}</div>
+            <div style={{background:"rgba(252,211,77,0.1)",border:"1px solid rgba(252,211,77,0.28)",borderRadius:10,padding:"4px 9px",fontSize:12,fontWeight:800,color:"#FCD34D"}}>🪙{player.coins}</div>
+            <div style={{background:"rgba(249,115,22,0.12)",border:"1px solid rgba(249,115,22,0.28)",borderRadius:10,padding:"4px 9px",fontSize:12,fontWeight:800,color:"#F97316"}}>🔥{player.streak}</div>
             {user?(
               <div onClick={()=>goTo("progress")} title="My Progress" style={{width:33,height:33,borderRadius:"50%",background:curRank.colour,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:15,border:"2px solid rgba(255,255,255,0.25)"}}>{curRank.icon}</div>
             ):(
@@ -2379,70 +2017,24 @@ export default function App(){
       </div>
 
       <div style={{maxWidth:520,margin:"0 auto",padding:"14px 16px 100px"}}>
-
-        {/* Welcome Hero — role-aware */}
-        {(()=>{
-          const pName = profile?.name||(user?.full_name?.split(" ")[0])||"Explorer";
-          const role = profile?.role||"student";
-          const ag = AGE_GROUPS.find(a=>a.id===(profile?.ageGroup||"core"))||AGE_GROUPS[2];
-          const greetings = {
-            student: `Hey ${pName}! Ready to play? 🎮`,
-            parent:  `Hi ${pName}! ${pName}'s learning is waiting! 📚`,
-            teacher: `Welcome back! Your class awaits 🍎`,
-            tutor:   `Hi ${pName}! Ready to teach? 🎓`,
-          };
-          return(
-            <div style={{textAlign:"center",marginBottom:16,padding:"20px 16px",background:"rgba(255,255,255,0.06)",borderRadius:24,border:"1px solid rgba(255,255,255,0.1)",animation:"slideUp 0.4s ease"}}>
-              {isYoungMode?(
-                <>
-                  <div style={{fontSize:56,marginBottom:8,animation:"worldFloat 3s infinite"}}>
-                    {profile?.ageGroup==="toddler"?"🐣":"🌈"}
-                  </div>
-                  <div style={{color:"white",fontWeight:900,fontSize:24,marginBottom:4}}>
-                    Hello {pName}! 👋
-                  </div>
-                  <div style={{color:"rgba(255,255,255,0.7)",fontSize:15,marginBottom:10}}>
-                    Let's learn and play today! 🎉
-                  </div>
-                </>
-              ):(
-                <>
-                  <div style={{color:"white",fontWeight:900,fontSize:20,marginBottom:4}}>
-                    {greetings[role]||greetings.student}
-                  </div>
-                  <div style={{display:"flex",justifyContent:"center",gap:8,flexWrap:"wrap",marginBottom:8}}>
-                    <span style={{background:"rgba(255,255,255,0.1)",borderRadius:20,padding:"4px 12px",fontSize:12,color:"rgba(255,255,255,0.7)"}}>
-                      {ag.icon} {ag.label}
-                    </span>
-                    <span style={{background:"rgba(255,255,255,0.1)",borderRadius:20,padding:"4px 12px",fontSize:12,color:"rgba(255,255,255,0.7)"}}>
-                      👥 {visitorCount??"..."} explorers
-                    </span>
-                    <span style={{background:"rgba(255,255,255,0.1)",borderRadius:20,padding:"4px 12px",fontSize:12,color:"rgba(255,255,255,0.7)"}}>
-                      {curRank.icon} {curRank.title}
-                    </span>
-                  </div>
-                </>
-              )}
-              {/* Suggested next world */}
-              {(()=>{
-                const myGroup = profile?.ageGroup||"core";
-                const suggestedWorld = getAllWorlds(player).find(w=>w.ageGroup===myGroup&&w.missions.some(m=>!isCompleted(m.id)));
-                if(!suggestedWorld)return null;
-                const nextM = suggestedWorld.missions.find(m=>!isCompleted(m.id)&&isMissionUnlocked(suggestedWorld,m));
-                if(!nextM)return null;
-                return(
-                  <button onClick={()=>{SFX.click();setActiveWorld(suggestedWorld);setScreen("map");}}
-                    style={{background:"linear-gradient(135deg,#4F46E5,#7C3AED)",border:"none",borderRadius:16,padding:"12px 20px",color:"white",fontWeight:800,fontSize:isYoungMode?17:15,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 16px rgba(79,70,229,0.4)",animation:"pulse 3s infinite"}}>
-                    {isYoungMode?"▶ Play Now! 🎮":`▶ Continue: ${nextM.name}`}
-                  </button>
-                );
-              })()}
-              <button onClick={()=>{Profile.clear();setProfile(null);}} style={{marginTop:10,display:"block",background:"none",border:"none",color:"rgba(255,255,255,0.25)",fontSize:11,cursor:"pointer",fontFamily:"inherit",width:"100%"}}>
-                Change profile
-              </button>
+        {/* Subscribed success banner */}
+        {typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("subscribed")==="true"&&(
+          <div style={{background:"linear-gradient(135deg,rgba(5,150,105,0.3),rgba(4,120,87,0.2))",border:"1px solid rgba(5,150,105,0.4)",borderRadius:16,padding:"14px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:28}}>🎉</span>
+            <div>
+              <div style={{color:"#4ADE80",fontWeight:800,fontSize:14}}>You're now Premium! Free trial active.</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>Enjoy all worlds, missions & tricks for free for 30 days.</div>
             </div>
-          );
-        })()}
+          </div>
+        )}
+
+        {/* Welcome */}
+        <div style={{textAlign:"center",marginBottom:14}}>
+          {user&&<p style={{color:"white",fontWeight:800,fontSize:17,margin:"0 0 6px"}}>👋 Hey, {user.full_name?.split(" ")[0]||"Explorer"}!</p>}
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(255,255,255,0.06)",borderRadius:20,padding:"7px 16px"}}>
+            <span style={{color:"rgba(255,255,255,0.55)",fontSize:12}}>👥 {visitorCount??"..."} explorers · {curRank.icon} {curRank.title}</span>
+          </div>
+        </div>
 
         {/* Daily challenge */}
         <div style={{background:"linear-gradient(135deg,rgba(245,158,11,0.14),rgba(239,68,68,0.14))",border:"1px solid rgba(245,158,11,0.28)",borderRadius:18,padding:"14px 16px",marginBottom:16,animation:"pulse 3s infinite"}}>
@@ -2503,25 +2095,22 @@ export default function App(){
           </div>
         )}
 
-        {/* Adventure Map */}
+        {/* Age-grouped Adventure Map */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div style={{color:"white",fontWeight:900,fontSize:18}}>🗺 Adventure Map</div>
-          <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            {!user&&<button onClick={()=>setShowAuth(true)} style={{padding:"5px 12px",borderRadius:16,background:"rgba(79,70,229,0.5)",border:"1px solid rgba(99,102,241,0.4)",color:"white",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Save progress →</button>}
-          </div>
+          {!user&&<button onClick={()=>setShowAuth(true)} style={{padding:"5px 12px",borderRadius:16,background:"rgba(79,70,229,0.5)",border:"1px solid rgba(99,102,241,0.4)",color:"white",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Sign in to save →</button>}
         </div>
 
         {AGE_GROUPS.map(ag=>{
           const shadowLocked = ag.isShadow && !WORLDS.every(w=>w.missions.every(m=>isCompleted(m.id)));
           const groupWorlds = getAllWorlds(player).filter(w=>w.ageGroup===ag.id);
-          const isMyGroup = ag.id===(profile?.ageGroup||"core");
           return(
             <div key={ag.id} style={{marginBottom:24}}>
               {/* Age group header */}
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,paddingBottom:8,borderBottom:`1px solid ${isMyGroup?"rgba(252,211,77,0.3)":"rgba(255,255,255,0.1)"}`}}>
-                <span style={{fontSize:isMyGroup?26:20}}>{ag.icon}</span>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,paddingBottom:8,borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+                <span style={{fontSize:20}}>{ag.icon}</span>
                 <div>
-                  <div style={{color:isMyGroup?"#FCD34D":"white",fontWeight:900,fontSize:isMyGroup?17:15}}>{ag.label}{isMyGroup?" ← Your level":""}</div>
+                  <div style={{color:"white",fontWeight:900,fontSize:15}}>{ag.label}</div>
                   <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{ag.desc}</div>
                 </div>
                 <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"3px 10px"}}>
@@ -2541,7 +2130,7 @@ export default function App(){
                     style={{background:world.gradient,borderRadius:20,padding:"16px 18px",marginBottom:10,cursor:"pointer",boxShadow:"0 6px 24px rgba(0,0,0,0.35)",animation:`slideUp ${0.1+i*0.06}s ease`,position:"relative"}}>
                     {world.free&&<div style={{position:"absolute",top:10,right:12,background:"rgba(74,222,128,0.25)",border:"1px solid rgba(74,222,128,0.5)",borderRadius:8,padding:"2px 8px",fontSize:10,fontWeight:800,color:"#4ADE80"}}>✅ FREE</div>}
                     <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-                      <div style={{fontSize:world.ageGroup==="toddler"||world.ageGroup==="early"?52:38,lineHeight:1,flexShrink:0,animation:"worldFloat 4s infinite"}}>{world.icon}</div>
+                      <div style={{fontSize:38,lineHeight:1,flexShrink:0,animation:"worldFloat 4s infinite"}}>{world.icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:2}}>
                           <div style={{color:"white",fontWeight:900,fontSize:16}}>{world.name}</div>
