@@ -1,4 +1,4 @@
-// v6.0 - GAMIFIED 11+ QUEST | BASE44 SDK AUTH | CLOUD PROGRESS
+// v7.0 - GAMIFIED 11+ QUEST | PRESTIGE + MASTERY + DAILY CHALLENGES + SHADOW WORLDS
 import { useState, useEffect, useRef, useCallback } from "react";
 import { User } from "@/api/entities";
 
@@ -441,6 +441,7 @@ const AGE_GROUPS = [
   {id:"junior",   label:"Ages 7–9",   icon:"🌱", desc:"Foundation skills — build confidence"},
   {id:"core",     label:"Ages 9–11",  icon:"⭐", desc:"11+ core content — exam ready"},
   {id:"advanced", label:"Ages 11–13", icon:"🚀", desc:"Beyond 11+ — challenge yourself"},
+  {id:"shadow",   label:"Shadow Realm", icon:"💀", desc:"Unlocked after completing all worlds — ×2 XP", isShadow:true},
 ];
 
 const WORLDS=[
@@ -557,6 +558,97 @@ const WORLDS=[
     {id:"av_boss", name:"⚔️ Realm Boss",          icon:"🧿",topic:"BOSS",         xp:350,coins:80,questions:8, isBoss:true},
    ]},
 ];
+// WORLDS + SHADOW_WORLDS merged at runtime — see getAllWorlds()
+// ─── MASTERY SYSTEM ───────────────────────────────────────────────────────────
+// Each mission can be completed at Bronze→Silver→Gold→Platinum
+// Bronze: ≥70% | Silver: ≥80% + first time | Gold: 100% | Platinum: 100% + second run
+const MASTERY_LEVELS = [
+  {id:"none",    label:"",         icon:"",   colour:"transparent", minPct:0,  xpMult:1},
+  {id:"bronze",  label:"Bronze",   icon:"🥉", colour:"#CD7F32",     minPct:70, xpMult:1},
+  {id:"silver",  label:"Silver",   icon:"🥈", colour:"#9CA3AF",     minPct:80, xpMult:1.25},
+  {id:"gold",    label:"Gold",     icon:"🥇", colour:"#F59E0B",     minPct:100,xpMult:1.5},
+  {id:"platinum",label:"Platinum", icon:"💎", colour:"#60A5FA",     minPct:100,xpMult:2},
+];
+function getMasteryLevel(missionId, masteryData){
+  const m = (masteryData||{})[missionId];
+  if(!m) return MASTERY_LEVELS[0];
+  if(m.platinum) return MASTERY_LEVELS[4];
+  if(m.gold)     return MASTERY_LEVELS[3];
+  if(m.silver)   return MASTERY_LEVELS[2];
+  if(m.bronze)   return MASTERY_LEVELS[1];
+  return MASTERY_LEVELS[0];
+}
+function nextMasteryLevel(missionId, masteryData){
+  const cur = getMasteryLevel(missionId, masteryData);
+  const idx = MASTERY_LEVELS.indexOf(cur);
+  return idx < MASTERY_LEVELS.length-1 ? MASTERY_LEVELS[idx+1] : null;
+}
+
+// ─── SHADOW WORLDS (unlocked after completing ALL 10 worlds) ─────────────────
+const SHADOW_WORLDS=[
+  {id:"shadow_maths",    ageGroup:"shadow", isShadow:true,
+   name:"Shadow Maths",       icon:"💀",colour:"#4C1D95",gradient:"linear-gradient(135deg,#1e003d,#4C1D95)",
+   desc:"Harder versions of every maths concept. ×2 XP reward.",
+   missions:[
+    {id:"sh_m1",name:"Dark Fractions",    icon:"💀",topic:"Fractions",           xp:200,coins:50,questions:8},
+    {id:"sh_m2",name:"Shadow Algebra",    icon:"💀",topic:"Algebra",             xp:200,coins:50,questions:8},
+    {id:"sh_m3",name:"Cursed Percentages",icon:"💀",topic:"Percentages",        xp:220,coins:55,questions:8},
+    {id:"sh_m4",name:"Phantom Geometry",  icon:"💀",topic:"Geometry",           xp:220,coins:55,questions:8},
+    {id:"sh_mb",name:"⚔️ Shadow Titan",   icon:"💀",topic:"BOSS",               xp:600,coins:150,questions:12,isBoss:true},
+   ]},
+  {id:"shadow_english",  ageGroup:"shadow", isShadow:true,
+   name:"Shadow English",     icon:"🌑",colour:"#1F2937",gradient:"linear-gradient(135deg,#0a0a0a,#1F2937)",
+   desc:"Advanced comprehension and grammar. ×2 XP reward.",
+   missions:[
+    {id:"sh_e1",name:"Dark Grammar",      icon:"🌑",topic:"Grammar",             xp:200,coins:50,questions:8},
+    {id:"sh_e2",name:"Shadow Vocab",      icon:"🌑",topic:"Vocabulary",          xp:200,coins:50,questions:8},
+    {id:"sh_e3",name:"Cursed Punctuation",icon:"🌑",topic:"Punctuation",         xp:220,coins:55,questions:8},
+    {id:"sh_eb",name:"⚔️ Darkness Boss",  icon:"🌑",topic:"BOSS",               xp:600,coins:150,questions:10,isBoss:true},
+   ]},
+  {id:"shadow_verbal",   ageGroup:"shadow", isShadow:true,
+   name:"Shadow Verbal",      icon:"🔮",colour:"#4A1942",gradient:"linear-gradient(135deg,#1a0020,#4A1942)",
+   desc:"Twisted analogies, codes and sequences. ×2 XP reward.",
+   missions:[
+    {id:"sh_v1",name:"Dark Analogies",    icon:"🔮",topic:"Analogies",           xp:200,coins:50,questions:8},
+    {id:"sh_v2",name:"Shadow Codes",      icon:"🔮",topic:"Codes & Ciphers",     xp:200,coins:50,questions:8},
+    {id:"sh_v3",name:"Cursed Sequences",  icon:"🔮",topic:"Sequences",           xp:220,coins:55,questions:8},
+    {id:"sh_vb",name:"⚔️ Phantom Boss",   icon:"🔮",topic:"BOSS",               xp:600,coins:150,questions:10,isBoss:true},
+   ]},
+];
+
+function getAllWorlds(player){ 
+  const allCompleted = player?.completed_missions||[];
+  const regularDone = WORLDS.every(w=>w.missions.every(m=>allCompleted.includes(m.id)));
+  return [...WORLDS, ...(regularDone ? SHADOW_WORLDS : [])];
+}
+
+// ─── PRESTIGE SYSTEM ─────────────────────────────────────────────────────────
+const PRESTIGE_MULTIPLIERS=[1,1.5,2,2.5,3,4,5];
+function getPrestigeMultiplier(prestigeCount){
+  return PRESTIGE_MULTIPLIERS[Math.min(prestigeCount||0, PRESTIGE_MULTIPLIERS.length-1)];
+}
+const PRESTIGE_BADGES=[
+  {id:"prestige_1",icon:"🔁",name:"Prestige I",    desc:"First rebirth — brave soul!"},
+  {id:"prestige_2",icon:"⚡",name:"Prestige II",   desc:"Second rebirth — relentless!"},
+  {id:"prestige_3",icon:"🌀",name:"Prestige III",  desc:"Third rebirth — unstoppable!"},
+  {id:"prestige_5",icon:"🌟",name:"Prestige V",    desc:"Fifth rebirth — LEGEND!"},
+];
+
+// ─── WEEKLY CHALLENGES ────────────────────────────────────────────────────────
+function getWeeklyChallenge(){
+  const weekNum = Math.floor(Date.now()/(7*24*60*60*1000));
+  const challenges=[
+    {id:"wc_perfect3",  icon:"⭐",name:"Triple Flawless",        desc:"Score 100% on 3 missions this week",            xpBonus:500,coins:100,target:3,  type:"perfect"},
+    {id:"wc_boss2",     icon:"⚔️",name:"Boss Hunter",             desc:"Defeat 2 boss battles this week",               xpBonus:400,coins:80, target:2,  type:"boss"},
+    {id:"wc_streak5",   icon:"🔥",name:"Streaker",                desc:"Complete missions 5 days in a row",             xpBonus:600,coins:120,target:5,  type:"streak"},
+    {id:"wc_missions7", icon:"🗺",name:"World Explorer",          desc:"Complete 7 missions this week",                 xpBonus:350,coins:70, target:7,  type:"missions"},
+    {id:"wc_mastery",   icon:"💎",name:"Mastery Seeker",          desc:"Earn a Gold or Platinum star this week",        xpBonus:450,coins:90, target:1,  type:"mastery"},
+    {id:"wc_shadow",    icon:"💀",name:"Shadow Runner",           desc:"Complete 2 Shadow World missions",              xpBonus:700,coins:140,target:2,  type:"shadow"},
+    {id:"wc_all_sub",   icon:"🎓",name:"All-Rounder",             desc:"Complete a mission in each subject this week",  xpBonus:500,coins:100,target:4,  type:"all_sub"},
+  ];
+  return challenges[weekNum % challenges.length];
+}
+
 // ─── TRICKS ───────────────────────────────────────────────────────────────────
 const TRICKS={
   t_nine: {icon:"🖐",title:"The 9× Finger Trick",      subject:"maths",  body:"Hold 10 fingers up. For 9×N, fold down finger N.\nLeft side = tens. Right side = units.\n\n9×7 → fold finger 7 → 6 left, 3 right → 63 ✓"},
@@ -800,7 +892,7 @@ function SchoolsScreen({goTo}) {
 }
 
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"schools",icon:"🏫",label:"Schools"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"prestige",icon:"🔁",label:"Prestige"},{id:"schools",icon:"🏫",label:"Schools"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
@@ -1297,7 +1389,7 @@ function LearnScreen({goTo, player}){
           {/* Subject lessons */}
           <div style={{color:"rgba(255,255,255,0.5)",fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>📚 Study Lessons</div>
           {Object.entries(LESSONS).map(([id,subj])=>{
-            const worldObj = WORLDS.find(w=>w.id===id);
+            const worldObj = getAllWorlds(player).find(w=>w.id===id);
             return(
               <div key={id} onClick={()=>setSubject(id)} style={{background:worldObj?.gradient||"rgba(255,255,255,0.08)",borderRadius:18,padding:"16px 18px",marginBottom:10,cursor:"pointer",boxShadow:"0 4px 20px rgba(0,0,0,0.3)",display:"flex",alignItems:"center",gap:14}}>
                 <div style={{fontSize:36,flexShrink:0}}>{subj.icon}</div>
@@ -1452,7 +1544,11 @@ export default function App(){
     const local = Progress.getLocal(u.id);
     setPlayer({xp:local.xp||0, coins:local.coins||0, streak:local.streak_days||0, last_practice:local.last_practice_date||"",
       completed_missions:local.completed_missions||[], badges:local.badges||[],
-      daily_missions_done:local.daily_missions_done||0, daily_date:local.daily_date||""});
+      daily_missions_done:local.daily_missions_done||0, daily_date:local.daily_date||"",
+      mastery:local.mastery||{}, prestige:local.prestige||0,
+      prestige_mult:getPrestigeMultiplier(local.prestige||0),
+      weekly_progress:local.weekly_progress||{}, week_key:local.week_key||"",
+      rival_bests:local.rival_bests||{}});
   }
 
   async function logout(){
@@ -1481,7 +1577,7 @@ export default function App(){
   const timerRef=useRef(null);
 
   // Player
-  const [player,setPlayer]=useState({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});
+  const [player,setPlayer]=useState({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:"",mastery:{},prestige:0,prestige_mult:1,weekly_progress:{},week_key:"",rival_bests:{}});
   const [visitorCount,setVisitorCount]=useState(null);
 
   const today=new Date().toISOString().split("T")[0];
@@ -1538,15 +1634,67 @@ export default function App(){
     if(pct<70)return;
     try{
       const prev = {...player, xp:player.xp||0, coins:player.coins||0, streak_days:player.streak||0, last_practice_date:player.last_practice||'', completed_missions:player.completed_missions||[], badges:player.badges||[], daily_missions_done:player.daily_missions_done||0, daily_date:player.daily_date||''};
-      const newXP=(prev.xp||0)+activeMission.xp;
-      const newCoins=(prev.coins||0)+activeMission.coins;
+      const mult = getPrestigeMultiplier(prev.prestige||0);
+
+      // ── Mastery update ─────────────────────────────────────────────────────
+      const prevMastery = {...(player.mastery||{})};
+      const mEntry = prevMastery[activeMission.id]||{};
+      const curMasteryLevel = getMasteryLevel(activeMission.id, prevMastery);
+      let newMasteryEntry = {...mEntry};
+      let masteryXPBonus = 0;
+      let masteryUpgrade = null;
+      if(pct>=70 && !mEntry.bronze){newMasteryEntry.bronze=true; masteryXPBonus=30; masteryUpgrade=MASTERY_LEVELS[1];}
+      if(pct>=80 && !mEntry.silver){newMasteryEntry.silver=true; masteryXPBonus=60; masteryUpgrade=MASTERY_LEVELS[2];}
+      if(pct===100 && !mEntry.gold){newMasteryEntry.gold=true; masteryXPBonus=100; masteryUpgrade=MASTERY_LEVELS[3];}
+      else if(pct===100 && mEntry.gold && !mEntry.platinum){newMasteryEntry.platinum=true; masteryXPBonus=200; masteryUpgrade=MASTERY_LEVELS[4];}
+      prevMastery[activeMission.id]=newMasteryEntry;
+
+      // ── Rival: save personal best ──────────────────────────────────────────
+      const prevRivals = {...(player.rival_bests||{})};
+      const prevBest = prevRivals[activeMission.id]||{pct:0,time:9999};
+      const missionTime = activeMission.isBoss ? (activeMission.questions*25 - (timeLeft||0)) : null;
+      if(pct>prevBest.pct||(pct===prevBest.pct&&missionTime&&missionTime<prevBest.time)){
+        prevRivals[activeMission.id]={pct,time:missionTime,date:today};
+      }
+
+      // ── XP with multiplier ─────────────────────────────────────────────────
+      const rawXP = activeMission.xp + masteryXPBonus;
+      const earnedXP = Math.round(rawXP * mult);
+      const earnedCoins = activeMission.coins;
+      const newXP=(prev.xp||0)+earnedXP;
+      const newCoins=(prev.coins||0)+earnedCoins;
       const prevCompleted=prev.completed_missions||[];
       const newCompleted=prevCompleted.includes(activeMission.id)?prevCompleted:[...prevCompleted,activeMission.id];
+
+      // ── Streak ─────────────────────────────────────────────────────────────
       let streak=prev.streak_days||0;
       const yesterday=new Date(Date.now()-86400000).toISOString().split("T")[0];
       if(prev.last_practice_date===today){}else if(prev.last_practice_date===yesterday)streak++;else streak=1;
       let dd=prev.daily_missions_done||0,ddate=prev.daily_date||"";
       if(ddate!==today){dd=0;ddate=today;}dd++;
+
+      // ── Weekly challenge progress ──────────────────────────────────────────
+      const wc=getWeeklyChallenge();
+      const weekNum=Math.floor(Date.now()/(7*24*60*60*1000)).toString();
+      const prevWP={...(player.weekly_progress||{})};
+      const prevWK=player.week_key||"";
+      let wp=prevWK===weekNum?{...prevWP}:{count:0,done:false};
+      if(!wp.done){
+        if(wc.type==="perfect"&&pct===100)wp.count=(wp.count||0)+1;
+        else if(wc.type==="boss"&&activeMission.isBoss)wp.count=(wp.count||0)+1;
+        else if(wc.type==="missions")wp.count=(wp.count||0)+1;
+        else if(wc.type==="mastery"&&masteryUpgrade&&(masteryUpgrade.id==="gold"||masteryUpgrade.id==="platinum"))wp.count=(wp.count||0)+1;
+        else if(wc.type==="shadow"&&activeMission.id?.startsWith("sh_"))wp.count=(wp.count||0)+1;
+        else if(wc.type==="streak"&&streak>=wc.target)wp.count=wc.target;
+        else if(wc.type==="all_sub"){const subs=wp.subs||[];const wId=activeMission._worldId||"";if(!subs.includes(wId))wp.subs=[...subs,wId];wp.count=(wp.subs||[]).length;}
+        if(wp.count>=wc.target&&!wp.done){
+          wp.done=true;
+          const bonusXP=Math.round(wc.xpBonus*mult);
+          const finalXP=newXP+bonusXP;
+          setTimeout(()=>setPopBadge({icon:wc.icon,name:"Weekly Complete! 🎉",desc:`+${bonusXP}XP bonus earned!`}),3000);
+        }
+      }
+
       if(activeMission.trick)setNewTrick(TRICKS[activeMission.trick]||null);
       const pb=[...(prev.badges||[])],badges=[...pb];
       const nl=calcLevel(newXP).level;
@@ -1558,12 +1706,18 @@ export default function App(){
       if(nl>=5&&!badges.includes("level_5"))badges.push("level_5");
       if(nl>=10&&!badges.includes("level_10"))badges.push("level_10");
       if(newCompleted.length>=10&&!badges.includes("ten_missions"))badges.push("ten_missions");
+      // Prestige badges
+      const prestigeCount=prev.prestige||0;
+      PRESTIGE_BADGES.forEach(pb2=>{const n=parseInt(pb2.id.split("_")[1]);if(prestigeCount>=n&&!badges.includes(pb2.id))badges.push(pb2.id);});
       const earned=badges.filter(b=>!pb.includes(b));
       const BDEFS={first_quest:{icon:"🎯",name:"First Quest",desc:"Complete your first mission"},streak_3:{icon:"🔥",name:"On Fire",desc:"3-day streak"},streak_7:{icon:"💎",name:"Diamond",desc:"7-day streak"},perfect:{icon:"⭐",name:"Flawless",desc:"100% score"},boss_slayer:{icon:"👹",name:"Boss Slayer",desc:"Defeat a Boss"},level_5:{icon:"🚀",name:"Rising Star",desc:"Reach Level 5"},level_10:{icon:"👑",name:"Champion",desc:"Reach Level 10"},ten_missions:{icon:"💯",name:"Veteran",desc:"Complete 10 missions"}};
-      if(earned.length>0){const b=BDEFS[earned[0]];if(b)setTimeout(()=>setPopBadge(b),2800);}
-      const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate};
+      if(earned.length>0){const b=BDEFS[earned[0]]||PRESTIGE_BADGES.find(x=>x.id===earned[0]);if(b)setTimeout(()=>setPopBadge(b),2800);}
+      if(masteryUpgrade&&masteryUpgrade.id!=="none"){
+        setTimeout(()=>setPopBadge({icon:masteryUpgrade.icon,name:`${masteryUpgrade.label} Star!`,desc:`${activeMission.name} — ${masteryUpgrade.label} mastery earned! +${masteryXPBonus}XP bonus`}),1500);
+      }
+      const data={xp:newXP,coins:newCoins,level:nl,streak_days:streak,last_practice_date:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,mastery:prevMastery,prestige:prev.prestige||0,prestige_mult:mult,weekly_progress:wp,week_key:weekNum,rival_bests:prevRivals};
       if(user) Progress.saveLocal(user.id, data);
-      setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate}));
+      setPlayer(p=>({...p,xp:newXP,coins:newCoins,streak,last_practice:today,completed_missions:newCompleted,badges,daily_missions_done:dd,daily_date:ddate,mastery:prevMastery,weekly_progress:wp,week_key:weekNum,rival_bests:prevRivals}));
       if(nl>curLevel)setTimeout(()=>SFX.levelup(),600);
     }catch(e){console.error(e);}
   }
@@ -1689,7 +1843,10 @@ export default function App(){
                   style={{flex:1,background:completed?"rgba(252,211,77,0.12)":unlocked?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.22)",borderRadius:18,padding:"14px 16px",cursor:unlocked?"pointer":"default",border:completed?"1px solid rgba(252,211,77,0.35)":mission.isBoss?"1px solid rgba(239,68,68,0.35)":"1px solid rgba(255,255,255,0.08)"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                     <div>
-                      <div style={{color:completed?"#FCD34D":unlocked?"white":"rgba(255,255,255,0.28)",fontWeight:800,fontSize:15,marginBottom:3}}>{mission.name}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:6}}>
+                        <div style={{color:completed?"#FCD34D":unlocked?"white":"rgba(255,255,255,0.28)",fontWeight:800,fontSize:15}}>{mission.name}</div>
+                        {(()=>{const ml=getMasteryLevel(mission.id,player.mastery);return ml.icon?<span style={{fontSize:13}} title={ml.label+" mastery"}>{ml.icon}</span>:null;})()}
+                      </div>
                       <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{mission.isBoss?"⏱ TIMED · ":""}{mission.questions}q · +{mission.xp}XP · 🪙{mission.coins}</div>
                     </div>
                     {unlocked&&!completed&&<span style={{color:mission.isBoss?"#EF4444":"#FCD34D",fontSize:20}}>▶</span>}
@@ -1724,7 +1881,7 @@ export default function App(){
         {Object.entries(TRICKS).map(([id,trick],i)=>{
           const missionId=WORLDS.flatMap(w=>w.missions).find(m=>m.trick===id)?.id;
           const unlocked=missionId?player.completed_missions.includes(missionId):false;
-          const world=WORLDS.find(w=>w.id===trick.subject);
+          const world=[...WORLDS,...SHADOW_WORLDS].find(w=>w.id===trick.subject);
           return(
             <div key={id} style={{background:unlocked?"rgba(255,255,255,0.07)":"rgba(0,0,0,0.28)",borderRadius:18,padding:"16px",marginBottom:10,border:unlocked?"1px solid rgba(252,211,77,0.22)":"1px solid rgba(255,255,255,0.05)",animation:`slideUp ${0.05+i*0.04}s ease`}}>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:unlocked?10:0}}>
@@ -1752,6 +1909,87 @@ export default function App(){
   // ── SCHOOLS ────────────────────────────────────────────────────────────────
   if(screen==="schools")return <SchoolsScreen goTo={goTo}/>;
 
+
+
+  // ── PRESTIGE SCREEN ───────────────────────────────────────────────────────
+  if(screen==="prestige"){
+    const allDone = getAllWorlds(player).every(w=>w.missions.every(m=>isCompleted(m.id)));
+    const regularDone = WORLDS.every(w=>w.missions.every(m=>isCompleted(m.id)));
+    const prestigeCount = player.prestige||0;
+    const nextMult = getPrestigeMultiplier(prestigeCount+1);
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#1a003d,#3b0082)"}}>
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+          <div style={{padding:"14px 0 8px",display:"flex",alignItems:"center",gap:12}}>
+            <button onClick={()=>goTo("home")} style={{background:"rgba(255,255,255,0.12)",border:"none",color:"white",fontWeight:700,fontSize:12,borderRadius:20,padding:"7px 12px",cursor:"pointer"}}>← Back</button>
+            <h2 style={{color:"white",fontWeight:900,fontSize:20,margin:0}}>🔁 Prestige Rebirth</h2>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.07)",borderRadius:20,padding:"20px",marginBottom:16,textAlign:"center",border:"1px solid rgba(168,85,247,0.4)"}}>
+            <div style={{fontSize:52,marginBottom:8}}>🌟</div>
+            <h3 style={{color:"white",fontWeight:900,fontSize:22,margin:"0 0 8px"}}>Prestige {prestigeCount>0?`× ${prestigeCount}`:""}</h3>
+            <p style={{color:"rgba(255,255,255,0.6)",fontSize:14,margin:"0 0 16px"}}>
+              Reset your missions and start fresh — but keep your XP, coins, badges, and tricks.
+              All future XP is multiplied!
+            </p>
+            <div style={{display:"flex",gap:10,justifyContent:"center",marginBottom:20,flexWrap:"wrap"}}>
+              <div style={{background:"rgba(252,211,77,0.1)",border:"1px solid rgba(252,211,77,0.3)",borderRadius:14,padding:"12px 20px",textAlign:"center"}}>
+                <div style={{color:"#FCD34D",fontWeight:900,fontSize:24}}>×{getPrestigeMultiplier(prestigeCount)}</div>
+                <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>Current XP mult</div>
+              </div>
+              <div style={{background:"rgba(168,85,247,0.15)",border:"1px solid rgba(168,85,247,0.4)",borderRadius:14,padding:"12px 20px",textAlign:"center"}}>
+                <div style={{color:"#A855F7",fontWeight:900,fontSize:24}}>×{nextMult}</div>
+                <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>After prestige</div>
+              </div>
+            </div>
+            <div style={{background:"rgba(0,0,0,0.3)",borderRadius:14,padding:"14px",marginBottom:16,textAlign:"left"}}>
+              <div style={{color:"#4ADE80",fontWeight:800,fontSize:13,marginBottom:8}}>✅ You KEEP:</div>
+              {["XP & Level","Coins","All Badges","All Tricks","Mastery stars"].map(x=><div key={x} style={{color:"rgba(255,255,255,0.7)",fontSize:12,marginBottom:4}}>• {x}</div>)}
+              <div style={{color:"#EF4444",fontWeight:800,fontSize:13,margin:"10px 0 8px"}}>🔄 RESET:</div>
+              {["Mission completions (replay everything!)","Daily challenge progress","Weekly challenge progress"].map(x=><div key={x} style={{color:"rgba(255,255,255,0.5)",fontSize:12,marginBottom:4}}>• {x}</div>)}
+            </div>
+            {!regularDone?(
+              <div style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:12,padding:"12px",marginBottom:12}}>
+                <div style={{color:"#EF4444",fontWeight:700,fontSize:13}}>🔒 Complete all regular worlds first!</div>
+                <div style={{color:"rgba(255,255,255,0.5)",fontSize:12,marginTop:4}}>Finish every mission in all 10 worlds to unlock Prestige.</div>
+              </div>
+            ):(
+              <button onClick={()=>{
+                if(!window.confirm(`Prestige ${prestigeCount+1}? Your missions reset, but you keep XP, coins and badges. XP mult becomes ×${nextMult}!`)) return;
+                const newPrestige = prestigeCount+1;
+                const newMult = getPrestigeMultiplier(newPrestige);
+                const badges=[...(player.badges||[])];
+                PRESTIGE_BADGES.forEach(pb=>{const n=parseInt(pb.id.split("_")[1]);if(newPrestige>=n&&!badges.includes(pb.id))badges.push(pb.id);});
+                const newPlayer={...player,completed_missions:[],daily_missions_done:0,daily_date:"",weekly_progress:{},week_key:"",prestige:newPrestige,prestige_mult:newMult,badges};
+                setPlayer(newPlayer);
+                if(user){const d={...newPlayer,streak_days:newPlayer.streak,last_practice_date:newPlayer.last_practice};Progress.saveLocal(user.id,d);}
+                SFX.levelup();
+                setTimeout(()=>setPopBadge({icon:"🔁",name:`Prestige ${newPrestige}!`,desc:`×${newMult} XP multiplier active — you legend.`}),500);
+                goTo("home");
+              }} style={{width:"100%",padding:"16px",borderRadius:16,border:"none",background:"linear-gradient(135deg,#7C3AED,#A855F7)",color:"white",fontWeight:900,fontSize:16,cursor:"pointer",fontFamily:"inherit",animation:"pulse 2s infinite"}}>
+                🔁 PRESTIGE NOW → ×{nextMult} XP
+              </button>
+            )}
+          </div>
+          <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"16px"}}>
+            <div style={{color:"rgba(255,255,255,0.5)",fontSize:12,fontWeight:700,marginBottom:10,textTransform:"uppercase",letterSpacing:"1px"}}>Prestige History</div>
+            {prestigeCount===0
+              ? <div style={{color:"rgba(255,255,255,0.3)",fontSize:13,textAlign:"center"}}>No prestiges yet. Complete all worlds!</div>
+              : Array.from({length:prestigeCount}).map((_,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                  <span style={{fontSize:22}}>🔁</span>
+                  <div>
+                    <div style={{color:"white",fontWeight:700,fontSize:14}}>Prestige {i+1}</div>
+                    <div style={{color:"rgba(255,255,255,0.4)",fontSize:12}}>×{getPrestigeMultiplier(i+1)} XP multiplier</div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+        <BottomNav screen={screen} goTo={goTo}/>
+      </div>
+    );
+  }
 
 
   // ── HOME ───────────────────────────────────────────────────────────────────
@@ -1814,6 +2052,49 @@ export default function App(){
           </div>
         </div>
 
+        {/* Weekly Challenge */}
+        {(()=>{
+          const wc=getWeeklyChallenge();
+          const weekNum=Math.floor(Date.now()/(7*24*60*60*1000)).toString();
+          const wp=player.week_key===weekNum?player.weekly_progress:{count:0,done:false};
+          const prog=Math.min(wp.count||0,wc.target);
+          const pct=Math.round((prog/wc.target)*100);
+          return(
+            <div style={{background:"linear-gradient(135deg,rgba(99,102,241,0.14),rgba(168,85,247,0.14))",border:"1px solid rgba(99,102,241,0.28)",borderRadius:18,padding:"14px 16px",marginBottom:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <div>
+                  <div style={{color:"#A78BFA",fontWeight:800,fontSize:11,textTransform:"uppercase",letterSpacing:"1px",marginBottom:3}}>📅 Weekly Challenge</div>
+                  <div style={{color:"white",fontWeight:800,fontSize:15}}>{wc.icon} {wc.name}</div>
+                  <div style={{color:"rgba(255,255,255,0.55)",fontSize:12,marginTop:2}}>{wc.desc}</div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0,marginLeft:10}}>
+                  <div style={{color:"#A78BFA",fontWeight:900,fontSize:15}}>+{wc.xpBonus}XP</div>
+                  {wp.done&&<div style={{color:"#4ADE80",fontSize:11,fontWeight:700,marginTop:2}}>✅ Done!</div>}
+                </div>
+              </div>
+              <div style={{height:5,background:"rgba(255,255,255,0.12)",borderRadius:3,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#A78BFA,#7C3AED)",borderRadius:3,transition:"width 0.8s"}}/>
+              </div>
+              <div style={{color:"rgba(255,255,255,0.4)",fontSize:11,marginTop:4}}>{prog}/{wc.target}</div>
+            </div>
+          );
+        })()}
+
+        {/* Prestige CTA — only show when all worlds done */}
+        {WORLDS.every(w=>w.missions.every(m=>isCompleted(m.id)))&&(
+          <div onClick={()=>goTo("prestige")} style={{background:"linear-gradient(135deg,rgba(124,58,237,0.3),rgba(168,85,247,0.2))",border:"1px solid rgba(168,85,247,0.5)",borderRadius:18,padding:"14px 16px",marginBottom:16,cursor:"pointer",animation:"pulse 3s infinite"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:36}}>🔁</span>
+              <div style={{flex:1}}>
+                <div style={{color:"#A855F7",fontWeight:900,fontSize:14}}>🌟 PRESTIGE AVAILABLE!</div>
+                <div style={{color:"white",fontWeight:700,fontSize:15}}>You've conquered all worlds!</div>
+                <div style={{color:"rgba(255,255,255,0.55)",fontSize:12}}>Prestige → reset missions, keep XP, earn ×{getPrestigeMultiplier((player.prestige||0)+1)} XP multiplier</div>
+              </div>
+              <span style={{color:"#A855F7",fontSize:20}}>→</span>
+            </div>
+          </div>
+        )}
+
         {/* Age-grouped Adventure Map */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div style={{color:"white",fontWeight:900,fontSize:18}}>🗺 Adventure Map</div>
@@ -1821,7 +2102,8 @@ export default function App(){
         </div>
 
         {AGE_GROUPS.map(ag=>{
-          const groupWorlds = WORLDS.filter(w=>w.ageGroup===ag.id);
+          const shadowLocked = ag.isShadow && !WORLDS.every(w=>w.missions.every(m=>isCompleted(m.id)));
+          const groupWorlds = getAllWorlds(player).filter(w=>w.ageGroup===ag.id);
           return(
             <div key={ag.id} style={{marginBottom:24}}>
               {/* Age group header */}
@@ -1832,7 +2114,9 @@ export default function App(){
                   <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{ag.desc}</div>
                 </div>
                 <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"3px 10px"}}>
-                  <span style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{groupWorlds.length} worlds</span>
+                  {ag.isShadow && shadowLocked
+                    ? <span style={{color:"#EF4444",fontSize:11}}>🔒 Complete all worlds first</span>
+                    : <span style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{groupWorlds.length} worlds</span>}
                 </div>
               </div>
               {/* World cards for this age group */}
