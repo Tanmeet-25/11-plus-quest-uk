@@ -51,9 +51,23 @@
       "enum": [
         "none",
         "trial",
-        "active",
+        "monthly",
+        "annual",
+        "promo",
         "cancelled"
       ]
+    },
+    "subscription_start": {
+      "type": "string"
+    },
+    "subscription_end": {
+      "type": "string"
+    },
+    "subscription_plan": {
+      "type": "string"
+    },
+    "promo_used": {
+      "type": "boolean"
     }
   },
   "required": [],

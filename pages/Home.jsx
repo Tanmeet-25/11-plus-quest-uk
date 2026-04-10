@@ -1,6 +1,6 @@
 // v8.0 - ONBOARDING + AGE GROUPS 3-4, 4-7 + ROLE-BASED FLOW + FRIENDLY HOME SCREEN
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User } from "@/api/entities";
+import { User, UserProgress } from "@/api/entities";
 
 // ─── LOCAL STORAGE HELPERS ────────────────────────────────────────────────────
 const LS = {
@@ -1100,7 +1100,7 @@ function SchoolsScreen({goTo}) {
 }
 
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"prestige",icon:"🔁",label:"Prestige"},{id:"schools",icon:"🏫",label:"Schools"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"schools",icon:"🏫",label:"Schools"},{id:"account",icon:"👤",label:"Account"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
@@ -1867,14 +1867,28 @@ export default function App(){
   // ── Base44 SDK auth ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [subRecord, setSubRecord] = useState(null);
+  const [subLoading, setSubLoading] = useState(false);
 
   // Load current user on mount
   useEffect(()=>{
-    User.me().then(u=>{ setUser(u); }).catch(()=>{ setUser(null); }).finally(()=>setAuthLoading(false));
+    User.me().then(async u=>{
+      setUser(u);
+      if(u){ const sub = await loadSubStatus(u.id); setSubRecord(sub); }
+    }).catch(()=>{ setUser(null); }).finally(()=>setAuthLoading(false));
   },[]);
+
+  async function refreshSub(uid){
+    setSubLoading(true);
+    const sub = await loadSubStatus(uid||user?.id);
+    setSubRecord(sub);
+    setSubLoading(false);
+  }
 
   function handleAuthSuccess(u){
     setUser(u);
+    // Load subscription status
+    loadSubStatus(u.id).then(sub=>setSubRecord(sub));
     // Load local progress keyed by user id
     const local = Progress.getLocal(u.id);
     setPlayer({xp:local.xp||0, coins:local.coins||0, streak:local.streak_days||0, last_practice:local.last_practice_date||"",
@@ -1889,6 +1903,7 @@ export default function App(){
   async function logout(){
     await User.logout();
     setUser(null);
+    setSubRecord(null);
     setPlayer({xp:0,coins:0,streak:0,last_practice:"",completed_missions:[],badges:[],daily_missions_done:0,daily_date:""});
   }
 
@@ -2360,6 +2375,39 @@ export default function App(){
   }
 
 
+  // ── AUTH GATE: require login ─────────────────────────────────────────────────
+  if(authLoading || subLoading){
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:52,marginBottom:12,animation:"pulse 1s infinite"}}>🎓</div>
+          <div style={{color:"white",fontWeight:700,fontSize:16}}>Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Must be logged in
+  if(!user){
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63,#24243e)"}}>
+        <AuthModal onClose={()=>{}} onAuthSuccess={handleAuthSuccess} canClose={false}/>
+      </div>
+    );
+  }
+
+  // Must have active subscription
+  if(!isSubActive(subRecord)){
+    return(
+      <SubscriptionScreen
+        user={user}
+        subRecord={subRecord}
+        onActivated={()=>refreshSub(user.id)}
+        onLogout={logout}
+      />
+    );
+  }
+
   // ── HOME ───────────────────────────────────────────────────────────────────
   const isYoungMode = profile?.ageGroup==="toddler"||profile?.ageGroup==="early";
   const homeBg = isYoungMode
@@ -2379,11 +2427,7 @@ export default function App(){
           <div style={{display:"flex",alignItems:"center",gap:6}}>
             <div style={{background:"rgba(252,211,77,0.15)",border:"1px solid rgba(252,211,77,0.35)",borderRadius:10,padding:"4px 9px",fontSize:isYoungMode?13:12,fontWeight:800,color:"#FCD34D"}}>🪙{player.coins}</div>
             <div style={{background:"rgba(249,115,22,0.15)",border:"1px solid rgba(249,115,22,0.35)",borderRadius:10,padding:"4px 9px",fontSize:isYoungMode?13:12,fontWeight:800,color:"#F97316"}}>🔥{player.streak}</div>
-            {user?(
               <div onClick={()=>goTo("progress")} title="My Progress" style={{width:33,height:33,borderRadius:"50%",background:curRank.colour,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:15,border:"2px solid rgba(255,255,255,0.25)"}}>{curRank.icon}</div>
-            ):(
-              <button onClick={()=>setShowAuth(true)} style={{padding:"7px 12px",borderRadius:10,background:"#4F46E5",color:"white",fontWeight:700,fontSize:12,border:"none",cursor:"pointer",fontFamily:"inherit"}}>Sign In</button>
-            )}
           </div>
         </div>
       </div>
@@ -2517,7 +2561,7 @@ export default function App(){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <div style={{color:"white",fontWeight:900,fontSize:18}}>🗺 Adventure Map</div>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            {!user&&<button onClick={()=>setShowAuth(true)} style={{padding:"5px 12px",borderRadius:16,background:"rgba(79,70,229,0.5)",border:"1px solid rgba(99,102,241,0.4)",color:"white",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Save progress →</button>}
+            {user&&<span style={{padding:"4px 10px",borderRadius:16,background:"rgba(79,70,229,0.3)",border:"1px solid rgba(99,102,241,0.3)",color:"rgba(255,255,255,0.6)",fontSize:11,fontWeight:700}}>{subRecord?.subscription==="trial"?"🆓 Trial":subRecord?.subscription==="annual"?"🏆 Annual":subRecord?.subscription==="promo"?"🎟 Promo":"✅ Active"}</span>}
           </div>
         </div>
 
