@@ -2475,6 +2475,25 @@ export default function App(){
 
   // ── SCHOOLS ────────────────────────────────────────────────────────────────
   if(screen==="account"){
+    const [acctPromo, setAcctPromo] = useState("");
+    const [acctPromoErr, setAcctPromoErr] = useState("");
+    const [acctPromoOk, setAcctPromoOk] = useState(false);
+    const [acctPromoLoading, setAcctPromoLoading] = useState(false);
+
+    async function handleAcctPromo(e){
+      e.preventDefault();
+      setAcctPromoErr("");
+      setAcctPromoLoading(true);
+      if(acctPromo.trim().toLowerCase()=== PROMO_CODE.toLowerCase()){
+        const ok = await activateSubscription(user.id, "promo", true);
+        if(ok){ setAcctPromoOk(true); await refreshSub(user.id); }
+        else setAcctPromoErr("Something went wrong. Try again.");
+      } else {
+        setAcctPromoErr("❌ Invalid promo code.");
+      }
+      setAcctPromoLoading(false);
+    }
+
     const subPlanLabel = subRecord?.subscription==="trial"?"Free Trial":subRecord?.subscription==="monthly"?"Monthly (£1.99/mo)":subRecord?.subscription==="annual"?"Annual (£19.99/yr)":subRecord?.subscription==="promo"?"Promo Code (1 Month Free)":"No active plan";
     const subEndStr = subRecord?.subscription_end ? new Date(subRecord.subscription_end).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}) : "—";
     return(
@@ -2533,6 +2552,20 @@ export default function App(){
               </div>
             </div>
           )}
+          <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"20px",marginBottom:14}}>
+            <div style={{color:"rgba(255,255,255,0.5)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",marginBottom:12}}>🎟 Promo Code</div>
+            {acctPromoOk ? (
+              <div style={{textAlign:"center",padding:"10px 0",color:"#4ADE80",fontWeight:800,fontSize:15}}>🎉 Code applied! 1 month free unlocked.</div>
+            ) : (
+              <form onSubmit={handleAcctPromo} style={{display:"flex",flexDirection:"column",gap:8}}>
+                <input value={acctPromo} onChange={e=>setAcctPromo(e.target.value)} placeholder="Enter promo code..." style={{width:"100%",padding:"12px",borderRadius:12,border:"2px solid rgba(255,255,255,0.15)",fontSize:13,background:"rgba(255,255,255,0.08)",color:"white",boxSizing:"border-box",fontFamily:"inherit",outline:"none",textAlign:"center"}}/>
+                {acctPromoErr&&<div style={{color:"#FCA5A5",fontSize:12,fontWeight:600,textAlign:"center"}}>{acctPromoErr}</div>}
+                <button type="submit" disabled={acctPromoLoading||!acctPromo.trim()} style={{padding:"12px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit",opacity:(acctPromoLoading||!acctPromo.trim())?"0.6":"1"}}>
+                  {acctPromoLoading?"⏳ Checking...":"Redeem 🎁"}
+                </button>
+              </form>
+            )}
+          </div>
           <button onClick={logout} style={{width:"100%",padding:"14px",borderRadius:16,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.08)",color:"#FCA5A5",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>
             🚪 Sign Out
           </button>
