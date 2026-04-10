@@ -1283,7 +1283,7 @@ function SchoolsScreen({goTo}) {
 }
 
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"tricks",icon:"🔑",label:"Tricks"},{id:"schools",icon:"🏫",label:"Schools"},{id:"account",icon:"👤",label:"Account"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"schools",icon:"🏫",label:"Schools"},{id:"account",icon:"👤",label:"Account"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
