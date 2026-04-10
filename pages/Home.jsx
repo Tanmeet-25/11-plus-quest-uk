@@ -886,8 +886,192 @@ const DAILY=[
   {name:"Weekend Warrior", icon:"⚔️",desc:"Beat any Boss Battle",          xpBonus:150,coins:60},
 ];
 
+// ─── SUBSCRIPTION HELPERS ────────────────────────────────────────────────────
+const PROMO_CODE = "ifyouknowthecodeyouhavetoknowjay";
+
+async function loadSubStatus(userId) {
+  try {
+    const records = await UserProgress.filter({ user_id: userId });
+    if (records && records.length > 0) return records[0];
+    return null;
+  } catch(e) { console.error(e); return null; }
+}
+
+function isSubActive(subRecord) {
+  if (!subRecord) return false;
+  const status = subRecord.subscription;
+  if (!status || status === "none" || status === "cancelled") return false;
+  if (subRecord.subscription_end) {
+    const end = new Date(subRecord.subscription_end);
+    if (end < new Date()) return false;
+  }
+  return true;
+}
+
+async function activateSubscription(userId, plan, promoUsed=false) {
+  const now = new Date();
+  let endDate = new Date(now);
+  if (plan === "trial" || plan === "monthly" || plan === "promo") endDate.setMonth(endDate.getMonth() + 1);
+  else if (plan === "annual") endDate.setFullYear(endDate.getFullYear() + 1);
+  const data = {
+    user_id: userId,
+    subscription: plan,
+    subscription_start: now.toISOString(),
+    subscription_end: endDate.toISOString(),
+    subscription_plan: plan,
+    promo_used: promoUsed,
+  };
+  try {
+    const existing = await UserProgress.filter({ user_id: userId });
+    if (existing && existing.length > 0) {
+      await UserProgress.update(existing[0].id, data);
+    } else {
+      await UserProgress.create({ ...data, xp:0, coins:0, streak_days:0, completed_missions:[], badges:[] });
+    }
+    return true;
+  } catch(e) { console.error(e); return false; }
+}
+
+// ─── PAYWALL / SUBSCRIPTION SCREEN ───────────────────────────────────────────
+function SubscriptionScreen({ user, subRecord, onActivated, onLogout }) {
+  const [tab, setTab] = useState("plans");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoSuccess, setPromoSuccess] = useState(false);
+  const [activating, setActivating] = useState(null);
+
+  const trialUsed = subRecord && subRecord.subscription && subRecord.subscription !== "none" && subRecord.subscription !== "cancelled";
+
+  async function handlePromo(e) {
+    e.preventDefault();
+    setPromoError("");
+    setPromoLoading(true);
+    if (promoCode.trim().toLowerCase() === PROMO_CODE.toLowerCase()) {
+      const ok = await activateSubscription(user.id, "promo", true);
+      if (ok) { setPromoSuccess(true); setTimeout(() => onActivated(), 1500); }
+      else setPromoError("Something went wrong. Please try again.");
+    } else {
+      setPromoError("❌ Invalid promo code. Try again!");
+    }
+    setPromoLoading(false);
+  }
+
+  async function handlePlan(plan) {
+    setActivating(plan);
+    const ok = await activateSubscription(user.id, plan, false);
+    if (ok) setTimeout(() => onActivated(), 800);
+    else setActivating(null);
+  }
+
+  return (
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63,#24243e)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 16px"}}>
+      <div style={{width:"100%",maxWidth:420}}>
+        <div style={{textAlign:"center",marginBottom:28}}>
+          <div style={{fontSize:52,marginBottom:4}}>🎓</div>
+          <div style={{color:"#FCD34D",fontWeight:900,fontSize:28,letterSpacing:"-0.5px"}}>11+ Quest</div>
+          <div style={{color:"rgba(255,255,255,0.55)",fontSize:13,marginTop:4}}>Unlock your full adventure</div>
+        </div>
+        <div style={{display:"flex",background:"rgba(255,255,255,0.07)",borderRadius:16,padding:4,marginBottom:20,gap:4}}>
+          <button onClick={()=>{setTab("plans");setPromoError("");}} style={{flex:1,padding:"10px 0",borderRadius:12,border:"none",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit",background:tab==="plans"?"white":"transparent",color:tab==="plans"?"#1e1b4b":"rgba(255,255,255,0.6)",transition:"all 0.2s"}}>💳 Plans</button>
+          <button onClick={()=>{setTab("promo");setPromoError("");}} style={{flex:1,padding:"10px 0",borderRadius:12,border:"none",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit",background:tab==="promo"?"#FCD34D":"transparent",color:tab==="promo"?"#1e1b4b":"rgba(255,255,255,0.6)",transition:"all 0.2s"}}>🎟 Promo Code</button>
+        </div>
+        {tab === "plans" && (
+          <div style={{animation:"slideUp 0.3s ease"}}>
+            {!trialUsed && (
+              <div style={{background:"linear-gradient(135deg,rgba(5,150,105,0.25),rgba(16,185,129,0.15))",border:"2px solid rgba(5,150,105,0.5)",borderRadius:20,padding:"20px 18px",marginBottom:14,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:12,right:14,background:"#059669",color:"white",fontWeight:800,fontSize:10,borderRadius:20,padding:"3px 10px",textTransform:"uppercase",letterSpacing:"1px"}}>FREE</div>
+                <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+                  <span style={{fontSize:32}}>🆓</span>
+                  <div>
+                    <div style={{color:"white",fontWeight:900,fontSize:17}}>1 Month Free Trial</div>
+                    <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>Full access — no card needed</div>
+                  </div>
+                </div>
+                <div style={{fontSize:11,color:"rgba(255,255,255,0.45)",marginBottom:14}}>Access all 10 worlds, boss battles, and challenges</div>
+                <button onClick={()=>handlePlan("trial")} disabled={!!activating} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#059669,#10B981)",color:"white",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit",opacity:activating?"0.7":"1"}}>
+                  {activating==="trial"?"⏳ Activating...":"Start Free Trial 🚀"}
+                </button>
+              </div>
+            )}
+            <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:20,padding:"20px 18px",marginBottom:14}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <span style={{fontSize:28}}>📅</span>
+                  <div>
+                    <div style={{color:"white",fontWeight:900,fontSize:16}}>Monthly</div>
+                    <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>Cancel anytime</div>
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{color:"#FCD34D",fontWeight:900,fontSize:22}}>£1.99</div>
+                  <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>/month</div>
+                </div>
+              </div>
+              <button onClick={()=>handlePlan("monthly")} disabled={!!activating} style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid rgba(252,211,77,0.5)",background:"transparent",color:"#FCD34D",fontWeight:800,fontSize:14,cursor:"pointer",fontFamily:"inherit",opacity:activating?"0.7":"1"}}>
+                {activating==="monthly"?"⏳ Activating...":"Subscribe Monthly →"}
+              </button>
+            </div>
+            <div style={{background:"linear-gradient(135deg,rgba(79,70,229,0.25),rgba(124,58,237,0.2))",border:"2px solid rgba(99,102,241,0.5)",borderRadius:20,padding:"20px 18px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:12,right:14,background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:10,borderRadius:20,padding:"3px 10px",textTransform:"uppercase",letterSpacing:"1px"}}>BEST VALUE</div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <span style={{fontSize:28}}>🏆</span>
+                  <div>
+                    <div style={{color:"white",fontWeight:900,fontSize:16}}>Annual</div>
+                    <div style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>Save ~16% vs monthly</div>
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{color:"#A78BFA",fontWeight:900,fontSize:22}}>£19.99</div>
+                  <div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>/year</div>
+                </div>
+              </div>
+              <button onClick={()=>handlePlan("annual")} disabled={!!activating} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#4F46E5,#7C3AED)",color:"white",fontWeight:800,fontSize:14,cursor:"pointer",fontFamily:"inherit",opacity:activating?"0.7":"1"}}>
+                {activating==="annual"?"⏳ Activating...":"Get Annual Access →"}
+              </button>
+            </div>
+            <div style={{textAlign:"center",color:"rgba(255,255,255,0.3)",fontSize:11,marginBottom:16}}>
+              By subscribing you agree to our terms. Cancel anytime.
+            </div>
+          </div>
+        )}
+        {tab === "promo" && (
+          <div style={{animation:"slideUp 0.3s ease"}}>
+            <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:20,padding:"24px 20px",marginBottom:16}}>
+              <div style={{textAlign:"center",marginBottom:18}}>
+                <div style={{fontSize:40,marginBottom:8}}>🎟</div>
+                <div style={{color:"white",fontWeight:900,fontSize:17,marginBottom:4}}>Have a promo code?</div>
+                <div style={{color:"rgba(255,255,255,0.5)",fontSize:13}}>Enter it below to unlock 1 month free</div>
+              </div>
+              {promoSuccess ? (
+                <div style={{textAlign:"center",padding:"20px 0"}}>
+                  <div style={{fontSize:52,marginBottom:8,animation:"starBurst 0.6s ease"}}>🎉</div>
+                  <div style={{color:"#4ADE80",fontWeight:900,fontSize:18}}>Code accepted!</div>
+                  <div style={{color:"rgba(255,255,255,0.6)",fontSize:13,marginTop:4}}>1 month free access unlocked ✨</div>
+                </div>
+              ) : (
+                <form onSubmit={handlePromo}>
+                  <input value={promoCode} onChange={e=>setPromoCode(e.target.value)} placeholder="Enter promo code..." style={{width:"100%",padding:"14px",borderRadius:12,border:"2px solid rgba(255,255,255,0.2)",fontSize:14,background:"rgba(255,255,255,0.08)",color:"white",boxSizing:"border-box",fontFamily:"inherit",marginBottom:10,outline:"none",textAlign:"center",letterSpacing:"1px"}}/>
+                  {promoError && <div style={{background:"rgba(220,38,38,0.15)",borderRadius:10,padding:"10px 12px",marginBottom:10,color:"#FCA5A5",fontSize:13,fontWeight:600,textAlign:"center"}}>{promoError}</div>}
+                  <button type="submit" disabled={promoLoading||!promoCode.trim()} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#FCD34D,#F59E0B)",color:"#1e1b4b",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit",opacity:(promoLoading||!promoCode.trim())?"0.6":"1"}}>
+                    {promoLoading?"⏳ Checking...":"Redeem Code 🎁"}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+        <div style={{textAlign:"center"}}>
+          <button onClick={onLogout} style={{background:"none",border:"none",color:"rgba(255,255,255,0.3)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Sign out</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── AUTH MODAL ───────────────────────────────────────────────────────────────
-function AuthModal({onClose, onAuthSuccess}){
+function AuthModal({onClose, onAuthSuccess, canClose=true}){
   const [mode,setMode]=useState("login");
   const [email,setEmail]=useState("");
   const [password,setPass]=useState("");
@@ -905,7 +1089,7 @@ function AuthModal({onClose, onAuthSuccess}){
       }
       const me = await User.me();
       onAuthSuccess(me);
-      onClose();
+      if(canClose) onClose();
     } catch(err){
       setError(err?.response?.data?.detail || err?.message || "Something went wrong. Please try again.");
     } finally{setLoading(false);}
@@ -915,7 +1099,6 @@ function AuthModal({onClose, onAuthSuccess}){
     setLoading(true);
     try{
       await User.loginWithGoogle();
-      // Page will reload after OAuth redirect
     } catch(err){
       setError(err?.message||"Google sign-in failed.");
       setLoading(false);
@@ -923,14 +1106,14 @@ function AuthModal({onClose, onAuthSuccess}){
   }
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:2000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
       <div style={{background:"white",borderRadius:24,padding:"28px 24px",width:"100%",maxWidth:380,boxShadow:"0 24px 80px rgba(0,0,0,0.5)",animation:"popIn 0.3s ease"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div>
             <h2 style={{margin:0,fontSize:20,fontWeight:900,color:"#1e1b4b"}}>{mode==="login"?"Welcome back! 🎮":"Join the Quest! 🎓"}</h2>
             <p style={{margin:"4px 0 0",fontSize:12,color:"#6b7280"}}>{mode==="login"?"Continue your adventure":"Create your free account"}</p>
           </div>
-          <button onClick={onClose} style={{background:"#f3f4f6",border:"none",width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          {canClose&&<button onClick={onClose} style={{background:"#f3f4f6",border:"none",width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>}
         </div>
         <button onClick={handleGoogle} disabled={loading} style={{width:"100%",padding:"13px",borderRadius:12,border:"2px solid #e5e7eb",fontSize:14,marginBottom:14,cursor:"pointer",fontFamily:"inherit",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"white"}}>
           <img src="https://www.google.com/favicon.ico" width={16} height={16} alt="G"/>
@@ -2290,6 +2473,74 @@ export default function App(){
   if(screen==="learn")return <LearnScreen goTo={goTo} player={player}/>;
 
   // ── SCHOOLS ────────────────────────────────────────────────────────────────
+  if(screen==="account"){
+    const subPlanLabel = subRecord?.subscription==="trial"?"Free Trial":subRecord?.subscription==="monthly"?"Monthly (£1.99/mo)":subRecord?.subscription==="annual"?"Annual (£19.99/yr)":subRecord?.subscription==="promo"?"Promo Code (1 Month Free)":"No active plan";
+    const subEndStr = subRecord?.subscription_end ? new Date(subRecord.subscription_end).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}) : "—";
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0f0c29,#302b63)"}}>
+        <div style={{maxWidth:520,margin:"0 auto",padding:"0 16px 100px"}}>
+          <div style={{padding:"20px 0 10px"}}>
+            <h2 style={{color:"white",fontWeight:900,fontSize:22,margin:0}}>👤 My Account</h2>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"20px",marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
+              <div style={{width:52,height:52,borderRadius:"50%",background:curRank.colour,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,border:"2px solid rgba(255,255,255,0.2)"}}>{curRank.icon}</div>
+              <div>
+                <div style={{color:"white",fontWeight:900,fontSize:17}}>{user?.full_name||user?.email?.split("@")[0]||"Explorer"}</div>
+                <div style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>{user?.email}</div>
+                <div style={{color:"rgba(255,255,255,0.45)",fontSize:11,marginTop:2}}>{curRank.title} · Level {curLevel}</div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+              <div style={{background:"rgba(255,255,255,0.06)",borderRadius:12,padding:"10px",textAlign:"center"}}>
+                <div style={{color:"#FCD34D",fontWeight:900,fontSize:18}}>{player.xp||0}</div>
+                <div style={{color:"rgba(255,255,255,0.4)",fontSize:10,marginTop:2}}>XP</div>
+              </div>
+              <div style={{background:"rgba(255,255,255,0.06)",borderRadius:12,padding:"10px",textAlign:"center"}}>
+                <div style={{color:"#F97316",fontWeight:900,fontSize:18}}>{player.streak||0}</div>
+                <div style={{color:"rgba(255,255,255,0.4)",fontSize:10,marginTop:2}}>Day Streak 🔥</div>
+              </div>
+              <div style={{background:"rgba(255,255,255,0.06)",borderRadius:12,padding:"10px",textAlign:"center"}}>
+                <div style={{color:"#4ADE80",fontWeight:900,fontSize:18}}>{player.completed_missions?.length||0}</div>
+                <div style={{color:"rgba(255,255,255,0.4)",fontSize:10,marginTop:2}}>Missions Done</div>
+              </div>
+            </div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"20px",marginBottom:14}}>
+            <div style={{color:"rgba(255,255,255,0.5)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",marginBottom:12}}>📋 Subscription</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{color:"rgba(255,255,255,0.6)",fontSize:13}}>Plan</span>
+              <span style={{color:"white",fontWeight:700,fontSize:13}}>{subPlanLabel}</span>
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <span style={{color:"rgba(255,255,255,0.6)",fontSize:13}}>Access until</span>
+              <span style={{color:"#4ADE80",fontWeight:700,fontSize:13}}>{subEndStr}</span>
+            </div>
+            <button onClick={()=>{setSubRecord(null);}} style={{width:"100%",padding:"12px",borderRadius:12,border:"1px solid rgba(99,102,241,0.4)",background:"rgba(79,70,229,0.15)",color:"#A78BFA",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+              🔄 Change Plan / Renew
+            </button>
+          </div>
+          {player.badges?.length>0&&(
+            <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"20px",marginBottom:14}}>
+              <div style={{color:"rgba(255,255,255,0.5)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",marginBottom:12}}>🏅 Badges ({player.badges.length})</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                {player.badges.map(b=>{
+                  const defs={first_quest:{icon:"🎯",name:"First Quest"},streak_3:{icon:"🔥",name:"On Fire"},streak_7:{icon:"💎",name:"Diamond"},perfect:{icon:"⭐",name:"Flawless"},boss_slayer:{icon:"👹",name:"Boss Slayer"},level_5:{icon:"🚀",name:"Rising Star"},level_10:{icon:"👑",name:"Champion"},ten_missions:{icon:"💯",name:"Veteran"}};
+                  const bd=defs[b]||{icon:"🏅",name:b};
+                  return <div key={b} style={{background:"rgba(255,255,255,0.08)",borderRadius:10,padding:"6px 10px",display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:16}}>{bd.icon}</span><span style={{color:"rgba(255,255,255,0.75)",fontSize:11,fontWeight:700}}>{bd.name}</span></div>;
+                })}
+              </div>
+            </div>
+          )}
+          <button onClick={logout} style={{width:"100%",padding:"14px",borderRadius:16,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.08)",color:"#FCA5A5",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>
+            🚪 Sign Out
+          </button>
+        </div>
+        <BottomNav screen={screen} goTo={goTo}/>
+      </div>
+    );
+  }
+
   if(screen==="schools")return <SchoolsScreen goTo={goTo}/>;
 
 
