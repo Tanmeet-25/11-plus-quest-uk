@@ -2051,6 +2051,7 @@ export default function App(){
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [subRecord, setSubRecord] = useState(null);
+  const [showSubScreen, setShowSubScreen] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
 
   // Load current user on mount
@@ -2516,7 +2517,7 @@ export default function App(){
               <span style={{color:"rgba(255,255,255,0.6)",fontSize:13}}>Access until</span>
               <span style={{color:"#4ADE80",fontWeight:700,fontSize:13}}>{subEndStr}</span>
             </div>
-            <button onClick={()=>{setSubRecord(null);}} style={{width:"100%",padding:"12px",borderRadius:12,border:"1px solid rgba(99,102,241,0.4)",background:"rgba(79,70,229,0.15)",color:"#A78BFA",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
+            <button onClick={()=>{setShowSubScreen(true);}} style={{width:"100%",padding:"12px",borderRadius:12,border:"1px solid rgba(99,102,241,0.4)",background:"rgba(79,70,229,0.15)",color:"#A78BFA",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>
               🔄 Change Plan / Renew
             </button>
           </div>
@@ -2648,12 +2649,12 @@ export default function App(){
   }
 
   // Must have active subscription
-  if(!isSubActive(subRecord)){
+  if(showSubScreen || !isSubActive(subRecord)){
     return(
       <SubscriptionScreen
         user={user}
         subRecord={subRecord}
-        onActivated={()=>refreshSub(user.id)}
+        onActivated={()=>{setShowSubScreen(false);refreshSub(user.id);}}
         onLogout={logout}
       />
     );
