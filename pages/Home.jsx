@@ -155,6 +155,98 @@ const QBANK={
       {q:"🔴🔵🔴🔵? What comes next?",vis:"🔴🔵🔴🔵 ❓",options:["🔴","🔵","🟡","🟢"],answer:"🔴",explanation:"Red Blue Red Blue → Red! 🔴"},
       {q:"🐘🐭 Which is bigger?",vis:"🐘 vs 🐭",options:["Elephant","Mouse","Same","Neither"],answer:"Elephant",explanation:"Elephant is the biggest! 🐘"},
     ],
+
+    "Toddler More Less":[
+      {q:"🍎🍎 vs 🍎🍎🍎 — Which group has MORE?",vis:"🍎🍎 OR 🍎🍎🍎",options:["Left (2)","Right (3)","Same","Can't tell"],answer:"Right (3)",explanation:"3 apples is more than 2! Always count to compare 🍎"},
+      {q:"Which number is MORE — 3 or 5?",vis:"3 ❓ 5",options:["3","5","Same","Neither"],answer:"5",explanation:"5 is more than 3! Bigger number = more"},
+      {q:"Which number is FEWER — 7 or 2?",vis:"7 ❓ 2",options:["7","2","Same","Both"],answer:"2",explanation:"2 is fewer than 7 — it's a smaller number!"},
+      {q:"🐶🐶🐶🐶 vs 🐶🐶 — Which has FEWER?",vis:"4 dogs vs 2 dogs",options:["4 dogs","2 dogs","Same","Both"],answer:"2 dogs",explanation:"2 is fewer than 4! ✅"},
+      {q:"⭐ vs ⭐⭐⭐ — Are these the SAME amount?",vis:"⭐ vs ⭐⭐⭐",options:["Yes","No — first is fewer","No — first is more","Can't tell"],answer:"No — first is fewer",explanation:"1 star is fewer than 3 stars!"},
+    ],
+    "Toddler Order":[
+      {q:"What comes FIRST — 1, 2 or 3?",vis:"1 → 2 → 3",options:["1","2","3","0"],answer:"1",explanation:"We always start counting at 1! 1️⃣"},
+      {q:"Put 3, 1, 2 in order. What is in the MIDDLE?",vis:"3 · 1 · 2 → order them",options:["1","2","3","0"],answer:"2",explanation:"Correct order is 1, 2, 3 — so 2 is in the middle!"},
+      {q:"What comes BETWEEN 2 and 4?",vis:"2 → ❓ → 4",options:["1","3","5","6"],answer:"3",explanation:"2, 3, 4 — 3 is between them! ✨"},
+      {q:"Which day comes LAST — Monday, Wednesday or Friday?",vis:"Mon · Wed · Fri",options:["Monday","Wednesday","Friday","Saturday"],answer:"Friday",explanation:"Mon → Wed → Fri — Friday comes last of these three!"},
+      {q:"🐣🐥🐓 What comes AFTER the chick 🐥?",vis:"🐣 → 🐥 → ❓",options:["🐓 Chicken","🐣 Egg","🦆 Duck","🐦 Bird"],answer:"🐓 Chicken",explanation:"The chick grows into a chicken! 🐓"},
+    ],
+    "Toddler Letters":[
+      {q:"What letter is this? A",vis:"A",options:["A","B","C","D"],answer:"A",explanation:"This is the letter A! The first letter of the alphabet 🅰️"},
+      {q:"What letter is this? B",vis:"B",options:["A","B","P","D"],answer:"B",explanation:"This is B! Like Ball and Bear 🐻"},
+      {q:"Which letter starts the word CAT 🐱?",vis:"C - A - T",options:["B","D","C","G"],answer:"C",explanation:"C-A-T — CAT starts with the letter C!"},
+      {q:"Which letter starts DOG 🐶?",vis:"D - O - G",options:["B","D","G","T"],answer:"D",explanation:"D-O-G — DOG starts with D!"},
+      {q:"What letter comes AFTER A in the alphabet?",vis:"A → ?",options:["C","Z","B","D"],answer:"B",explanation:"A, B, C... B always comes after A! 🅱️"},
+    ],
+    "Toddler Sounds":[
+      {q:"🐱 What sound does a cat make?",vis:"🐱",options:["Woof","Moo","Meow","Quack"],answer:"Meow",explanation:"Cats say MEOW! 🐾"},
+      {q:"🐮 What sound does a cow make?",vis:"🐮",options:["Baa","Moo","Oink","Roar"],answer:"Moo",explanation:"Cows say MOO! 🥛"},
+      {q:"🦆 What sound does a duck make?",vis:"🦆",options:["Tweet","Bark","Quack","Moo"],answer:"Quack",explanation:"Ducks say QUACK! 🌊"},
+      {q:"🦁 What sound does a lion make?",vis:"🦁",options:["Moo","Bark","Quack","Roar"],answer:"Roar",explanation:"Lions ROAR — they are the kings of the jungle! 👑"},
+      {q:"🐑 What sound does a sheep make?",vis:"🐑",options:["Moo","Baa","Woof","Oink"],answer:"Baa",explanation:"Sheep say BAA! 🌿"},
+    ],
+    "Toddler Words":[
+      {q:"🍌 What is this fruit?",vis:"🍌",options:["Apple","Orange","Banana","Grape"],answer:"Banana",explanation:"It's a Banana! Yellow and curved 🍌"},
+      {q:"🚗 What is this vehicle?",vis:"🚗",options:["Boat","Car","Plane","Bike"],answer:"Car",explanation:"It's a Car! Vroom vroom 🚗"},
+      {q:"🏠 What is this building?",vis:"🏠",options:["School","Shop","House","Church"],answer:"House",explanation:"It's a House — where a family lives! 🏠"},
+      {q:"🌳 What is this?",vis:"🌳",options:["Flower","Grass","Tree","Bush"],answer:"Tree",explanation:"It's a Tree — tall with leaves and a trunk! 🌳"},
+      {q:"🌙 What is this in the night sky?",vis:"🌙",options:["Sun","Star","Moon","Cloud"],answer:"Moon",explanation:"It's the Moon! We see it at night 🌙"},
+    ],
+    "Toddler Body":[
+      {q:"👁️ What body part is this?",vis:"👁️",options:["Ear","Eye","Nose","Mouth"],answer:"Eye",explanation:"These are our eyes — we use them to see! 👁️"},
+      {q:"What do we use to HEAR?",vis:"👂",options:["Eyes","Hands","Ears","Nose"],answer:"Ears",explanation:"We hear with our ears! 👂 Can you wiggle yours?"},
+      {q:"What do we use to SMELL?",vis:"👃",options:["Mouth","Nose","Eyes","Hands"],answer:"Nose",explanation:"We smell with our nose! 👃"},
+      {q:"How many fingers on ONE hand?",vis:"✋",options:["4","5","6","3"],answer:"5",explanation:"Count: 1,2,3,4,5 — 5 fingers on one hand! ✋"},
+      {q:"Where is your HEART?",vis:"❤️",options:["Head","Leg","Chest","Foot"],answer:"Chest",explanation:"Your heart is in your chest — put your hand there and feel it beat! ❤️"},
+    ],
+    "Toddler Feelings":[
+      {q:"😊 How does this face feel?",vis:"😊",options:["Sad","Angry","Happy","Scared"],answer:"Happy",explanation:"A big smile means HAPPY! 😊"},
+      {q:"😢 How does this face feel?",vis:"😢",options:["Happy","Sad","Excited","Calm"],answer:"Sad",explanation:"Tears mean SAD 😢 — it's OK to feel sad sometimes"},
+      {q:"😠 How does this face feel?",vis:"😠",options:["Happy","Sad","Angry","Sleepy"],answer:"Angry",explanation:"A scrunched, red face means ANGRY! 😠"},
+      {q:"😴 How does this face feel?",vis:"😴",options:["Excited","Sleepy","Angry","Sad"],answer:"Sleepy",explanation:"Closed eyes and Zzzs means SLEEPY! 😴"},
+      {q:"😲 How does this face feel?",vis:"😲",options:["Sad","Angry","Surprised","Calm"],answer:"Surprised",explanation:"Wide eyes and open mouth means SURPRISED! 😲"},
+    ],
+    "Toddler Food":[
+      {q:"🍎 What fruit is this?",vis:"🍎",options:["Banana","Apple","Orange","Grape"],answer:"Apple",explanation:"It's an Apple — red and crunchy! 🍎"},
+      {q:"🥕 What vegetable is this?",vis:"🥕",options:["Potato","Carrot","Pea","Bean"],answer:"Carrot",explanation:"It's a Carrot — rabbits love them! 🐰🥕"},
+      {q:"🍞 What is this?",vis:"🍞",options:["Cake","Biscuit","Bread","Cereal"],answer:"Bread",explanation:"It's Bread — great for sandwiches! 🥪"},
+      {q:"🥛 What drink is this?",vis:"🥛",options:["Juice","Water","Tea","Milk"],answer:"Milk",explanation:"It's Milk — from cows and good for your bones! 🐄"},
+      {q:"🍰 What is this?",vis:"🍰",options:["Pizza","Sandwich","Cake","Biscuit"],answer:"Cake",explanation:"It's Cake — yummy on birthdays! 🎂"},
+    ],
+    "Toddler Weather":[
+      {q:"☀️ What weather is this?",vis:"☀️",options:["Rainy","Cloudy","Sunny","Snowy"],answer:"Sunny",explanation:"A bright sun means SUNNY weather! ☀️"},
+      {q:"🌧️ What weather is this?",vis:"🌧️",options:["Sunny","Windy","Rainy","Foggy"],answer:"Rainy",explanation:"Water drops from clouds = RAIN! 🌧️"},
+      {q:"❄️ What weather is this?",vis:"❄️",options:["Hot","Rainy","Sunny","Snowy"],answer:"Snowy",explanation:"Snowflakes mean SNOWY weather! ⛄"},
+      {q:"🌬️ What weather is this?",vis:"🌬️",options:["Sunny","Windy","Rainy","Hot"],answer:"Windy",explanation:"Moving air means WINDY! 🌬️"},
+      {q:"What do you wear when it RAINS?",vis:"☔",options:["Sunglasses","Raincoat","Swimsuit","Scarf"],answer:"Raincoat",explanation:"A raincoat keeps you dry in the rain! ☔"},
+    ],
+    "Toddler Transport":[
+      {q:"✈️ What is this?",vis:"✈️",options:["Boat","Train","Plane","Car"],answer:"Plane",explanation:"It's a Plane — it flies in the sky! ✈️"},
+      {q:"🚂 What is this?",vis:"🚂",options:["Bus","Car","Train","Truck"],answer:"Train",explanation:"It's a Train — it goes on tracks! 🚂 Choo choo!"},
+      {q:"Which transport travels on WATER?",vis:"🚗 🚢 ✈️ 🚂",options:["Car","Boat","Plane","Train"],answer:"Boat",explanation:"Boats travel on water! 🌊🚢"},
+      {q:"🚌 What is this?",vis:"🚌",options:["Car","Taxi","Bus","Van"],answer:"Bus",explanation:"It's a Bus — it carries lots of people! 🚌"},
+      {q:"Which transport FLIES in the sky?",vis:"🚗 🚢 ✈️ 🚂",options:["Car","Boat","Plane","Train"],answer:"Plane",explanation:"Planes fly in the sky! ✈️"},
+    ],
+    "Toddler Days":[
+      {q:"What comes AFTER Monday?",vis:"Monday → ❓",options:["Sunday","Wednesday","Tuesday","Thursday"],answer:"Tuesday",explanation:"Mon → Tue → Wed — Tuesday comes after Monday!"},
+      {q:"How many days are in a WEEK?",vis:"Mon Tue Wed Thu Fri Sat Sun",options:["5","6","7","8"],answer:"7",explanation:"There are 7 days in a week! Mon, Tue, Wed, Thu, Fri, Sat, Sun"},
+      {q:"Which day comes BEFORE Wednesday?",vis:"❓ → Wednesday",options:["Thursday","Tuesday","Monday","Friday"],answer:"Tuesday",explanation:"Mon → Tue → Wed — Tuesday comes before Wednesday!"},
+      {q:"Which days are the WEEKEND?",vis:"Mon Tue Wed Thu Fri Sat Sun",options:["Mon & Tue","Fri & Mon","Sat & Sun","Thu & Fri"],answer:"Sat & Sun",explanation:"Saturday and Sunday are the weekend — no school! 🎉"},
+      {q:"What day comes AFTER Friday?",vis:"Friday → ❓",options:["Thursday","Monday","Saturday","Sunday"],answer:"Saturday",explanation:"Fri → Sat → Sun — Saturday comes after Friday! 🎉"},
+    ],
+    "Toddler Seasons":[
+      {q:"🌸 Which season has flowers blooming?",vis:"🌸🌱",options:["Summer","Winter","Spring","Autumn"],answer:"Spring",explanation:"Spring brings flowers and new life! 🌸"},
+      {q:"☀️ Which season is the HOTTEST?",vis:"☀️🏖️",options:["Spring","Summer","Autumn","Winter"],answer:"Summer",explanation:"Summer is the hottest season — ice cream time! 🍦"},
+      {q:"🍂 Which season has FALLING leaves?",vis:"🍂🍁",options:["Spring","Summer","Autumn","Winter"],answer:"Autumn",explanation:"Leaves fall off trees in Autumn! 🍁"},
+      {q:"❄️ Which season has SNOW?",vis:"❄️⛄",options:["Spring","Summer","Autumn","Winter"],answer:"Winter",explanation:"Winter is cold and often snowy! ❄️"},
+      {q:"How many SEASONS are there?",vis:"Spring · Summer · Autumn · Winter",options:["2","3","4","5"],answer:"4",explanation:"4 seasons: Spring, Summer, Autumn, Winter! 🌸☀️🍂❄️"},
+    ],
+    "Toddler BOSS":[
+      {q:"What shape has 3 sides?",vis:"🔺",options:["Circle","Square","Triangle","Oval"],answer:"Triangle",explanation:"Triangle = 3 sides! 🔺"},
+      {q:"🍎🍎🍎 + 🍎🍎 = How many apples?",vis:"🍎🍎🍎 + 🍎🍎",options:["4","5","6","7"],answer:"5",explanation:"3+2=5 apples! Count them all 🍎"},
+      {q:"What colour is a banana? 🍌",vis:"🍌",options:["Red","Blue","Yellow","Green"],answer:"Yellow",explanation:"Bananas are yellow! 🍌"},
+      {q:"What comes after 3?",vis:"1 → 2 → 3 → ❓",options:["2","4","5","6"],answer:"4",explanation:"1,2,3,4 — 4 comes after 3!"},
+      {q:"🐶 What sound does a dog make?",vis:"🐶",options:["Meow","Woof","Moo","Baa"],answer:"Woof",explanation:"Dogs say WOOF! 🐾"},
+    ],
   },
   // ── EARLY YEARS QUESTIONS (age 4–7, visual, simple) ──────────────────────
   early:{
@@ -221,6 +313,77 @@ const QBANK={
       {q:"9 - 4 = ?",vis:"9️⃣ ➖ 4️⃣",options:["3","4","5","6"],answer:"5",explanation:"9 take away 4 = 5!"},
       {q:"Which word rhymes with DOG?",vis:"DOG 🐶 rhymes with ___",options:["Cat","Log","Run","Big"],answer:"Log",explanation:"Dog, Log — both end in -OG! 🪵🐶"},
       {q:"How many corners does a square have?",vis:"🟥",options:["2","3","4","5"],answer:"4",explanation:"4 corners! 🟥"},
+    ],
+
+    "Early Time":[
+      {q:"🕐 Short hand on 1, long hand on 12 = ?",vis:"🕐",options:["1 o'clock","Half past 1","Quarter past 1","2 o'clock"],answer:"1 o'clock",explanation:"Short hand on hour, long hand on 12 = o'clock! ⏰"},
+      {q:"Half past 3 in numbers is...",vis:"Long hand on 6, short between 3 & 4",options:["3:00","3:15","3:30","3:45"],answer:"3:30",explanation:"Half past = 30 minutes past the hour → 3:30!"},
+      {q:"Quarter past 2 means...",vis:"Long hand points to 3",options:["2:00","2:15","2:30","2:45"],answer:"2:15",explanation:"Quarter past = 15 minutes past → 2:15!"},
+      {q:"How many minutes in HALF an hour?",vis:"60 ÷ 2 = ?",options:["15","30","45","60"],answer:"30",explanation:"Half of 60 minutes = 30 minutes! ⏱️"},
+      {q:"It is 4 o'clock. 1 hour later = ?",vis:"4:00 + 1 hour",options:["3 o'clock","5 o'clock","6 o'clock","4:30"],answer:"5 o'clock",explanation:"4 + 1 = 5 o'clock! ⏰"},
+    ],
+    "Early Ordinals":[
+      {q:"🥇🥈🥉 Who came FIRST?",vis:"Gold, Silver, Bronze",options:["🥈 Silver","🥇 Gold","🥉 Bronze","None"],answer:"🥇 Gold",explanation:"1st place wins the GOLD medal! 🥇"},
+      {q:"In CAT, what is the 2nd letter?",vis:"C(1) - A(2) - T(3)",options:["C","A","T","CA"],answer:"A",explanation:"C=1st, A=2nd, T=3rd. The 2nd letter is A!"},
+      {q:"What is the FOURTH letter of the alphabet?",vis:"A B C D E...",options:["C","D","E","F"],answer:"D",explanation:"A=1st B=2nd C=3rd D=4th — it's D!"},
+      {q:"If you're 3rd in a queue, how many are IN FRONT?",vis:"□ □ YOU □ □",options:["1","2","3","4"],answer:"2",explanation:"3rd = 2 people in front, 2 behind!"},
+      {q:"5 apples in a row — what position is the MIDDLE?",vis:"🍎 🍎 🍎 🍎 🍎",options:["2nd","3rd","4th","1st"],answer:"3rd",explanation:"In a row of 5, the middle is position 3!"},
+    ],
+    "Early Multiplication":[
+      {q:"2 × 3 = ?",vis:"3 groups of 2: 🍎🍎 + 🍎🍎 + 🍎🍎",options:["4","5","6","7"],answer:"6",explanation:"2×3=6! Three groups of 2: 2+2+2=6"},
+      {q:"5 × 2 = ?",vis:"Count in 2s: 2, 4, 6, 8, ?",options:["7","8","10","12"],answer:"10",explanation:"5×2=10! Count in 2s five times: 2,4,6,8,10 🎵"},
+      {q:"3 × 4 = ?",vis:"3 groups of 4: 4+4+4",options:["7","10","12","15"],answer:"12",explanation:"3×4=12! Three groups of four: 4+4+4=12"},
+      {q:"4 × 2 = ?",vis:"4 pairs: each pair has 2",options:["6","8","10","4"],answer:"8",explanation:"4×2=8! Four pairs: 2+2+2+2=8"},
+      {q:"3 × 5 = ?",vis:"Count in 5s: 5, 10, ?",options:["12","13","15","18"],answer:"15",explanation:"3×5=15! Count in 5s: 5, 10, 15 ✋"},
+    ],
+    "Early Money":[
+      {q:"How many 1p coins make 5p?",vis:"1p+1p+1p+1p+1p = ?p",options:["3","4","5","6"],answer:"5",explanation:"Five 1p coins = 5p! Count: 1,2,3,4,5 🪙"},
+      {q:"Sweet = 3p. You give 5p. Change = ?",vis:"5p − 3p = ?",options:["1p","2p","3p","4p"],answer:"2p",explanation:"5−3=2p change! 💰"},
+      {q:"Which is worth MORE — 10p or 5p?",vis:"10p vs 5p",options:["5p","10p","Same","Neither"],answer:"10p",explanation:"10p is worth more — 10 is bigger than 5!"},
+      {q:"2p + 2p + 2p = ?",vis:"Three 2p coins 🪙🪙🪙",options:["4p","5p","6p","8p"],answer:"6p",explanation:"2+2+2=6p! Count in 2s: 2,4,6 🎵"},
+      {q:"Pencil = 8p, rubber = 4p. Total = ?",vis:"8p + 4p = ?",options:["10p","11p","12p","13p"],answer:"12p",explanation:"8+4=12p total! 🖊️"},
+    ],
+    "Early Science":[
+      {q:"Which LIVING thing grows from a seed?",vis:"🌱",options:["Rock","Plant","Stone","Water"],answer:"Plant",explanation:"Plants grow from seeds — they need water and sunlight! 🌱"},
+      {q:"What do plants need to GROW?",vis:"🌱 ☀️ 💧",options:["Sand & darkness","Water & sunlight","Snow & wind","Salt & soil"],answer:"Water & sunlight",explanation:"Plants need water AND sunlight to make food! ☀️💧"},
+      {q:"Which is a LIVING thing?",vis:"🐠 🪨 🪑 🪟",options:["Rock","Chair","Fish","Window"],answer:"Fish",explanation:"Fish are alive — they breathe, eat and grow! 🐠"},
+      {q:"Which material is HARD?",vis:"🪨 vs 🧸",options:["Feather","Cotton wool","Rock","Sponge"],answer:"Rock",explanation:"Rocks are hard — they don't squish or bend! 🪨"},
+      {q:"Which sense do we use to TASTE food?",vis:"👅",options:["Hearing","Seeing","Smelling","Tasting"],answer:"Tasting",explanation:"Our tongue and taste buds let us taste! 👅"},
+    ],
+    "Early Materials":[
+      {q:"Which material is WATERPROOF?",vis:"🧥 raincoat",options:["Paper","Wool","Plastic","Cotton"],answer:"Plastic",explanation:"Plastic repels water — that's why raincoats are made of it! ☔"},
+      {q:"A wooden chair is made from?",vis:"🪑",options:["Metal","Plastic","Wood","Stone"],answer:"Wood",explanation:"Wood comes from trees! 🌳"},
+      {q:"Which material can you SEE THROUGH?",vis:"🪟",options:["Brick","Wood","Glass","Metal"],answer:"Glass",explanation:"Glass is transparent — light passes right through! 🪟"},
+      {q:"Rocks are best described as...",vis:"🪨",options:["Soft and stretchy","Hard and rigid","Flexible","Shiny"],answer:"Hard and rigid",explanation:"Rocks are hard — they can't be squished or bent!"},
+      {q:"Which material STRETCHES?",vis:"🔴 rubber band",options:["Wood","Glass","Rubber","Stone"],answer:"Rubber",explanation:"Rubber is elastic — it stretches and bounces back! 🔴"},
+    ],
+    "Early Senses":[
+      {q:"We SEE with our...",vis:"👁️",options:["Ears","Hands","Eyes","Nose"],answer:"Eyes",explanation:"Our eyes let us see colours, shapes and movement! 👁️"},
+      {q:"We HEAR with our...",vis:"👂",options:["Eyes","Hands","Ears","Nose"],answer:"Ears",explanation:"Our ears pick up sound waves! 👂"},
+      {q:"We TASTE with our...",vis:"👅",options:["Nose","Tongue","Eyes","Skin"],answer:"Tongue",explanation:"Our tongue has thousands of taste buds! 👅"},
+      {q:"We SMELL with our...",vis:"👃",options:["Mouth","Tongue","Eyes","Nose"],answer:"Nose",explanation:"Smell receptors in our nose detect scents! 👃"},
+      {q:"We feel HOT and COLD with our...",vis:"✋ 🌡️",options:["Eyes","Ears","Skin","Nose"],answer:"Skin",explanation:"Nerve endings in our skin detect temperature! 🌡️"},
+    ],
+    "Early Geography":[
+      {q:"How many CONTINENTS in the world?",vis:"🌍🌎🌏",options:["5","6","7","8"],answer:"7",explanation:"7 continents: Africa, Antarctica, Asia, Australia, Europe, N. America, S. America!"},
+      {q:"The UK is in which continent?",vis:"🇬🇧",options:["Asia","Africa","Europe","America"],answer:"Europe",explanation:"The UK is in Europe! 🇪🇺"},
+      {q:"The LARGEST continent is...",vis:"Map of the world",options:["Africa","Europe","Asia","Australia"],answer:"Asia",explanation:"Asia is the biggest continent! 🌏"},
+      {q:"The AMAZON rainforest is mainly in...",vis:"🌴🌿",options:["Africa","South America","Asia","Europe"],answer:"South America",explanation:"The Amazon is in Brazil, South America! 🌴"},
+      {q:"The SMALLEST continent is...",vis:"Australia vs others",options:["Europe","Asia","Australia","Africa"],answer:"Australia",explanation:"Australia is the smallest continent! 🦘"},
+    ],
+    "Early Countries":[
+      {q:"Capital city of England?",vis:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",options:["Edinburgh","Cardiff","London","Belfast"],answer:"London",explanation:"London is England's capital — Big Ben is there! 🎡"},
+      {q:"Capital of Scotland?",vis:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",options:["Glasgow","Edinburgh","Dundee","Aberdeen"],answer:"Edinburgh",explanation:"Edinburgh is Scotland's capital — home of the castle! 🏰"},
+      {q:"Capital of France?",vis:"🇫🇷",options:["Lyon","Marseille","Paris","Nice"],answer:"Paris",explanation:"Paris is France's capital — the Eiffel Tower is there! 🗼"},
+      {q:"The Eiffel Tower is in which country?",vis:"🗼",options:["Italy","Spain","France","Germany"],answer:"France",explanation:"The Eiffel Tower is in Paris, France! 🇫🇷"},
+      {q:"Capital of Spain?",vis:"🇪🇸",options:["Barcelona","Valencia","Seville","Madrid"],answer:"Madrid",explanation:"Madrid is the capital of Spain! 🇪🇸"},
+    ],
+    "Early Weather":[
+      {q:"What causes RAIN?",vis:"☁️💧",options:["Sun melting ice","Water vapour from clouds falling","Wind blowing the sea","Clouds moving fast"],answer:"Water vapour from clouds falling",explanation:"Water evaporates, forms clouds, then falls as rain! 💧☁️"},
+      {q:"What instrument measures TEMPERATURE?",vis:"🌡️",options:["Ruler","Thermometer","Scale","Compass"],answer:"Thermometer",explanation:"A thermometer measures how hot or cold it is! 🌡️"},
+      {q:"Which UK season is usually the WETTEST?",vis:"🇬🇧 🌧️",options:["Summer","Spring","Autumn","Winter"],answer:"Autumn",explanation:"Autumn is often the wettest season in the UK! 🍂"},
+      {q:"A STORM has...",vis:"⛈️",options:["Light drizzle","Heavy rain + thunder + lightning","Light snow","Sunshine & clouds"],answer:"Heavy rain + thunder + lightning",explanation:"Storms bring heavy rain, thunder and lightning! ⛈️"},
+      {q:"Wind is caused by...",vis:"🌬️",options:["Earth spinning only","Differences in air pressure","The moon pulling","Rain falling"],answer:"Differences in air pressure",explanation:"Air moves from high to low pressure — that's wind!"},
     ],
   },
   maths:{
@@ -589,202 +752,36 @@ const QBANK={
       {q:"'Beautiful' is a?",options:["Noun","Verb","Adjective","Adverb"],answer:"Adjective",explanation:"Describes = adjective."},
       {q:"Repeated start sounds in a sentence is?",options:["Simile","Alliteration","Metaphor","Hyperbole"],answer:"Alliteration",explanation:"Same start sounds = alliteration."},
     ],
-    // ── TODDLER EXTRA TOPICS ──────────────────────────────────────────────────
-    "Toddler More Less":[
-      {q:"🍎🍎 vs 🍎🍎🍎 — Which group has MORE?",vis:"🍎🍎 OR 🍎🍎🍎",options:["Left (2)","Right (3)","Same","Can't tell"],answer:"Right (3)",explanation:"3 apples is more than 2! Always count to compare 🍎"},
-      {q:"Which number is MORE — 3 or 5?",vis:"3 ❓ 5",options:["3","5","Same","Neither"],answer:"5",explanation:"5 is more than 3! Bigger number = more"},
-      {q:"Which number is FEWER — 7 or 2?",vis:"7 ❓ 2",options:["7","2","Same","Both"],answer:"2",explanation:"2 is fewer than 7 — it's a smaller number!"},
-      {q:"🐶🐶🐶🐶 vs 🐶🐶 — Which has FEWER?",vis:"4 dogs vs 2 dogs",options:["4 dogs","2 dogs","Same","Both"],answer:"2 dogs",explanation:"2 is fewer than 4! ✅"},
-      {q:"⭐ vs ⭐⭐⭐ — Are these the SAME amount?",vis:"⭐ vs ⭐⭐⭐",options:["Yes","No — first is fewer","No — first is more","Can't tell"],answer:"No — first is fewer",explanation:"1 star is fewer than 3 stars! They are different"},
-    ],
-    "Toddler Order":[
-      {q:"What comes FIRST — 1, 2 or 3?",vis:"1 → 2 → 3",options:["1","2","3","0"],answer:"1",explanation:"We always start counting at 1! 1️⃣"},
-      {q:"Put 3, 1, 2 in order. What is in the MIDDLE?",vis:"3 · 1 · 2 → order them",options:["1","2","3","0"],answer:"2",explanation:"Correct order is 1, 2, 3 — so 2 is in the middle!"},
-      {q:"What comes BETWEEN 2 and 4?",vis:"2 → ❓ → 4",options:["1","3","5","6"],answer:"3",explanation:"2, 3, 4 — 3 is between them! ✨"},
-      {q:"Which day comes LAST — Monday, Wednesday or Friday?",vis:"Mon · Wed · Fri",options:["Monday","Wednesday","Friday","Saturday"],answer:"Friday",explanation:"Mon → Wed → Fri — Friday comes last of these three!"},
-      {q:"🐣🐥🐓 What comes AFTER the chick 🐥?",vis:"🐣 → 🐥 → ❓",options:["🐓 Chicken","🐣 Egg","🦆 Duck","🐦 Bird"],answer:"🐓 Chicken",explanation:"The chick grows into a chicken! 🐓"},
-    ],
-    "Toddler Letters":[
-      {q:"What letter is this? A",vis:"A",options:["A","B","C","D"],answer:"A",explanation:"This is the letter A! The first letter of the alphabet 🅰️"},
-      {q:"What letter is this? B",vis:"B",options:["A","B","P","D"],answer:"B",explanation:"This is B! Like Ball and Bear 🐻"},
-      {q:"Which letter starts the word CAT 🐱?",vis:"C - A - T",options:["B","D","C","G"],answer:"C",explanation:"C-A-T — CAT starts with the letter C!"},
-      {q:"Which letter starts DOG 🐶?",vis:"D - O - G",options:["B","D","G","T"],answer:"D",explanation:"D-O-G — DOG starts with D!"},
-      {q:"What letter comes AFTER A in the alphabet?",vis:"A → ?",options:["C","Z","B","D"],answer:"B",explanation:"A, B, C... B always comes after A! 🅱️"},
-    ],
-    "Toddler Sounds":[
-      {q:"🐱 What sound does a cat make?",vis:"🐱",options:["Woof","Moo","Meow","Quack"],answer:"Meow",explanation:"Cats say MEOW! 🐾"},
-      {q:"🐮 What sound does a cow make?",vis:"🐮",options:["Baa","Moo","Oink","Roar"],answer:"Moo",explanation:"Cows say MOO! 🥛"},
-      {q:"🦆 What sound does a duck make?",vis:"🦆",options:["Tweet","Bark","Quack","Moo"],answer:"Quack",explanation:"Ducks say QUACK! 🌊"},
-      {q:"🦁 What sound does a lion make?",vis:"🦁",options:["Moo","Bark","Quack","Roar"],answer:"Roar",explanation:"Lions ROAR — they are the kings of the jungle! 👑"},
-      {q:"🐑 What sound does a sheep make?",vis:"🐑",options:["Moo","Baa","Woof","Oink"],answer:"Baa",explanation:"Sheep say BAA! 🌿"},
-    ],
-    "Toddler Words":[
-      {q:"🍌 What is this fruit?",vis:"🍌",options:["Apple","Orange","Banana","Grape"],answer:"Banana",explanation:"It's a Banana! Yellow and curved 🍌"},
-      {q:"🚗 What is this vehicle?",vis:"🚗",options:["Boat","Car","Plane","Bike"],answer:"Car",explanation:"It's a Car! Vroom vroom 🚗"},
-      {q:"🏠 What is this building?",vis:"🏠",options:["School","Shop","House","Church"],answer:"House",explanation:"It's a House — where a family lives! 🏠"},
-      {q:"🌳 What is this?",vis:"🌳",options:["Flower","Grass","Tree","Bush"],answer:"Tree",explanation:"It's a Tree — tall with leaves and a trunk! 🌳"},
-      {q:"🌙 What is this in the night sky?",vis:"🌙",options:["Sun","Star","Moon","Cloud"],answer:"Moon",explanation:"It's the Moon! We see it at night 🌙"},
-    ],
-    "Toddler Body":[
-      {q:"👁️ What body part is this?",vis:"👁️",options:["Ear","Eye","Nose","Mouth"],answer:"Eye",explanation:"These are our eyes — we use them to see! 👁️"},
-      {q:"What do we use to HEAR?",vis:"👂",options:["Eyes","Hands","Ears","Nose"],answer:"Ears",explanation:"We hear with our ears! 👂 Can you wiggle yours?"},
-      {q:"What do we use to SMELL?",vis:"👃",options:["Mouth","Nose","Eyes","Hands"],answer:"Nose",explanation:"We smell with our nose! 👃"},
-      {q:"How many fingers on ONE hand?",vis:"✋",options:["4","5","6","3"],answer:"5",explanation:"Count: 1,2,3,4,5 — 5 fingers on one hand! ✋"},
-      {q:"Where is your HEART?",vis:"❤️",options:["Head","Leg","Chest","Foot"],answer:"Chest",explanation:"Your heart is in your chest — put your hand there and feel it beat! ❤️"},
-    ],
-    "Toddler Feelings":[
-      {q:"😊 How does this face feel?",vis:"😊",options:["Sad","Angry","Happy","Scared"],answer:"Happy",explanation:"A big smile means HAPPY! 😊"},
-      {q:"😢 How does this face feel?",vis:"😢",options:["Happy","Sad","Excited","Calm"],answer:"Sad",explanation:"Tears mean SAD 😢 — it's OK to feel sad sometimes"},
-      {q:"😠 How does this face feel?",vis:"😠",options:["Happy","Sad","Angry","Sleepy"],answer:"Angry",explanation:"A scrunched, red face means ANGRY! 😠"},
-      {q:"😴 How does this face feel?",vis:"😴",options:["Excited","Sleepy","Angry","Sad"],answer:"Sleepy",explanation:"Closed eyes and Zzzs means SLEEPY! 😴"},
-      {q:"😲 How does this face feel?",vis:"😲",options:["Sad","Angry","Surprised","Calm"],answer:"Surprised",explanation:"Wide eyes and open mouth means SURPRISED! 😲"},
-    ],
-    "Toddler Food":[
-      {q:"🍎 What fruit is this?",vis:"🍎",options:["Banana","Apple","Orange","Grape"],answer:"Apple",explanation:"It's an Apple — red and crunchy! 🍎"},
-      {q:"🥕 What vegetable is this?",vis:"🥕",options:["Potato","Carrot","Pea","Bean"],answer:"Carrot",explanation:"It's a Carrot — rabbits love them! 🐰🥕"},
-      {q:"🍞 What is this?",vis:"🍞",options:["Cake","Biscuit","Bread","Cereal"],answer:"Bread",explanation:"It's Bread — great for sandwiches! 🥪"},
-      {q:"🥛 What drink is this?",vis:"🥛",options:["Juice","Water","Tea","Milk"],answer:"Milk",explanation:"It's Milk — from cows and good for your bones! 🐄"},
-      {q:"🍰 What is this?",vis:"🍰",options:["Pizza","Sandwich","Cake","Biscuit"],answer:"Cake",explanation:"It's Cake — yummy on birthdays! 🎂"},
-    ],
-    "Toddler Weather":[
-      {q:"☀️ What weather is this?",vis:"☀️",options:["Rainy","Cloudy","Sunny","Snowy"],answer:"Sunny",explanation:"A bright sun means SUNNY weather! ☀️"},
-      {q:"🌧️ What weather is this?",vis:"🌧️",options:["Sunny","Windy","Rainy","Foggy"],answer:"Rainy",explanation:"Water drops from clouds = RAIN! 🌧️"},
-      {q:"❄️ What weather is this?",vis:"❄️",options:["Hot","Rainy","Sunny","Snowy"],answer:"Snowy",explanation:"Snowflakes mean SNOWY weather! ⛄"},
-      {q:"🌬️ What weather is this?",vis:"🌬️",options:["Sunny","Windy","Rainy","Hot"],answer:"Windy",explanation:"Moving air means WINDY! 🌬️"},
-      {q:"What do you wear when it RAINS?",vis:"☔",options:["Sunglasses","Raincoat","Swimsuit","Scarf"],answer:"Raincoat",explanation:"A raincoat keeps you dry in the rain! ☔"},
-    ],
-    "Toddler Transport":[
-      {q:"✈️ What is this?",vis:"✈️",options:["Boat","Train","Plane","Car"],answer:"Plane",explanation:"It's a Plane — it flies in the sky! ✈️"},
-      {q:"🚂 What is this?",vis:"🚂",options:["Bus","Car","Train","Truck"],answer:"Train",explanation:"It's a Train — it goes on tracks! 🚂 Choo choo!"},
-      {q:"🚢 What travels on WATER?",vis:"🚗 🚢 ✈️ 🚂",options:["Car","Boat","Plane","Train"],answer:"Boat",explanation:"Boats travel on water! 🌊🚢"},
-      {q:"🚌 What is this?",vis:"🚌",options:["Car","Taxi","Bus","Van"],answer:"Bus",explanation:"It's a Bus — it carries lots of people! 🚌"},
-      {q:"Which transport FLIES in the sky?",vis:"🚗 🚢 ✈️ 🚂",options:["Car","Boat","Plane","Train"],answer:"Plane",explanation:"Planes fly in the sky! ✈️"},
-    ],
-    "Toddler Days":[
-      {q:"What comes AFTER Monday?",vis:"Monday → ❓",options:["Sunday","Wednesday","Tuesday","Thursday"],answer:"Tuesday",explanation:"Mon → Tue → Wed — Tuesday comes after Monday!"},
-      {q:"How many days are in a WEEK?",vis:"Mon Tue Wed Thu Fri Sat Sun",options:["5","6","7","8"],answer:"7",explanation:"There are 7 days in a week! Mon, Tue, Wed, Thu, Fri, Sat, Sun"},
-      {q:"Which day comes BEFORE Wednesday?",vis:"❓ → Wednesday",options:["Thursday","Tuesday","Monday","Friday"],answer:"Tuesday",explanation:"Mon → Tue → Wed — Tuesday comes before Wednesday!"},
-      {q:"Which days are the WEEKEND?",vis:"Mon Tue Wed Thu Fri Sat Sun",options:["Mon & Tue","Fri & Mon","Sat & Sun","Thu & Fri"],answer:"Sat & Sun",explanation:"Saturday and Sunday are the weekend — no school! 🎉"},
-      {q:"What day comes AFTER Friday?",vis:"Friday → ❓",options:["Thursday","Monday","Saturday","Sunday"],answer:"Saturday",explanation:"Fri → Sat → Sun — Saturday comes after Friday! 🎉"},
-    ],
-    "Toddler Seasons":[
-      {q:"🌸 Which season has flowers blooming?",vis:"🌸🌱",options:["Summer","Winter","Spring","Autumn"],answer:"Spring",explanation:"Spring brings flowers and new life! 🌸"},
-      {q:"☀️ Which season is the HOTTEST?",vis:"☀️🏖️",options:["Spring","Summer","Autumn","Winter"],answer:"Summer",explanation:"Summer is the hottest season — ice cream time! 🍦"},
-      {q:"🍂 Which season has FALLING leaves?",vis:"🍂🍁",options:["Spring","Summer","Autumn","Winter"],answer:"Autumn",explanation:"Leaves fall off trees in Autumn! 🍁"},
-      {q:"❄️ Which season has SNOW?",vis:"❄️⛄",options:["Spring","Summer","Autumn","Winter"],answer:"Winter",explanation:"Winter is cold and often snowy! ❄️"},
-      {q:"How many SEASONS are there?",vis:"Spring · Summer · Autumn · Winter",options:["2","3","4","5"],answer:"4",explanation:"4 seasons: Spring, Summer, Autumn, Winter! 🌸☀️🍂❄️"},
-    ],
-    "Toddler BOSS":[
-      {q:"What shape has 3 sides?",vis:"🔺",options:["Circle","Square","Triangle","Oval"],answer:"Triangle",explanation:"Triangle = 3 sides! 🔺 Count the corners"},
-      {q:"🍎🍎🍎 + 🍎🍎 = How many apples?",vis:"🍎🍎🍎 + 🍎🍎",options:["4","5","6","7"],answer:"5",explanation:"3+2=5 apples! Count them all 🍎"},
-      {q:"What colour is a banana? 🍌",vis:"🍌",options:["Red","Blue","Yellow","Green"],answer:"Yellow",explanation:"Bananas are yellow! 🍌"},
-      {q:"What comes after 3?",vis:"1 → 2 → 3 → ❓",options:["2","4","5","6"],answer:"4",explanation:"1,2,3,4 — 4 comes after 3!"},
-      {q:"🐶 What sound does a dog make?",vis:"🐶",options:["Meow","Woof","Moo","Baa"],answer:"Woof",explanation:"Dogs say WOOF! 🐾"},
-    ],
 
-    // ── EARLY EXTRA TOPICS ────────────────────────────────────────────────────
-    "Early Time":[
-      {q:"🕐 When the short hand is on 1 and long hand on 12, it is...",vis:"🕐",options:["1 o'clock","Half past 1","Quarter to 1","2 o'clock"],answer:"1 o'clock",explanation:"Short hand on 1, long hand on 12 = 1 o'clock! ⏰"},
-      {q:"Half past 3 in numbers is...",vis:"Short hand between 3&4, long hand on 6",options:["3:00","3:15","3:30","3:45"],answer:"3:30",explanation:"Half past = 30 minutes past the hour → 3:30!"},
-      {q:"Quarter past 2 means...",vis:"Long hand points to 3",options:["2:00","2:15","2:30","2:45"],answer:"2:15",explanation:"Quarter past = 15 minutes past — long hand on 3!"},
-      {q:"How many minutes in HALF an hour?",vis:"60 ÷ 2 = ?",options:["15","30","45","60"],answer:"30",explanation:"Half of 60 minutes = 30 minutes! ⏱️"},
-      {q:"It is 4 o'clock. 1 hour later it will be...",vis:"4:00 + 1 hour = ?",options:["3 o'clock","5 o'clock","6 o'clock","4:30"],answer:"5 o'clock",explanation:"4 + 1 = 5 o'clock! Time moves forward ⏰"},
-    ],
-    "Early Ordinals":[
-      {q:"🥇🥈🥉 Who came FIRST in the race?",vis:"Gold, Silver, Bronze medals",options:["🥈 Silver","🥇 Gold","🥉 Bronze","None"],answer:"🥇 Gold",explanation:"1st place wins the GOLD medal! 🥇"},
-      {q:"In the word CAT, what is the 2nd letter?",vis:"C - A - T (1st-2nd-3rd)",options:["C","A","T","CT"],answer:"A",explanation:"C is 1st, A is 2nd, T is 3rd. The 2nd letter is A!"},
-      {q:"What is the FOURTH letter of the alphabet?",vis:"A B C D E...",options:["C","D","E","F"],answer:"D",explanation:"A=1st, B=2nd, C=3rd, D=4th — it's D!"},
-      {q:"If you're 3rd in a queue of 5, how many are IN FRONT of you?",vis:"□ □ YOU □ □",options:["1","2","3","4"],answer:"2",explanation:"3rd = 2 people in front, 2 people behind!"},
-      {q:"5 apples in a row — what position is the MIDDLE one?",vis:"🍎 🍎 🍎 🍎 🍎",options:["2nd","3rd","4th","1st"],answer:"3rd",explanation:"In a row of 5, the middle is 3rd position!"},
-    ],
-    "Early Multiplication":[
-      {q:"2 × 3 = ?",vis:"🍎🍎 + 🍎🍎 + 🍎🍎 (3 groups of 2)",options:["4","5","6","7"],answer:"6",explanation:"2×3=6! Think: 3 groups of 2 = 2+2+2 = 6"},
-      {q:"5 × 2 = ?",vis:"Count in 2s five times: 2,4,6,8,?",options:["7","8","10","12"],answer:"10",explanation:"5×2=10! Count in 2s: 2,4,6,8,10 🎵"},
-      {q:"3 × 4 = ?",vis:"4+4+4 = ? (3 groups of 4)",options:["7","10","12","15"],answer:"12",explanation:"3×4=12! Three groups of four: 4+4+4=12"},
-      {q:"4 × 2 = ?",vis:"4 pairs: □□ □□ □□ □□",options:["6","8","10","4"],answer:"8",explanation:"4×2=8! Four pairs = 4+4 or 2+2+2+2 = 8"},
-      {q:"What does 3 × 5 equal?",vis:"3 groups of 5: 5+5+5",options:["12","13","15","18"],answer:"15",explanation:"3×5=15! Count in 5s: 5,10,15 ✋"},
-    ],
-    "Early Money":[
-      {q:"How many 1p coins make 5p?",vis:"1p+1p+1p+1p+1p",options:["3","4","5","6"],answer:"5",explanation:"Five 1p coins = 5p! Count them: 1,2,3,4,5 🪙"},
-      {q:"A sweet costs 3p. You give 5p. Change = ?",vis:"5p − 3p = ?",options:["1p","2p","3p","4p"],answer:"2p",explanation:"5−3=2p change! 💰"},
-      {q:"Which is worth MORE — 10p or 5p?",vis:"10p vs 5p",options:["5p","10p","Same","Neither"],answer:"10p",explanation:"10p is worth more — 10 is bigger than 5!"},
-      {q:"2p + 2p + 2p = ?",vis:"🪙🪙🪙 (three 2p coins)",options:["4p","5p","6p","8p"],answer:"6p",explanation:"2+2+2=6p! Count in 2s: 2,4,6 🎵"},
-      {q:"Pencil = 8p, rubber = 4p. Total = ?",vis:"8p + 4p = ?",options:["10p","11p","12p","13p"],answer:"12p",explanation:"8+4=12p! Add the pences together 🖊️"},
-    ],
-    "Early Science":[
-      {q:"Which LIVING thing grows from a seed?",vis:"🌱",options:["Rock","Plant","Stone","Water"],answer:"Plant",explanation:"Plants grow from seeds — they need water and sunlight! 🌱"},
-      {q:"What do plants need to GROW?",vis:"🌱 ☀️ 💧",options:["Sand and darkness","Water and sunlight","Snow and wind","Salt and soil"],answer:"Water and sunlight",explanation:"Plants need water AND sunlight to make food! ☀️💧"},
-      {q:"Which is a LIVING thing?",vis:"🐠 🪨 🪑 🪟",options:["Rock","Chair","Fish","Window"],answer:"Fish",explanation:"Fish are alive — they breathe, eat and grow! 🐠"},
-      {q:"Which material is HARD?",vis:"🪨 vs 🧸",options:["Feather","Cotton wool","Rock","Sponge"],answer:"Rock",explanation:"Rocks are hard — they don't squish or bend! 🪨"},
-      {q:"Which sense do we use to TASTE food?",vis:"👅",options:["Hearing","Seeing","Smelling","Tasting"],answer:"Tasting",explanation:"Our tongue and taste buds let us taste! 👅"},
-    ],
-    "Early Materials":[
-      {q:"Which material is WATERPROOF?",vis:"🧥 raincoat",options:["Paper","Wool","Plastic","Cotton"],answer:"Plastic",explanation:"Plastic repels water — that's why raincoats are made of it! ☔"},
-      {q:"What is a wooden chair made from?",vis:"🪑",options:["Metal","Plastic","Wood","Stone"],answer:"Wood",explanation:"Wood comes from trees! 🌳"},
-      {q:"Which material can you SEE THROUGH?",vis:"🪟",options:["Brick","Wood","Glass","Metal"],answer:"Glass",explanation:"Glass is transparent — light passes through it! 🪟"},
-      {q:"Rocks are which type of material?",vis:"🪨",options:["Soft and stretchy","Hard and rigid","Flexible","Shiny"],answer:"Hard and rigid",explanation:"Rocks are hard — they can't be squished or bent!"},
-      {q:"Which material STRETCHES?",vis:"🔴 rubber band",options:["Wood","Glass","Rubber","Stone"],answer:"Rubber",explanation:"Rubber is elastic — it stretches and bounces back! 🔴"},
-    ],
-    "Early Senses":[
-      {q:"We SEE with our...",vis:"👁️",options:["Ears","Hands","Eyes","Nose"],answer:"Eyes",explanation:"Our eyes let us see colours, shapes and movement! 👁️"},
-      {q:"We HEAR with our...",vis:"👂",options:["Eyes","Hands","Ears","Nose"],answer:"Ears",explanation:"Our ears pick up sound waves! 👂"},
-      {q:"We TASTE with our...",vis:"👅",options:["Nose","Tongue","Eyes","Skin"],answer:"Tongue",explanation:"Our tongue has thousands of taste buds! 👅"},
-      {q:"We SMELL with our...",vis:"👃",options:["Mouth","Tongue","Eyes","Nose"],answer:"Nose",explanation:"Smell receptors in our nose detect scents! 👃"},
-      {q:"We feel HOT and COLD with our...",vis:"✋ 🌡️",options:["Eyes","Ears","Skin","Nose"],answer:"Skin",explanation:"Nerve endings in our skin detect temperature! 🌡️"},
-    ],
-    "Early Geography":[
-      {q:"How many CONTINENTS are there in the world?",vis:"🌍🌎🌏",options:["5","6","7","8"],answer:"7",explanation:"7 continents: Africa, Antarctica, Asia, Australia, Europe, North America, South America!"},
-      {q:"Which continent is the UK in?",vis:"🇬🇧",options:["Asia","Africa","Europe","America"],answer:"Europe",explanation:"The UK is in Europe! 🇪🇺"},
-      {q:"The LARGEST continent is...",vis:"Map of the world",options:["Africa","Europe","Asia","Australia"],answer:"Asia",explanation:"Asia is the biggest continent — home to over 4 billion people! 🌏"},
-      {q:"The AMAZON rainforest is mainly in...",vis:"🌴🌿 South America",options:["Africa","South America","Asia","Europe"],answer:"South America",explanation:"The Amazon is in Brazil, South America! 🌴"},
-      {q:"The SMALLEST continent is...",vis:"7 continents by size",options:["Europe","Asia","Australia","Africa"],answer:"Australia",explanation:"Australia is the smallest continent! 🦘"},
-    ],
-    "Early Countries":[
-      {q:"What is the CAPITAL city of England?",vis:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",options:["Edinburgh","Cardiff","London","Belfast"],answer:"London",explanation:"London is England's capital — Big Ben is there! 🎡"},
-      {q:"What is the CAPITAL of Scotland?",vis:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",options:["Glasgow","Edinburgh","Dundee","Aberdeen"],answer:"Edinburgh",explanation:"Edinburgh is Scotland's capital — home of the castle! 🏰"},
-      {q:"What is the CAPITAL of France?",vis:"🇫🇷",options:["Lyon","Marseille","Paris","Nice"],answer:"Paris",explanation:"Paris is France's capital — the Eiffel Tower is there! 🗼"},
-      {q:"Which country is the EIFFEL TOWER in?",vis:"🗼",options:["Italy","Spain","France","Germany"],answer:"France",explanation:"The Eiffel Tower is in Paris, France! 🇫🇷"},
-      {q:"The capital of Spain is...",vis:"🇪🇸",options:["Barcelona","Valencia","Seville","Madrid"],answer:"Madrid",explanation:"Madrid is the capital of Spain! 🇪🇸"},
-    ],
-    "Early Weather":[
-      {q:"What causes RAIN?",vis:"☁️💧",options:["Sun melting ice","Water vapour from clouds falling","Wind blowing the sea","Clouds moving fast"],answer:"Water vapour from clouds falling",explanation:"Water evaporates, forms clouds, then falls as rain! 💧☁️"},
-      {q:"What instrument measures TEMPERATURE?",vis:"🌡️",options:["Ruler","Thermometer","Scale","Compass"],answer:"Thermometer",explanation:"A thermometer measures how hot or cold it is! 🌡️"},
-      {q:"Which UK season is usually the WETTEST?",vis:"🇬🇧 🌧️",options:["Summer","Spring","Autumn","Winter"],answer:"Autumn",explanation:"Autumn tends to be the wettest season in the UK! 🍂"},
-      {q:"A STORM has...",vis:"⛈️",options:["Light drizzle only","Heavy rain with thunder & lightning","Light snow","Sunshine with clouds"],answer:"Heavy rain with thunder & lightning",explanation:"Storms bring heavy rain, thunder and lightning! ⛈️"},
-      {q:"Wind is caused by...",vis:"🌬️",options:["Earth spinning only","Differences in air pressure","The moon pulling","Rain falling"],answer:"Differences in air pressure",explanation:"Air moves from high pressure to low pressure — that's wind!"},
-    ],
-
-    // ── JUNIOR EXTRA TOPICS ───────────────────────────────────────────────────
-    "Junior Fractions":[
-      {q:"What is ½ of 12?",vis:"12 ÷ 2 = ?",options:["3","6","8","4"],answer:"6",explanation:"Half means divide by 2: 12÷2 = 6! ½ = ÷2"},
-      {q:"What is ¼ of 20?",vis:"20 ÷ 4 = ?",options:["4","5","6","8"],answer:"5",explanation:"Quarter means divide by 4: 20÷4 = 5! ¼ = ÷4"},
-      {q:"Which fraction is BIGGER — ½ or ¼?",vis:"½ vs ¼ — imagine a pizza",options:["¼","½","Same","Can't tell"],answer:"½",explanation:"½ is bigger! Half a pizza is more than a quarter 🍕"},
-      {q:"3 out of 4 equal parts shaded = ?",vis:"▓▓▓░ (3 shaded, 1 empty)",options:["¾","¼","⅓","½"],answer:"¾",explanation:"3 out of 4 = ¾ (three quarters)! Numerator over denominator"},
-      {q:"What is ⅓ of 15?",vis:"15 ÷ 3 = ?",options:["3","4","5","6"],answer:"5",explanation:"⅓ means divide by 3: 15÷3 = 5! ⅓ = ÷3"},
-    ],
-    "Junior Decimals":[
-      {q:"0.5 as a fraction is...",vis:"0.5 = ? / 2",options:["¼","⅓","½","¾"],answer:"½",explanation:"0.5 = ½ (one half)! 5 tenths = half of 1"},
-      {q:"Which is BIGGER — 0.7 or 0.3?",vis:"0.7 ❓ 0.3",options:["0.3","0.7","They are equal","Impossible to say"],answer:"0.7",explanation:"0.7 > 0.3 because 7 tenths > 3 tenths!"},
-      {q:"£1.50 + £2.30 = ?",vis:"£1.50 + £2.30 = £?",options:["£3.70","£3.80","£3.90","£4.00"],answer:"£3.80",explanation:"£1+£2=£3, 50p+30p=80p → £3.80! Add pounds then pence"},
-      {q:"0.25 as a fraction is...",vis:"0.25 = 25/100 = ?",options:["½","¼","⅓","¾"],answer:"¼",explanation:"0.25 = ¼ — 25 hundredths = one quarter!"},
-      {q:"Order smallest first: 0.4, 0.1, 0.9, 0.6",vis:"Four decimals to order",options:["0.4,0.1,0.6,0.9","0.9,0.6,0.4,0.1","0.1,0.4,0.6,0.9","0.6,0.4,0.1,0.9"],answer:"0.1,0.4,0.6,0.9",explanation:"Compare tenths digits: 1<4<6<9 → 0.1<0.4<0.6<0.9!"},
-    ],
-    "Junior Percentages":[
-      {q:"What is 50% of 40?",vis:"50% = ½ so 40÷2",options:["10","15","20","25"],answer:"20",explanation:"50% = ½ → 40÷2 = 20! Half of 40"},
-      {q:"What is 10% of 80?",vis:"10% = ÷10",options:["4","6","8","10"],answer:"8",explanation:"10% = divide by 10 → 80÷10 = 8! Move the decimal point"},
-      {q:"25% as a fraction is...",vis:"25% = 25/100 = ?",options:["½","¼","⅓","¾"],answer:"¼",explanation:"25% = ¼! 25 out of 100 = 1 out of 4"},
-      {q:"A £20 toy has 10% off. New price = ?",vis:"£20 − 10% = ?",options:["£15","£16","£18","£19"],answer:"£18",explanation:"10% of £20 = £2, so £20 − £2 = £18! ✂️"},
-      {q:"100% of 55 = ?",vis:"100% = the whole thing",options:["5.5","50","55","100"],answer:"55",explanation:"100% of something = the whole amount → 100% of 55 = 55!"},
-    ],
-    "Junior Science":[
-      {q:"What force PULLS objects towards Earth?",vis:"⬇️ 🌍",options:["Magnetism","Friction","Gravity","Air resistance"],answer:"Gravity",explanation:"Gravity is the force pulling everything towards Earth! 🌍 Drop something — gravity does that"},
-      {q:"What force SLOWS a sliding object?",vis:"🛑 object slowing down",options:["Gravity","Magnetism","Friction","Push"],answer:"Friction",explanation:"Friction acts against motion — rough surfaces create more friction! 🛞"},
-      {q:"Which material CONDUCTS electricity?",vis:"⚡ circuit",options:["Wood","Plastic","Rubber","Copper (metal)"],answer:"Copper (metal)",explanation:"Metals conduct electricity — copper wires in every plug! 🔌"},
-      {q:"Plants make food using PHOTOSYNTHESIS. What do they need?",vis:"🌱 + ☀️ + 💧 + CO₂",options:["Soil only","Sugar and air","Sunlight + water + CO₂","Fertiliser only"],answer:"Sunlight + water + CO₂",explanation:"Photosynthesis = sunlight + water + carbon dioxide → glucose + oxygen! 🌿"},
-      {q:"Which part of a flower produces POLLEN?",vis:"🌸 flower diagram",options:["Petal","Leaf","Stamen","Root"],answer:"Stamen",explanation:"The stamen is the male part — it makes pollen for reproduction! 🌼"},
-    ],
-  
   }
+  "Junior Fractions":[
+    {q:"What is ½ of 12?",vis:"12 ÷ 2 = ?",options:["3","6","8","4"],answer:"6",explanation:"Half means ÷2: 12÷2=6! ½ = divide by 2"},
+    {q:"What is ¼ of 20?",vis:"20 ÷ 4 = ?",options:["4","5","6","8"],answer:"5",explanation:"Quarter means ÷4: 20÷4=5! ¼ = divide by 4"},
+    {q:"Which fraction is BIGGER — ½ or ¼?",vis:"½ vs ¼ (imagine a pizza 🍕)",options:["¼","½","Same","Can't tell"],answer:"½",explanation:"½ is bigger! Half a pizza > a quarter 🍕"},
+    {q:"3 out of 4 equal parts shaded = ?",vis:"▓▓▓░ (3 shaded, 1 empty)",options:["¾","¼","⅓","½"],answer:"¾",explanation:"3 out of 4 = ¾ (three quarters)!"},
+    {q:"What is ⅓ of 15?",vis:"15 ÷ 3 = ?",options:["3","4","5","6"],answer:"5",explanation:"⅓ means ÷3: 15÷3=5!"},
+  ],
+  "Junior Decimals":[
+    {q:"0.5 as a fraction is...",vis:"0.5 = ?",options:["¼","⅓","½","¾"],answer:"½",explanation:"0.5 = ½ (one half)! 5 tenths = half of 1"},
+    {q:"Which is BIGGER — 0.7 or 0.3?",vis:"0.7 ❓ 0.3",options:["0.3","0.7","Equal","Impossible to say"],answer:"0.7",explanation:"0.7 > 0.3 because 7 tenths > 3 tenths!"},
+    {q:"£1.50 + £2.30 = ?",vis:"£1.50 + £2.30",options:["£3.70","£3.80","£3.90","£4.00"],answer:"£3.80",explanation:"£1+£2=£3, 50p+30p=80p → £3.80!"},
+    {q:"0.25 as a fraction is...",vis:"0.25 = 25/100",options:["½","¼","⅓","¾"],answer:"¼",explanation:"0.25 = ¼ — 25 hundredths = one quarter!"},
+    {q:"Order smallest first: 0.4, 0.1, 0.9, 0.6",vis:"Four decimals",options:["0.4,0.1,0.6,0.9","0.9,0.6,0.4,0.1","0.1,0.4,0.6,0.9","0.6,0.4,0.1,0.9"],answer:"0.1,0.4,0.6,0.9",explanation:"Compare tenths: 1<4<6<9 → 0.1<0.4<0.6<0.9!"},
+  ],
+  "Junior Percentages":[
+    {q:"What is 50% of 40?",vis:"50% = ½",options:["10","15","20","25"],answer:"20",explanation:"50% = ½ → 40÷2=20!"},
+    {q:"What is 10% of 80?",vis:"10% = ÷10",options:["4","6","8","10"],answer:"8",explanation:"10% = ÷10 → 80÷10=8!"},
+    {q:"25% as a fraction is...",vis:"25% = 25/100",options:["½","¼","⅓","¾"],answer:"¼",explanation:"25% = ¼! 25 out of 100 = 1 out of 4"},
+    {q:"£20 toy with 10% off = ?",vis:"£20 − 10%",options:["£15","£16","£18","£19"],answer:"£18",explanation:"10% of £20=£2, so £20−£2=£18! ✂️"},
+    {q:"100% of 55 = ?",vis:"100% = everything",options:["5.5","50","55","100"],answer:"55",explanation:"100% of something = the whole amount!"},
+  ],
+  "Junior Science":[
+    {q:"What force PULLS objects towards Earth?",vis:"⬇️ 🌍",options:["Magnetism","Friction","Gravity","Air resistance"],answer:"Gravity",explanation:"Gravity pulls everything toward Earth! Drop something — that's gravity 🌍"},
+    {q:"What force SLOWS a sliding object?",vis:"🛑",options:["Gravity","Magnetism","Friction","Push"],answer:"Friction",explanation:"Friction acts against motion — rough surfaces create more friction!"},
+    {q:"Which material CONDUCTS electricity?",vis:"⚡",options:["Wood","Plastic","Rubber","Copper"],answer:"Copper",explanation:"Metals like copper conduct electricity — that's why wires are copper! 🔌"},
+    {q:"Plants make food using...",vis:"🌱 + ☀️ + 💧 + CO₂",options:["Soil only","Fertiliser","Photosynthesis","Digestion"],answer:"Photosynthesis",explanation:"Photosynthesis = sunlight + water + CO₂ → glucose + oxygen! 🌿"},
+    {q:"Which part of a flower produces POLLEN?",vis:"🌸",options:["Petal","Leaf","Stamen","Root"],answer:"Stamen",explanation:"The stamen is the male part — it makes pollen for reproduction! 🌼"},
+  ],
 };
 
 // ─── WORLDS — age-categorised, all subjects ──────────────────────────────────
@@ -1645,8 +1642,119 @@ function SchoolsScreen({goTo}) {
   );
 }
 
+// ─── SIDE MISSIONS ────────────────────────────────────────────────────────────
+// Unlocked by completing worlds. Each side mission is a focused bonus challenge.
+const SIDE_MISSIONS = [
+  // ─ Unlocked after completing World 1 of any age group ─
+  {id:"sm_speed1",    name:"Speed Demon",         icon:"⚡", category:"bonus",  
+   unlockAfter:1,  xp:80,  coins:20, questions:8,
+   desc:"Answer 8 mixed questions as fast as you can!",
+   topics:["Times Tables","Fractions","Synonyms & Antonyms","Grammar"],
+   colour:"#F59E0B",gradient:"linear-gradient(135deg,#F59E0B,#D97706)"},
+  {id:"sm_vocab1",    name:"Word Wizard",          icon:"📚", category:"english",
+   unlockAfter:1,  xp:70,  coins:18, questions:6,
+   desc:"Master tricky vocabulary from all topics!",
+   topics:["Vocabulary","Synonyms & Antonyms"],
+   colour:"#10B981",gradient:"linear-gradient(135deg,#10B981,#047857)"},
+
+  // ─ Unlocked after completing 2 worlds ─
+  {id:"sm_logic1",    name:"Logic Starter",        icon:"🔍", category:"nvr",
+   unlockAfter:2,  xp:90,  coins:22, questions:6,
+   desc:"Non-verbal puzzles — patterns and shapes!",
+   topics:["2D Shapes","Symmetry & Reflection"],
+   colour:"#6366F1",gradient:"linear-gradient(135deg,#6366F1,#4F46E5)"},
+  {id:"sm_number1",   name:"Number Ninja",         icon:"🔢", category:"maths",
+   unlockAfter:2,  xp:85,  coins:20, questions:7,
+   desc:"Rapid-fire number challenges!",
+   topics:["Times Tables","Number Properties","Algebra"],
+   colour:"#4F46E5",gradient:"linear-gradient(135deg,#4F46E5,#7C3AED)"},
+  {id:"sm_spell1",    name:"Spell Check",          icon:"✍️", category:"english",
+   unlockAfter:2,  xp:75,  coins:18, questions:6,
+   desc:"Spelling, punctuation and grammar sprint!",
+   topics:["Punctuation","Grammar"],
+   colour:"#059669",gradient:"linear-gradient(135deg,#059669,#047857)"},
+
+  // ─ Unlocked after completing 3 worlds ─
+  {id:"sm_analogy1",  name:"Analogy Ace",          icon:"🔗", category:"verbal",
+   unlockAfter:3,  xp:100, coins:25, questions:6,
+   desc:"Master the art of word relationships!",
+   topics:["Analogies"],
+   colour:"#D97706",gradient:"linear-gradient(135deg,#D97706,#B45309)"},
+  {id:"sm_geo1",      name:"Geometry Genius",      icon:"📐", category:"maths",
+   unlockAfter:3,  xp:100, coins:25, questions:6,
+   desc:"Shapes, angles and spatial reasoning!",
+   topics:["Geometry","2D Shapes","Symmetry & Reflection"],
+   colour:"#7C3AED",gradient:"linear-gradient(135deg,#7C3AED,#6D28D9)"},
+  {id:"sm_code1",     name:"Code Breaker",         icon:"🔐", category:"verbal",
+   unlockAfter:3,  xp:95,  coins:23, questions:5,
+   desc:"Crack codes and ciphers like a spy!",
+   topics:["Codes & Ciphers"],
+   colour:"#DC2626",gradient:"linear-gradient(135deg,#DC2626,#991B1B)"},
+
+  // ─ Unlocked after completing 4 worlds ─
+  {id:"sm_pattern1",  name:"Pattern Master",       icon:"🔲", category:"nvr",
+   unlockAfter:4,  xp:110, coins:28, questions:7,
+   desc:"Matrices, sequences and visual patterns!",
+   topics:["Patterns & Matrices","Sequences"],
+   colour:"#0EA5E9",gradient:"linear-gradient(135deg,#0EA5E9,#0284C7)"},
+  {id:"sm_fraction1", name:"Fraction Frenzy",      icon:"½",  category:"maths",
+   unlockAfter:4,  xp:110, coins:28, questions:6,
+   desc:"Fractions, decimals and percentages blitz!",
+   topics:["Fractions","Percentages","Ratio & Proportion"],
+   colour:"#F472B6",gradient:"linear-gradient(135deg,#F472B6,#EC4899)"},
+  {id:"sm_lit1",      name:"Literary Legend",      icon:"🖊️", category:"english",
+   unlockAfter:4,  xp:105, coins:26, questions:6,
+   desc:"Similes, metaphors and literary devices!",
+   topics:["Literary Devices"],
+   colour:"#10B981",gradient:"linear-gradient(135deg,#10B981,#047857)"},
+
+  // ─ Unlocked after completing 5 worlds ─
+  {id:"sm_mega1",     name:"Mega Mix",             icon:"🌀", category:"mixed",
+   unlockAfter:5,  xp:150, coins:40, questions:10,
+   desc:"10 questions from ALL subjects — the ultimate mix!",
+   topics:["Times Tables","Grammar","Analogies","2D Shapes","Sequences"],
+   colour:"#8B5CF6",gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)"},
+  {id:"sm_stats1",    name:"Stats Specialist",     icon:"📊", category:"maths",
+   unlockAfter:5,  xp:120, coins:30, questions:7,
+   desc:"Graphs, averages and data handling!",
+   topics:["Statistics"],
+   colour:"#EF4444",gradient:"linear-gradient(135deg,#EF4444,#DC2626)"},
+  {id:"sm_seq1",      name:"Sequence Sprint",      icon:"📈", category:"verbal",
+   unlockAfter:5,  xp:120, coins:30, questions:6,
+   desc:"Number and letter sequences — spot the rule!",
+   topics:["Sequences"],
+   colour:"#F59E0B",gradient:"linear-gradient(135deg,#F59E0B,#D97706)"},
+
+  // ─ Unlocked after completing all 7 worlds ─
+  {id:"sm_ultimate",  name:"Ultimate Challenge",   icon:"👑", category:"boss",
+   unlockAfter:7,  xp:300, coins:80, questions:12,
+   desc:"ALL topics, hardest questions — prove you're the best!",
+   topics:["Times Tables","Fractions","Percentages","Grammar","Punctuation","Vocabulary","Analogies","Codes & Ciphers","Sequences","Patterns & Matrices","Geometry","Algebra"],
+   colour:"#DC2626",gradient:"linear-gradient(135deg,#7F1D1D,#DC2626,#F59E0B)"},
+  {id:"sm_speed2",    name:"Supersonic Speed",     icon:"🚀", category:"bonus",
+   unlockAfter:7,  xp:200, coins:50, questions:10,
+   desc:"Beat the clock — fastest fingers win!",
+   topics:["Times Tables","Synonyms & Antonyms","Sequences","2D Shapes"],
+   colour:"#4F46E5",gradient:"linear-gradient(135deg,#4F46E5,#7C3AED)"},
+];
+
+function getSideUnlockCount(completedMissions, ageGroup){
+  const myWorlds = WORLDS.filter(w=>w.ageGroup===ageGroup);
+  let worldsDone = 0;
+  for(const w of myWorlds){
+    if(w.missions.every(m=>completedMissions.includes(m.id))) worldsDone++;
+  }
+  return worldsDone;
+}
+
+function getUnlockedSideMissions(completedMissions, ageGroup){
+  const count = getSideUnlockCount(completedMissions, ageGroup);
+  return SIDE_MISSIONS.filter(sm=>sm.unlockAfter<=count);
+}
+
+
 function BottomNav({screen,goTo}){
-  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"learn",icon:"🤖",label:"Learn"},{id:"schools",icon:"🏫",label:"Schools"},{id:"account",icon:"👤",label:"Account"}];
+  const tabs=[{id:"home",icon:"🗺",label:"Map"},{id:"side",icon:"⚡",label:"Side"},{id:"learn",icon:"🤖",label:"Learn"},{id:"schools",icon:"🏫",label:"Schools"},{id:"account",icon:"👤",label:"Account"}];
   return(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(15,12,41,0.98)",backdropFilter:"blur(12px)",borderTop:"1px solid rgba(255,255,255,0.08)",padding:"8px 0 6px",zIndex:200}}>
       <div style={{maxWidth:520,margin:"0 auto",display:"flex"}}>
@@ -2521,8 +2629,23 @@ export default function App(){
   function startMission(mission,worldId){
     SFX.click();
     // Route toddler/early worlds to their qbank section
-    const qbankKey = worldId.startsWith("t_")?"toddler":worldId.startsWith("e_")&&worldId!=="english"?"early":worldId;
-    const pool=[...(QBANK[qbankKey]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
+    // Map worldId → QBANK top-level key
+    let qbankKey = worldId;
+    if(worldId.startsWith("t_")) qbankKey = "toddler";
+    else if(["e_numbers","e_letters","e_shapes2","e_telling_time","e_money","e_science","e_world"].includes(worldId)) qbankKey = "early";
+    else if(worldId==="j_fractions") qbankKey = "j_fractions";
+    else if(worldId==="j_data")      qbankKey = "j_data";
+    else if(worldId==="j_verbal")    qbankKey = "j_verbal";
+    else if(worldId==="j_science")   qbankKey = "j_science";
+    // j_numbers, j_shapes, j_english use existing flat QBANK topics via mission.topic directly
+    // For extra junior worlds, the topic IS the QBANK top-level key
+    const extraJuniorWorlds = ["j_fractions","j_data","j_verbal","j_science"];
+    let pool;
+    if(extraJuniorWorlds.includes(worldId)){
+      pool = [...(QBANK[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
+    } else {
+      pool = [...(QBANK[qbankKey]?.[mission.topic]||[])].sort(()=>Math.random()-0.5).slice(0,mission.questions);
+    }
     if(!pool.length)return;
     setActiveMission({...mission,_worldId:worldId});
     setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setFinalDisplayScore(0);setMissionDone(false);setNewTrick(null);setFlashAnim(null);
@@ -2737,7 +2860,7 @@ export default function App(){
       <MissionComplete mission={activeMission} score={finalDisplayScore} total={missionQs.length}
         xpEarned={Math.round((finalDisplayScore/missionQs.length)*100)>=70?activeMission?.xp:0}
         coinsEarned={Math.round((finalDisplayScore/missionQs.length)*100)>=70?activeMission?.coins:0}
-        newTrick={newTrick} onContinue={()=>setScreen("map")} onRetry={()=>startMission(activeMission,activeMission._worldId)}/>
+        newTrick={newTrick} onContinue={()=>setScreen(activeMission?.isSideMission?"side":"map")} onRetry={()=>{if(activeMission?.isSideMission){const sm=SIDE_MISSIONS.find(s=>s.id===activeMission.id);if(sm){let allQs=[];for(const topic of sm.topics){const flat=QBANK[topic];if(flat&&Array.isArray(flat)){allQs.push(...flat);continue;}for(const sec of Object.values(QBANK)){if(typeof sec==="object"&&!Array.isArray(sec)&&sec[topic])allQs.push(...sec[topic]);}}const pool=allQs.sort(()=>Math.random()-0.5).slice(0,sm.questions);setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setFinalDisplayScore(0);setMissionDone(false);setFlashAnim(null);return;}}startMission(activeMission,activeMission._worldId);}}/>
     </>
   );
 
@@ -2837,6 +2960,129 @@ export default function App(){
   if(screen==="learn")return <LearnScreen goTo={goTo} player={player}/>;
 
   // ── SCHOOLS ────────────────────────────────────────────────────────────────
+  // ── SIDE MISSIONS SCREEN ─────────────────────────────────────────────────
+  if(screen==="side"){
+    const myGroup = profile?.ageGroup||"core";
+    const worldsDone = getSideUnlockCount(player.completed_missions, myGroup);
+    const unlockedSMs = getUnlockedSideMissions(player.completed_missions, myGroup);
+    const nextUnlock = SIDE_MISSIONS.find(sm=>sm.unlockAfter>worldsDone);
+    const nextUnlockCount = nextUnlock?.unlockAfter||null;
+
+    const CAT_COLOURS = {maths:"#4F46E5",english:"#059669",verbal:"#D97706",nvr:"#DC2626",bonus:"#F59E0B",mixed:"#8B5CF6",boss:"#DC2626"};
+    const CAT_LABELS  = {maths:"Maths",english:"English",verbal:"Verbal",nvr:"Non-Verbal",bonus:"Bonus",mixed:"Mixed",boss:"Boss"};
+
+    function startSideMission(sm){
+      SFX.click();
+      // Gather questions from all listed topics
+      let allQs = [];
+      for(const topic of sm.topics){
+        // Try flat QBANK first, then nested under each section
+        const flat = QBANK[topic];
+        if(flat && Array.isArray(flat)) { allQs.push(...flat); continue; }
+        // Try in each sub-section
+        for(const sec of Object.values(QBANK)){
+          if(typeof sec==="object" && !Array.isArray(sec)){
+            if(sec[topic]) allQs.push(...sec[topic]);
+          }
+        }
+      }
+      const pool = allQs.sort(()=>Math.random()-0.5).slice(0,sm.questions);
+      if(!pool.length){alert("Questions coming soon! 🔧"); return;}
+      setActiveMission({...sm, isSideMission:true, _worldId:"side"});
+      setMissionQs(pool);setQIdx(0);setSelected(null);setMissionScore(0);setFinalDisplayScore(0);setMissionDone(false);setNewTrick(null);setFlashAnim(null);
+      setTimeLeft(null);setTimerActive(false);
+      setScreen("mission");
+    }
+
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0f0c29,#1a0a3d,#0f0c29)"}}>
+        <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(15,12,41,0.97)",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,0.1)",padding:"14px 16px"}}>
+          <div style={{maxWidth:520,margin:"0 auto"}}>
+            <h2 style={{margin:0,fontSize:20,fontWeight:900,color:"white"}}>⚡ Side Missions</h2>
+            <p style={{margin:"2px 0 0",fontSize:12,color:"rgba(255,255,255,0.45)"}}>Bonus challenges unlocked as you progress</p>
+          </div>
+        </div>
+
+        <div style={{maxWidth:520,margin:"0 auto",padding:"16px 16px 100px"}}>
+          {/* Progress tracker */}
+          <div style={{background:"linear-gradient(135deg,rgba(139,92,246,0.15),rgba(79,70,229,0.1))",border:"1px solid rgba(139,92,246,0.3)",borderRadius:20,padding:"16px 18px",marginBottom:18}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <div style={{color:"white",fontWeight:800,fontSize:15}}>🗺 Worlds Completed</div>
+              <div style={{background:"rgba(139,92,246,0.25)",borderRadius:20,padding:"4px 12px",color:"#A78BFA",fontWeight:800,fontSize:14}}>{worldsDone} / {WORLDS.filter(w=>w.ageGroup===myGroup).length}</div>
+            </div>
+            <div style={{background:"rgba(255,255,255,0.08)",borderRadius:8,height:8,overflow:"hidden"}}>
+              <div style={{height:"100%",background:"linear-gradient(90deg,#8B5CF6,#A78BFA)",width:`${Math.round((worldsDone/Math.max(WORLDS.filter(w=>w.ageGroup===myGroup).length,1))*100)}%`,transition:"width 0.5s",borderRadius:8}}/>
+            </div>
+            {nextUnlockCount&&(
+              <div style={{marginTop:8,color:"rgba(255,255,255,0.5)",fontSize:12}}>
+                🔒 Complete {nextUnlockCount-worldsDone} more world{nextUnlockCount-worldsDone>1?"s":""} to unlock more side missions
+              </div>
+            )}
+          </div>
+
+          {unlockedSMs.length===0&&(
+            <div style={{textAlign:"center",padding:"40px 20px",color:"rgba(255,255,255,0.4)"}}>
+              <div style={{fontSize:56,marginBottom:16}}>🔒</div>
+              <div style={{fontWeight:800,fontSize:18,color:"white",marginBottom:8}}>No Side Missions Yet</div>
+              <div style={{fontSize:14,lineHeight:1.5}}>Complete your first world on the Map to unlock bonus side missions!</div>
+            </div>
+          )}
+
+          {/* Unlocked missions */}
+          {unlockedSMs.map(sm=>{
+            const done = player.completed_missions.includes(sm.id);
+            const mastery = (player.mastery||{})[sm.id];
+            return(
+              <div key={sm.id} onClick={()=>startSideMission(sm)}
+                style={{background:sm.gradient,borderRadius:20,padding:"16px 18px",marginBottom:12,cursor:"pointer",
+                  boxShadow:done?"0 4px 20px rgba(0,0,0,0.3)":"0 4px 30px rgba(0,0,0,0.5)",
+                  border:done?"2px solid rgba(255,255,255,0.25)":"2px solid transparent",
+                  opacity:done?0.85:1,transition:"all 0.2s",position:"relative",overflow:"hidden"}}>
+                {done&&<div style={{position:"absolute",top:10,right:12,fontSize:16}}>✅</div>}
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <div style={{fontSize:36,flexShrink:0}}>{sm.icon}</div>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                      <span style={{color:"white",fontWeight:900,fontSize:16}}>{sm.name}</span>
+                      <span style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:"1px 7px",fontSize:10,fontWeight:700,color:"rgba(255,255,255,0.8)",textTransform:"uppercase"}}>{CAT_LABELS[sm.category]||sm.category}</span>
+                    </div>
+                    <div style={{color:"rgba(255,255,255,0.75)",fontSize:12,marginBottom:6}}>{sm.desc}</div>
+                    <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                      <span style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:"2px 8px",fontSize:11,fontWeight:700,color:"#FCD34D"}}>⭐ {sm.xp} XP</span>
+                      <span style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:"2px 8px",fontSize:11,fontWeight:700,color:"#FCD34D"}}>🪙 {sm.coins}</span>
+                      <span style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:"2px 8px",fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.7)"}}>❓ {sm.questions}q</span>
+                      {done&&mastery&&<span style={{fontSize:13}}>{mastery.gold?"🥇":mastery.silver?"🥈":"🥉"}</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Locked preview */}
+          {SIDE_MISSIONS.filter(sm=>sm.unlockAfter>worldsDone).length>0&&(
+            <div style={{marginTop:8}}>
+              <div style={{color:"rgba(255,255,255,0.35)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>🔒 Coming soon</div>
+              {SIDE_MISSIONS.filter(sm=>sm.unlockAfter>worldsDone).slice(0,3).map(sm=>(
+                <div key={sm.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"14px 16px",marginBottom:10,opacity:0.5}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{fontSize:26,filter:"grayscale(1)"}}>🔒</div>
+                    <div>
+                      <div style={{color:"rgba(255,255,255,0.5)",fontWeight:700,fontSize:14}}>{sm.name}</div>
+                      <div style={{color:"rgba(255,255,255,0.3)",fontSize:11}}>Complete {sm.unlockAfter} world{sm.unlockAfter>1?"s":""} to unlock</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <BottomNav screen={screen} goTo={goTo}/>
+      </div>
+    );
+  }
+
+
   if(screen==="account"){
     const [acctPromo, setAcctPromo] = useState("");
     const [acctPromoErr, setAcctPromoErr] = useState("");
